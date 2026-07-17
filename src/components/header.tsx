@@ -1,7 +1,16 @@
 import { View, Text, StyleSheet } from "react-native";
 import { Colors } from "../constants/theme";
 
-export default function CustomHeader({ options, route }) {
+interface CustomHeaderProps {
+    options?: {
+        title?: string;
+    };
+    route?: {
+        name: string;
+    };
+}
+
+export default function CustomHeader({ options, route }: CustomHeaderProps) {
     const title = options?.title ?? route?.name ?? '';
     const isHome = route?.name === "index";
 
@@ -24,14 +33,6 @@ export default function CustomHeader({ options, route }) {
 };
 
 const styles = StyleSheet.create({
-  container: {
-    backgroundColor: "#fff",
-    flex: 1,
-  },
-  mainView: {
-    flex: 1,
-    justifyContent: "flex-start",
-  },
   header: {
     backgroundColor: Colors.header,
     width: "100%",

@@ -3,6 +3,7 @@ import { StatusBar, StyleSheet } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Colors } from "../constants/theme";
 import CustomHeader from "../components/header"
+import { EllipsisIcon, HouseIcon, MapIcon, ShapesIcon } from "lucide-react-native";
 
 export default function RootLayout() {
   return (
@@ -21,11 +22,23 @@ export default function RootLayout() {
       >
         <Tabs.Screen 
           name="index" 
-          options={{ title: 'Home', tabBarActiveTintColor: '#D61967' }} 
+          options={{ 
+            title: 'Home', 
+            tabBarActiveTintColor: '#D61967',
+            tabBarIcon: ({color, size}) => (
+              <HouseIcon color={color} size={size} />
+            )
+          }} 
         />
         <Tabs.Screen 
           name="collection" 
-          options={{ title: 'Collection', tabBarActiveTintColor: '#44AD4E' }} 
+          options={{ 
+            title: 'Collection', 
+            tabBarActiveTintColor: '#44AD4E',
+            tabBarIcon: ({color, size}) => (
+              <ShapesIcon color={color} size={size} />
+            )
+          }} 
         />
         <Tabs.Screen
           name="scanner"
@@ -38,11 +51,23 @@ export default function RootLayout() {
 
         <Tabs.Screen 
           name="map" 
-          options={{ title: 'Map', tabBarActiveTintColor: '#24A8E0' }} 
+          options={{ 
+            title: 'Map', 
+            tabBarActiveTintColor: '#24A8E0',
+            tabBarIcon: ({color, size}) => (
+              <MapIcon color={color} size={size} />
+            )
+          }}
         />
         <Tabs.Screen 
           name="others" 
-          options={{ title: 'Others', tabBarActiveTintColor: '#FD7033' }} 
+          options={{ 
+            title: 'Others', 
+            tabBarActiveTintColor: '#FD7033',
+            tabBarIcon: ({color, size}) => (
+              <EllipsisIcon color={color} size={size} />
+            )
+          }} 
         />
       </Tabs>
     </SafeAreaView>
