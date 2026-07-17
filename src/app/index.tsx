@@ -1,18 +1,35 @@
-import { Text, View, StyleSheet } from "react-native";
+import { Text, View, StyleSheet, StatusBar } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
+import { Colors } from "../constants/theme";
+
+import { NavigationContainer } from "expo-router/build/react-navigation";
 
 export default function Index() {
   return (
     <View style={styles.container}>
-      <Text>HEY POOKIES</Text>
+      <StatusBar backgroundColor={Colors.header} barStyle={"light-content"} />
+      
+      <SafeAreaView style={styles.mainView}>
+        <Text>PPOOP</Text>
+
+      </SafeAreaView>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: "#45ab5a",
+    backgroundColor: "#fff",
     flex: 1,
-    alignItems: "center",
-    justifyContent: "center",
   },
+  mainView: {
+    flex: 1,
+    justifyContent: "flex-start",
+  },
+  header: {
+    backgroundColor: Colors.header,
+    width: "100%",
+    height: 50,
+    justifyContent: "space-between"
+  }
 });
