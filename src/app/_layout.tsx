@@ -8,7 +8,7 @@ import { EllipsisIcon, HouseIcon, MapIcon, ShapesIcon } from "lucide-react-nativ
 export default function RootLayout() {
   return (
     <SafeAreaView style={styles.container}>
-      <StatusBar backgroundColor={Colors.header} barStyle={"light-content"} />
+      <StatusBar backgroundColor={Colors.outlets.purple} barStyle={"light-content"} />
 
       <Tabs
         screenOptions={{
@@ -24,7 +24,7 @@ export default function RootLayout() {
           name="index" 
           options={{ 
             title: 'Home', 
-            tabBarActiveTintColor: '#D61967',
+            tabBarActiveTintColor: Colors.outlets.pink,
             tabBarIcon: ({color, size}) => (
               <HouseIcon color={color} size={size} />
             )
@@ -34,7 +34,7 @@ export default function RootLayout() {
           name="collection" 
           options={{ 
             title: 'Collection', 
-            tabBarActiveTintColor: '#44AD4E',
+            tabBarActiveTintColor: Colors.outlets.green,
             tabBarIcon: ({color, size}) => (
               <ShapesIcon color={color} size={size} />
             )
@@ -53,7 +53,7 @@ export default function RootLayout() {
           name="map" 
           options={{ 
             title: 'Map', 
-            tabBarActiveTintColor: '#24A8E0',
+            tabBarActiveTintColor: Colors.outlets.blue,
             tabBarIcon: ({color, size}) => (
               <MapIcon color={color} size={size} />
             )
@@ -63,7 +63,7 @@ export default function RootLayout() {
           name="others" 
           options={{ 
             title: 'Others', 
-            tabBarActiveTintColor: '#FD7033',
+            tabBarActiveTintColor: Colors.outlets.orange,
             tabBarIcon: ({color, size}) => (
               <EllipsisIcon color={color} size={size} />
             )
@@ -76,7 +76,7 @@ export default function RootLayout() {
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: Colors.header,
+    backgroundColor: Colors.outlets.purple,
     flex: 1,
     justifyContent: "center"
   }

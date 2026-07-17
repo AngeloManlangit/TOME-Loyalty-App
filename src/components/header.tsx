@@ -34,7 +34,7 @@ export default function CustomHeader({ options, route }: CustomHeaderProps) {
 
 const styles = StyleSheet.create({
   header: {
-    backgroundColor: Colors.header,
+    backgroundColor: Colors.outlets.purple,
     width: "100%",
     justifyContent: "space-between",
     paddingVertical: 20,

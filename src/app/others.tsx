@@ -1,16 +1,26 @@
-import { Image, View, StyleSheet } from "react-native";
+import { View, StyleSheet, Text } from "react-native";
+import { LinearGradient } from "expo-linear-gradient";
+import { Colors, bgTransparency } from "../constants/theme";
 
 export default function OthersScreen() {
   return (
     <View style={styles.container}>
-      <Image source={{ uri: "https://upload.wikimedia.org/wikipedia/en/thumb/b/b9/Tywin_Lannister_Profile_Charles_Dance.jpg/250px-Tywin_Lannister_Profile_Charles_Dance.jpg" }} />
+        <LinearGradient
+            colors={['#fff', `${Colors.outlets.orange}${bgTransparency}`]}
+            style={styles.mainView}
+        >
+            <Text>MAP</Text>
+        </LinearGradient>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: "#e47bc2",
+    backgroundColor: "#fff",
+    flex: 1,
+  },
+  mainView: {
     flex: 1,
   }
 });

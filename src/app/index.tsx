@@ -1,9 +1,16 @@
 import { Image, View, StyleSheet, Text, ScrollView, StatusBar } from "react-native";
+import { LinearGradient } from 'expo-linear-gradient';
+import { bgTransparency, Colors } from "../constants/theme";
 
 export default function HomeScreen() {
   return (
     <View style={styles.container}>
-      <Image style={styles.mainView} source={{ uri: "https://miro.medium.com/v2/resize:fit:1200/1*zCw9YQICYZzozYZsqeIiYA.png" }} />
+      <LinearGradient
+        colors={['#fff', `${Colors.outlets.pink}${bgTransparency}`]}
+        style={styles.mainView}
+      >
+
+      </LinearGradient>
     </View>
   );
 }
