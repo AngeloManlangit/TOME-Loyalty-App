@@ -1,10 +1,14 @@
 import { Tabs } from "expo-router";
-import { SafeAreaProvider } from "react-native-safe-area-context";
+import { StatusBar, StyleSheet } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
+import { Colors } from "../constants/theme";
 import CustomHeader from "../components/header"
 
 export default function RootLayout() {
   return (
-    <SafeAreaProvider>
+    <SafeAreaView style={styles.container}>
+      <StatusBar backgroundColor={Colors.header} barStyle={"light-content"} />
+
       <CustomHeader />
 
       <Tabs screenOptions={{ animation: "shift", headerShown: false }}>
@@ -13,12 +17,30 @@ export default function RootLayout() {
             title: "Home"
           }}
         />
-        <Tabs.Screen name="cool"
+        <Tabs.Screen name="collection"
           options={{
-            title: "Cool"
+            title: "Collection"
+          }}
+        />
+        <Tabs.Screen name="map"
+          options={{
+            title: "Map"
+          }}
+        />
+        <Tabs.Screen name="others"
+          options={{
+            title: "Others"
           }}
         />
       </Tabs>  
-    </SafeAreaProvider>
+    </SafeAreaView>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    backgroundColor: Colors.header,
+    flex: 1,
+    justifyContent: "center"
+  }
+});
