@@ -1,5 +1,5 @@
 import { View, Text, StyleSheet } from "react-native";
-import { Colors } from "../constants/theme";
+import { Colors, Fonts } from "../constants/theme";
 
 interface CustomHeaderProps {
     options?: {
@@ -20,7 +20,7 @@ export default function CustomHeader({ options, route }: CustomHeaderProps) {
                 isHome ? (
                     <View>
                         <Text style={styles.headerText}>Good Morning, </Text>
-                        <Text style={styles.headerText}>House!</Text>
+                        <Text style={[styles.headerText, styles.capitalized]}>House!</Text>
                     </View>
                 ) : 
                 (
@@ -37,11 +37,16 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.outlets.purple,
     width: "100%",
     justifyContent: "space-between",
-    paddingVertical: 20,
+    paddingVertical: 25,
     paddingHorizontal: 10,
   },
   headerText: {
     color: "#fff",
-    fontSize: 25
+    fontSize: 28,
+    fontFamily: Fonts.Lato_Bold,
+    paddingBottom: 3
+  },
+  capitalized: {
+    textTransform: "uppercase"
   }
 });

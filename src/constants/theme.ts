@@ -1,5 +1,10 @@
 import { Platform } from 'react-native';
 
+export const Fonts = {
+    Lato: 'Lato_400Regular',
+    Lato_Bold: 'Lato_700Bold'
+};
+
 export const bgTransparency: number = 15 as const;
 
 export const Colors = {

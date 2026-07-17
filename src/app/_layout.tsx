@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { Tabs } from "expo-router";
 import { StatusBar, StyleSheet } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -5,7 +6,27 @@ import { Colors } from "../constants/theme";
 import CustomHeader from "../components/header"
 import { EllipsisIcon, HouseIcon, MapIcon, ShapesIcon } from "lucide-react-native";
 
+import * as SplashScreen from 'expo-splash-screen';
+import { useFonts, Lato_400Regular, Lato_700Bold } from '@expo-google-fonts/lato';
+
+SplashScreen.preventAutoHideAsync();
+
 export default function RootLayout() {
+  const [loaded, error] = useFonts({
+    Lato_400Regular,
+    Lato_700Bold,
+  });
+
+  useEffect(() => {
+    if (loaded || error) {
+      SplashScreen.hideAsync();
+    }
+  }, [loaded, error]);
+
+  if (!loaded && !error) {
+    return null;
+  }
+
   return (
     <SafeAreaView style={styles.container}>
       <StatusBar backgroundColor={Colors.outlets.purple} barStyle={"light-content"} />
