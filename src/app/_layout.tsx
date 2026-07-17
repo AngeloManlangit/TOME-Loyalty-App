@@ -9,30 +9,42 @@ export default function RootLayout() {
     <SafeAreaView style={styles.container}>
       <StatusBar backgroundColor={Colors.header} barStyle={"light-content"} />
 
-      <CustomHeader />
+      <Tabs
+        screenOptions={{
+          header: (props) => <CustomHeader {...props} />,
+          tabBarStyle: {
+            height: 70,
+            paddingBottom: 10,
+          },
+          animation: "shift"
+        }}
+      >
+        <Tabs.Screen 
+          name="index" 
+          options={{ title: 'Home', tabBarActiveTintColor: '#D61967' }} 
+        />
+        <Tabs.Screen 
+          name="collection" 
+          options={{ title: 'Collection', tabBarActiveTintColor: '#44AD4E' }} 
+        />
+        <Tabs.Screen
+          name="scanner"
+          options={{
+            headerShown: false,
+            title: "Scanner", 
+            tabBarIcon: () => null, 
+          }}
+        />
 
-      <Tabs screenOptions={{ animation: "shift", headerShown: false }}>
-        <Tabs.Screen name="index" 
-          options={{
-            title: "Home"
-          }}
+        <Tabs.Screen 
+          name="map" 
+          options={{ title: 'Map', tabBarActiveTintColor: '#24A8E0' }} 
         />
-        <Tabs.Screen name="collection"
-          options={{
-            title: "Collection"
-          }}
+        <Tabs.Screen 
+          name="others" 
+          options={{ title: 'Others', tabBarActiveTintColor: '#FD7033' }} 
         />
-        <Tabs.Screen name="map"
-          options={{
-            title: "Map"
-          }}
-        />
-        <Tabs.Screen name="others"
-          options={{
-            title: "Others"
-          }}
-        />
-      </Tabs>  
+      </Tabs>
     </SafeAreaView>
   );
 }

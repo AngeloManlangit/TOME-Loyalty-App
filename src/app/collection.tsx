@@ -1,7 +1,7 @@
 import { Image, View, StyleSheet, StatusBar, Text } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-export default function Home() {
+export default function CollectionScreen() {
   return (
     <View style={styles.container}>
       <SafeAreaView style={styles.mainView}>

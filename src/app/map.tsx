@@ -2,7 +2,7 @@ import { Image, View, StyleSheet, StatusBar, Text } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Colors } from "../constants/theme";
 
-export default function Home() {
+export default function MapScreen() {
   return (
     <View style={styles.container}>
       <SafeAreaView style={styles.mainView}>

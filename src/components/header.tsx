@@ -1,10 +1,24 @@
 import { View, Text, StyleSheet } from "react-native";
 import { Colors } from "../constants/theme";
 
-export default function CustomHeader() {
+export default function CustomHeader({ options, route }) {
+    const title = options?.title ?? route?.name ?? '';
+    const isHome = route?.name === "index";
+
     return (
         <View style={styles.header}>
-          <Text> Hi poopies </Text>
+            {
+                isHome ? (
+                    <View>
+                        <Text style={styles.headerText}>Good Morning, </Text>
+                        <Text style={styles.headerText}>House!</Text>
+                    </View>
+                ) : 
+                (
+                    <Text style={styles.headerText}>{ title }</Text>
+                )
+            }
+            
         </View>
     );
 };
@@ -21,7 +35,12 @@ const styles = StyleSheet.create({
   header: {
     backgroundColor: Colors.header,
     width: "100%",
-    height: 50,
-    justifyContent: "space-between"
+    justifyContent: "space-between",
+    paddingVertical: 20,
+    paddingHorizontal: 10,
+  },
+  headerText: {
+    color: "#fff",
+    fontSize: 25
   }
 });
