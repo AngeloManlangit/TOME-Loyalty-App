@@ -37,6 +37,7 @@ export default function RootLayout() {
         screenOptions={{
           header: (props) => <CustomHeader {...props} />,
           tabBarStyle: {
+            position: 'absolute',
             height: 62,
             paddingBottom: 10
           },

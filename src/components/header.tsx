@@ -24,7 +24,7 @@ export default function CustomHeader({ options, route }: CustomHeaderProps) {
                     </View>
                 ) : 
                 (
-                    <Text style={styles.headerText}>{ title }</Text>
+                    <Text style={[styles.headerText, styles.capitalized]}>{ title }</Text>
                 )
             }
             

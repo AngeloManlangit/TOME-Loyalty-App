@@ -6,6 +6,7 @@
     "@expo-google-fonts/lato": "^0.4.1",
     "@expo-google-fonts/montserrat": "^0.4.2",
     "@expo/ui": "~57.0.4",
+    "@gorhom/bottom-sheet": "^5.2.14",
     "expo": "~57.0.4",
     "expo-constants": "~57.0.3",
     "expo-device": "~57.0.0",
