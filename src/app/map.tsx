@@ -1,20 +1,23 @@
-import { Image, View, StyleSheet, StatusBar, Text } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
-import { Colors } from "../constants/theme";
+import { View, StyleSheet, Text } from "react-native";
+import { LinearGradient } from "expo-linear-gradient";
+import { Colors, bgTransparency } from "../constants/theme";
 
-export default function MapScreen() {
+export default function MapsScreen() {
   return (
     <View style={styles.container}>
-      <SafeAreaView style={styles.mainView}>
-        <Text>Map</Text>
-      </SafeAreaView>
+        <LinearGradient
+            colors={['#fff', `${Colors.outlets.blue}${bgTransparency}`]}
+            style={styles.mainView}
+        >
+            <Text>MAP</Text>
+        </LinearGradient>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: "#56e1c3",
+    backgroundColor: "#fff",
     flex: 1,
   },
   mainView: {

@@ -1,7 +1,21 @@
 import { Platform } from 'react-native';
 
+export const Fonts = {
+    Lato: 'Lato_400Regular',
+    Lato_Bold: 'Lato_700Bold',
+    Montserrat: 'Montserrat_600SemiBold'
+};
+
+export const bgTransparency: number = 10 as const;
+
 export const Colors = {
-    header: '#4A1475',
+    outlets: {
+        purple: '#4A1475',
+        pink: '#D61967',
+        green: '#44AD4E',
+        blue: '#24A8E0',
+        orange: '#FD7033'
+    },
     light: {
         text: '#000000',
         background: '#ffffff',

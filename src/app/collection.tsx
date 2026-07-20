@@ -1,19 +1,23 @@
-import { Image, View, StyleSheet, StatusBar, Text } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
+import { View, StyleSheet, Text } from "react-native";
+import { LinearGradient } from "expo-linear-gradient";
+import { Colors, bgTransparency } from "../constants/theme";
 
 export default function CollectionScreen() {
   return (
     <View style={styles.container}>
-      <SafeAreaView style={styles.mainView}>
-        <Text>Colletion</Text>
-      </SafeAreaView>
+        <LinearGradient
+            colors={['#fff', `${Colors.outlets.green}${bgTransparency}`]}
+            style={styles.mainView}
+        >
+            <Text>Colletion</Text>
+        </LinearGradient>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: "#7246b9",
+    backgroundColor: "#fff",
     flex: 1,
   },
   mainView: {
