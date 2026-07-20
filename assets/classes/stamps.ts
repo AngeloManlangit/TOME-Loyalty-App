@@ -6,4 +6,5 @@ export interface StampCardDetails {
     stampCard_title: string;
     stamp_number: number;
     stamp_total: number;
+    stamp_reward_index: number[];
 }

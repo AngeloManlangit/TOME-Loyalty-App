@@ -1,13 +1,18 @@
 import { Text, View, StyleSheet } from "react-native";
 
 interface StampCircleInterface {
-    stamped: boolean
+    stamped: boolean;
+    reward: boolean;
 }
 
-export default function StampCircle({stamped = false}: StampCircleInterface) {
+export default function StampCircle({stamped = false, reward = false}: StampCircleInterface) {
     return (
         <View style={[styles.circle, (stamped) ? {backgroundColor: '#000'} : {backgroundColor: '#fff'}]}>
-            <Text style={{ color: '#fff' }}>:)</Text>
+            <Text style={{ color: '#fff' }}>{`:\)`}</Text>
+            
+            {reward ? (
+                <Text style={styles.reward}>YAY</Text>
+            ) : ''}
         </View>
     );
 }
@@ -19,5 +24,9 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         borderRadius: '100%',
         aspectRatio: 1,
+    },
+    reward: {
+        fontSize: 20,
+        color: '#f32525'
     }
 })

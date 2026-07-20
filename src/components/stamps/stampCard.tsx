@@ -19,11 +19,12 @@ export default function StampCard({cardDetails}: StampCardProps) {
           {/* Generate an array based on stamp_total and map over it */}
           {Array.from({ length: cardDetails.stamp_total }).map((_, index) => {
             const isStamped = index < cardDetails.stamp_number;
+            const isReward = cardDetails.stamp_reward_index.includes(index + 1); // + 1 because the indices are the nth position instead of their actual numerical index
 
             return (
               <View key={index} style={[styles.gridItem, {width: itemWidth, height: '35%'}]}>
                 
-                <StampCircle stamped={isStamped} />
+                <StampCircle stamped={isStamped} reward={isReward} />
 
               </View>
             );
@@ -38,17 +39,15 @@ export default function StampCard({cardDetails}: StampCardProps) {
             { backgroundColor: cardDetails.stampCard_color }
         ]}>
             {hasBGImage ? (
-                // 2. The INNER wrapper forces the image to perfectly fill the outer bounds
                 <ImageBackground
                     source={{ uri: cardDetails.stampCard_image as string}}
                     style={styles.imageBackgroundWrapper}
-                    imageStyle={{ borderRadius: 15 }} // Apply radius directly to the rendered image
+                    imageStyle={{ borderRadius: 15 }}
                     resizeMode="cover"
                 >
                     {innerContent}
                 </ImageBackground>
             ) : (
-                // 3. Just render the grid if there is no image
                 innerContent
             )}
         </View>    
