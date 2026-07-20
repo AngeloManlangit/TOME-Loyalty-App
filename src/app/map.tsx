@@ -29,6 +29,8 @@ export default function MapsScreen() {
           style={styles.gradient}
       >
         <ScrollView contentContainerStyle={styles.scrollContent}>
+          <Image style={styles.logoImage} source={require('@/assets/images/TOME Colored.png')} resizeMode="contain" />
+
           <Image style={styles.image} source={{uri: 'https://miro.medium.com/v2/resize:fit:1200/1*zCw9YQICYZzozYZsqeIiYA.png'}} />
 
           <Text style={styles.brandsTitle}>Available Brands</Text>
@@ -70,6 +72,10 @@ const styles = StyleSheet.create({
     paddingVertical: 30,
     flexGrow: 1,
     alignItems: 'center'
+  },
+  logoImage: {
+    height: 80,
+    marginBottom: 10
   },
   image: {
     width: "100%",
