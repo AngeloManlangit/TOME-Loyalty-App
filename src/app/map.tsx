@@ -24,37 +24,36 @@ export default function MapsScreen() {
 
   return (
     <GestureHandlerRootView style={styles.container}>
-        <LinearGradient
-            colors={['#fff', `${Colors.outlets.blue}${bgTransparency}`]}
-            style={styles.gradient}
-        >
-          <ScrollView contentContainerStyle={styles.scrollContent}>
-            <Image style={styles.image} source={{uri: 'https://miro.medium.com/v2/resize:fit:1200/1*zCw9YQICYZzozYZsqeIiYA.png'}} />
+      <LinearGradient
+          colors={['#fff', `${Colors.outlets.blue}${bgTransparency}`]}
+          style={styles.gradient}
+      >
+        <ScrollView contentContainerStyle={styles.scrollContent}>
+          <Image style={styles.image} source={{uri: 'https://miro.medium.com/v2/resize:fit:1200/1*zCw9YQICYZzozYZsqeIiYA.png'}} />
 
-            <Text style={styles.brandsTitle}>Available Brands</Text>
+          <Text style={styles.brandsTitle}>Available Brands</Text>
 
-            <BrandsList chosenBrand={setBrand} />
-          </ScrollView>
-        </LinearGradient>
+          <BrandsList chosenBrand={setBrand} />
+        </ScrollView>
+      </LinearGradient>
 
-        {/* 2. Place the BottomSheet outside the ScrollView so it overlays the screen */}
-        <BottomSheet
-            ref={bottomSheetRef}
-            index={-1} // -1 means it starts fully hidden off-screen
-            snapPoints={snapPoints}
-            enablePanDownToClose={true}
-            backdropComponent={renderBackdrop}
-        >
-            <BottomSheetScrollView contentContainerStyle={styles.sheetContent}>
-                {selectedBrand && (
-                    <>
-                        {/* Assuming your brand logo is a local require() based on our previous setup */}
-                        <Image source={selectedBrand.logo} style={styles.modalLogo} resizeMode="contain" />
-                        <Text style={styles.modalTitle}>{selectedBrand.name}</Text>
-                    </>
-                )}
-            </BottomSheetScrollView>
-        </BottomSheet>
+      <BottomSheet
+          ref={bottomSheetRef}
+          index={-1} // -1 means it starts fully hidden off-screen
+          snapPoints={snapPoints}
+          enablePanDownToClose={true}
+          backdropComponent={renderBackdrop}
+      >
+          <BottomSheetScrollView contentContainerStyle={styles.sheetContent}>
+              {selectedBrand && (
+                  <>
+                      {/* Assuming your brand logo is a local require() based on our previous setup */}
+                      <Image source={selectedBrand.logo} style={styles.modalLogo} resizeMode="contain" />
+                      <Text style={styles.modalTitle}>{selectedBrand.name}</Text>
+                  </>
+              )}
+          </BottomSheetScrollView>
+      </BottomSheet>
     </GestureHandlerRootView>
   );
 }
