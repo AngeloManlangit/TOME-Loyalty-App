@@ -8,6 +8,7 @@ import { EllipsisIcon, HouseIcon, MapIcon, ShapesIcon } from "lucide-react-nativ
 
 import * as SplashScreen from 'expo-splash-screen';
 import { useFonts, Lato_400Regular, Lato_700Bold } from '@expo-google-fonts/lato';
+import { Montserrat_600SemiBold } from '@expo-google-fonts/montserrat'
 
 SplashScreen.preventAutoHideAsync();
 
@@ -15,6 +16,7 @@ export default function RootLayout() {
   const [loaded, error] = useFonts({
     Lato_400Regular,
     Lato_700Bold,
+    Montserrat_600SemiBold
   });
 
   useEffect(() => {
@@ -35,8 +37,8 @@ export default function RootLayout() {
         screenOptions={{
           header: (props) => <CustomHeader {...props} />,
           tabBarStyle: {
-            height: 70,
-            paddingBottom: 10,
+            height: 62,
+            paddingBottom: 10
           },
           animation: "shift"
         }}

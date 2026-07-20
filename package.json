@@ -4,6 +4,7 @@
   "version": "1.0.0",
   "dependencies": {
     "@expo-google-fonts/lato": "^0.4.1",
+    "@expo-google-fonts/montserrat": "^0.4.2",
     "@expo/ui": "~57.0.4",
     "expo": "~57.0.4",
     "expo-constants": "~57.0.3",

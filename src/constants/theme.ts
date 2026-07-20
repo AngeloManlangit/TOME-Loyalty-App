@@ -2,10 +2,11 @@ import { Platform } from 'react-native';
 
 export const Fonts = {
     Lato: 'Lato_400Regular',
-    Lato_Bold: 'Lato_700Bold'
+    Lato_Bold: 'Lato_700Bold',
+    Montserrat: 'Montserrat_600SemiBold'
 };
 
-export const bgTransparency: number = 15 as const;
+export const bgTransparency: number = 10 as const;
 
 export const Colors = {
     outlets: {
