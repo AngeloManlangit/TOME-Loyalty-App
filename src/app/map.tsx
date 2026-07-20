@@ -2,8 +2,16 @@ import { View, StyleSheet, Text, Image, ScrollView } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { Colors, Fonts, bgTransparency } from "../constants/theme";
 import BrandsList from "../components/mapPage/brands";
+import type { Brand } from "@/assets/classes/maps";
+import { useState } from "react";
 
 export default function MapsScreen() {
+  const [selectedBrand, setSelectedBrand] = useState<Brand | null>(null);
+  function setBrand(b: Brand) {
+    console.log(b.name)
+    setSelectedBrand(b);
+  }
+
   return (
     <View style={styles.container}>
         <LinearGradient
@@ -15,7 +23,7 @@ export default function MapsScreen() {
 
             <Text style={styles.brandsTitle}>Available Brands</Text>
 
-            <BrandsList />
+            <BrandsList chosenBrand={setBrand} />
           </ScrollView>
         </LinearGradient>
     </View>
