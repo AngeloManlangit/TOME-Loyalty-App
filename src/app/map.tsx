@@ -31,7 +31,7 @@ export default function MapsScreen() {
         <ScrollView contentContainerStyle={styles.scrollContent}>
           <Image style={styles.logoImage} source={require('@/assets/images/TOME Colored.png')} resizeMode="contain" />
 
-          <Image style={styles.image} source={{uri: 'https://miro.medium.com/v2/resize:fit:1200/1*zCw9YQICYZzozYZsqeIiYA.png'}} />
+          <Image style={styles.image} source={require('@/assets/images/TOME-MAP.png')} resizeMode="contain" />
 
           <Text style={styles.brandsTitle}>Available Brands</Text>
 
@@ -78,8 +78,9 @@ const styles = StyleSheet.create({
     marginBottom: 10
   },
   image: {
-    width: "100%",
-    height: 400, // Give the image a concrete height or aspect ratio
+    width: '100%',
+    height: 'auto',
+    aspectRatio: 16 / 9
   },
   brandsTitle: {
     fontSize: 28,

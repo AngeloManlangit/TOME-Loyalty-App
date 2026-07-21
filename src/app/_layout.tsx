@@ -10,6 +10,9 @@ import * as SplashScreen from 'expo-splash-screen';
 import { useFonts, Lato_400Regular, Lato_700Bold } from '@expo-google-fonts/lato';
 import { Montserrat_600SemiBold } from '@expo-google-fonts/montserrat'
 
+import ScannerButton from "../components/scannerPage/scannerButton";
+import { NoRippleTabBarButton } from "../components/custom/noRippleButton";
+
 SplashScreen.preventAutoHideAsync();
 
 export default function RootLayout() {
@@ -41,7 +44,7 @@ export default function RootLayout() {
             height: 62,
             paddingBottom: 10
           },
-          animation: "shift"
+          animation: "shift",
         }}
       >
         <Tabs.Screen 
@@ -68,8 +71,13 @@ export default function RootLayout() {
           name="scanner"
           options={{
             headerShown: false,
-            title: "Scanner", 
-            tabBarIcon: () => null, 
+            title: "", 
+            tabBarButton: (props) => (
+              <NoRippleTabBarButton {...props} />
+            ),
+            tabBarIcon: () => (
+              <ScannerButton />
+            )
           }}
         />
 

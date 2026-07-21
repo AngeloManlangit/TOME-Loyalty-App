@@ -1,6 +1,6 @@
 import { View, Text, StyleSheet } from "react-native";
 import { Fonts } from "../../constants/theme";
-import { SmallCapsText } from "../customTexts/smallCapsText";
+import { SmallCapsText } from "../custom/smallCapsText"
 import StampCard from "../stamps/stampCard";
 import { StampCardDetails } from "@/assets/classes/stamps";
 
