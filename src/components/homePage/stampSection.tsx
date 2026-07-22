@@ -15,7 +15,27 @@ const temp: StampCardDetails = {
   stamp_reward_index: [4, 9]
 };
 
+import { stampService } from "../../services/stampService";
+import { useEffect, useState } from "react";
+
 export default function StampSection() {
+  const [stamps, setStamps] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  
+  useEffect(() => {
+    const loadStamps = async () => {
+      setLoading(true);
+      const userStamps = await stampService.fetchStamps();
+      if (userStamps) {
+        console.log(userStamps)
+        setStamps(userStamps);
+      }
+      setLoading(false);
+    };
+
+    loadStamps();
+  }, []);
+
   return (
     <View style={styles.container}>
         <SmallCapsText baseSize={24} style={styles.headerText}>Stamp Cards</SmallCapsText>

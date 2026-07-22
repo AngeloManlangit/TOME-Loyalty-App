@@ -8,8 +8,10 @@ import { router } from 'expo-router';
 export default function Index() {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
+    const [loading, setLoading] = useState(false);
 
     const signIn = async () => {
+        setLoading(true)
         try {
             const user = await signInWithEmailAndPassword(auth, email, password);
             if (user) router.replace('/home');
@@ -17,6 +19,10 @@ export default function Index() {
         } catch (error: any) {
             console.log(error);
             alert('Sign in failed: ' + error.message)
+        } finally {
+            const user = auth.currentUser
+            console.log('Successfully signed in! Welcome user ' + user?.uid);
+            setLoading(false);
         }
     }
 
@@ -27,6 +33,9 @@ export default function Index() {
         } catch (error: any) {
             console.log(error);
             alert('Sign in failed: ' + error.message)
+        } finally {
+            console.log('Successfully signed in!');
+            setLoading(false);
         }
     }
 
@@ -44,6 +53,13 @@ export default function Index() {
             </TouchableOpacity>
 
             <TouchableOpacity onPress={() => router.replace('/home')}><Text>Touch me</Text></TouchableOpacity>
+
+            {
+                loading ? 
+                (
+                    <Text>LOADING...</Text>
+                ) : ('')
+            }
         </SafeAreaView>
     );
 }
