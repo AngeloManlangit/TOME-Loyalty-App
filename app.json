@@ -33,7 +33,15 @@
           "imageWidth": 76
         }
       ],
-      "expo-font"
+      "expo-font",
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "Allow $(PRODUCT_NAME) to access your camera",
+          "recordAudioAndroid": false,
+          "barcodeScannerEnabled": false
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": true,
