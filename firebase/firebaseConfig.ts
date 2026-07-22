@@ -10,13 +10,12 @@ import { getFirestore } from "firebase/firestore"
 // Your web app's Firebase configuration
 // For Firebase JS SDK v7.20.0 and later, measurementId is optional
 const firebaseConfig = {
-  apiKey: "AIzaSyDOBfwueQt7FZqJrHhUoIvVjlZJ25mTXfc",
-  authDomain: "tome-loyalty-app.firebaseapp.com",
-  projectId: "tome-loyalty-app",
-  storageBucket: "tome-loyalty-app.firebasestorage.app",
-  messagingSenderId: "56322668496",
-  appId: "1:56322668496:web:9fc67f2ba02f2b3fcc6bd5",
-  measurementId: "G-CRHWCVFMLD"
+  apiKey: process.env.EXPO_PUBLIC_FIREBASE_APIKEY,
+  authDomain: process.env.EXPO_PUBLIC_AUTH_DOMAIN,
+  projectId: process.env.EXPO_PUBLIC_PROJECT_ID,
+  storageBucket: process.env.EXPO_PUBLIC_STORAGE_BUCKET,
+  messagingSenderId: process.env.EXPO_PUBLIC_MESSAGING_SENDER_ID,
+  appId: process.env.EXPO_PUBLIC_APP_ID,
 };
 
 // Initialize Firebase
