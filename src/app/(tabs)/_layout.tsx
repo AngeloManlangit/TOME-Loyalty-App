@@ -27,7 +27,7 @@ export default function RootLayout() {
         }}
       >
         <Tabs.Screen 
-          name="index" 
+          name="home" 
           options={{ 
             title: 'Home', 
             tabBarActiveTintColor: Colors.outlets.pink,
