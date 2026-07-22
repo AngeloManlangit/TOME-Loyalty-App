@@ -12,7 +12,7 @@ const temp: StampCardDetails = {
   stampCard_title: 'my card baby',
   stamp_count: 4,
   stamp_total: 10,
-  stamp_reward_index: [5, 10]
+  stamp_reward_index: [4, 9]
 };
 
 export default function StampSection() {

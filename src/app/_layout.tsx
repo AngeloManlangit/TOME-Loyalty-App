@@ -1,7 +1,6 @@
 import { Stack } from "expo-router";
 import { useEffect } from "react";
-import { StyleSheet } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
+import { View, StyleSheet } from "react-native";
 
 import { Lato_400Regular, Lato_700Bold, useFonts } from '@expo-google-fonts/lato';
 import { Montserrat_600SemiBold } from '@expo-google-fonts/montserrat';
@@ -27,12 +26,12 @@ export default function RootLayout() {
   }
 
   return (
-    <SafeAreaView style={styles.container}>
-      <Stack screenOptions={{ headerShown: true }}>
+    <View style={styles.container}>
+      <Stack screenOptions={{ headerShown: false }}>
         <Stack.Screen name="index" />
         <Stack.Screen name="(tabs)" />
       </Stack>
-    </SafeAreaView>
+    </View>
   );
 }
 
