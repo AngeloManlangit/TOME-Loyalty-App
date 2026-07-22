@@ -1,6 +1,6 @@
-import { View, StyleSheet, Text } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
-import { Colors, bgTransparency } from "../constants/theme";
+import { StyleSheet, Text, View } from "react-native";
+import { Colors, bgTransparency } from "../../constants/theme";
 
 export default function CollectionScreen() {
   return (

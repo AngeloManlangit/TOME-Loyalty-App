@@ -1,30 +1,8 @@
-import { Image, View, StyleSheet, Text, ScrollView, StatusBar } from "react-native";
-import { LinearGradient } from 'expo-linear-gradient';
-import { bgTransparency, Colors } from "../constants/theme";
-import StampSection from "../components/homePage/stampSection";
+import { SafeAreaView } from 'react-native-safe-area-context'
+import { auth } from '../../firebase/firebaseConfig'
 
-export default function HomeScreen() {
-  return (
-    <View style={styles.container}>
-      <LinearGradient
-        colors={['#fff', `${Colors.outlets.pink}${bgTransparency}`]}
-        style={styles.mainView}
-      >
-        <StampSection />
-        
-      </LinearGradient>
-    </View>
-  );
+export default function index() {
+    <SafeAreaView>
+
+    </SafeAreaView>
 }
-
-const styles = StyleSheet.create({
-  container: {
-    backgroundColor: "#fff",
-    flex: 1,
-  },
-  mainView: {
-    flex: 1,
-    paddingVertical: 30,
-    paddingHorizontal: 20
-  }
-});
