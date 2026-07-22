@@ -6,6 +6,8 @@ import { Image, ScrollView, StyleSheet, Text } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import BrandsList from "../../components/mapPage/brands";
 import { Colors, Fonts, bgTransparency } from "../../constants/theme";
+import Animated, { SlideInRight } from 'react-native-reanimated';
+import { useFocusEffect } from "expo-router";
 
 export default function MapsScreen() {
   const [selectedBrand, setSelectedBrand] = useState<Brand | null>(null);
@@ -22,40 +24,55 @@ export default function MapsScreen() {
     (props: any) => <BottomSheetBackdrop appearsOnIndex={1} disappearsOnIndex={0} {...props} />, []
   );
 
+  // entry animations
+  const [animationKey, setAnimationKey] = useState(0);
+
+  useFocusEffect(
+    useCallback(() => {
+      setAnimationKey((prev) => prev + 1);
+    }, [])
+  );
+
   return (
     <GestureHandlerRootView style={styles.container}>
-      <LinearGradient
-          colors={['#fff', `${Colors.outlets.blue}${bgTransparency}`]}
-          style={styles.gradient}
+      <Animated.View 
+        key={animationKey} 
+        entering={SlideInRight.duration(300)}
+        style={{ flex: 1 }}
       >
-        <ScrollView contentContainerStyle={styles.scrollContent}>
-          <Image style={styles.logoImage} source={require('@/assets/images/TOME Colored.png')} resizeMode="contain" />
+        <LinearGradient
+            colors={['#fff', `${Colors.outlets.blue}${bgTransparency}`]}
+            style={styles.gradient}
+        >
+          <ScrollView contentContainerStyle={styles.scrollContent}>
+            <Image style={styles.logoImage} source={require('@/assets/images/TOME Colored.png')} resizeMode="contain" />
 
-          <Image style={styles.image} source={require('@/assets/images/TOME-MAP.png')} resizeMode="contain" />
+            <Image style={styles.image} source={require('@/assets/images/TOME-MAP.png')} resizeMode="contain" />
 
-          <Text style={styles.brandsTitle}>Available Brands</Text>
+            <Text style={styles.brandsTitle}>Available Brands</Text>
 
-          <BrandsList chosenBrand={setBrand} />
-        </ScrollView>
-      </LinearGradient>
+            <BrandsList chosenBrand={setBrand} />
+          </ScrollView>
+        </LinearGradient>
 
-      <BottomSheet
-          ref={bottomSheetRef}
-          index={-1} // -1 means it starts fully hidden off-screen
-          snapPoints={snapPoints}
-          enablePanDownToClose={true}
-          backdropComponent={renderBackdrop}
-      >
-          <BottomSheetScrollView contentContainerStyle={styles.sheetContent}>
-              {selectedBrand && (
-                  <>
-                      {/* Assuming your brand logo is a local require() based on our previous setup */}
-                      <Image source={selectedBrand.logo} style={styles.modalLogo} resizeMode="contain" />
-                      <Text style={styles.modalTitle}>{selectedBrand.name}</Text>
-                  </>
-              )}
-          </BottomSheetScrollView>
-      </BottomSheet>
+        <BottomSheet
+            ref={bottomSheetRef}
+            index={-1} // -1 means it starts fully hidden off-screen
+            snapPoints={snapPoints}
+            enablePanDownToClose={true}
+            backdropComponent={renderBackdrop}
+        >
+            <BottomSheetScrollView contentContainerStyle={styles.sheetContent}>
+                {selectedBrand && (
+                    <>
+                        {/* Assuming your brand logo is a local require() based on our previous setup */}
+                        <Image source={selectedBrand.logo} style={styles.modalLogo} resizeMode="contain" />
+                        <Text style={styles.modalTitle}>{selectedBrand.name}</Text>
+                    </>
+                )}
+            </BottomSheetScrollView>
+        </BottomSheet>
+      </Animated.View>
     </GestureHandlerRootView>
   );
 }

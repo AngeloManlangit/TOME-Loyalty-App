@@ -1,9 +1,27 @@
 import { Image, View, StyleSheet, Text, ScrollView, StatusBar } from "react-native";
+import { useState, useCallback } from 'react';
+import { useFocusEffect } from 'expo-router';
+import Animated, { SlideInRight } from 'react-native-reanimated';
 
 export default function HomeScreen() {
+  // entry animations
+  const [animationKey, setAnimationKey] = useState(0);
+
+  useFocusEffect(
+    useCallback(() => {
+      setAnimationKey((prev) => prev + 1);
+    }, [])
+  );
+
   return (
     <View style={styles.container}>
-      <Image style={styles.mainView} source={{ uri: "https://media.tenor.com/bDmyKRMnKMcAAAAM/like-cat.gif" }} />
+      <Animated.View 
+        key={animationKey} 
+        entering={SlideInRight.duration(300)}
+        style={{ flex: 1 }}
+      >
+        <Image style={styles.mainView} source={{ uri: "https://media.tenor.com/bDmyKRMnKMcAAAAM/like-cat.gif" }} />
+      </Animated.View>
     </View>
   );
 }

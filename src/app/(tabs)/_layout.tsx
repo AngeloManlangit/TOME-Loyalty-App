@@ -15,15 +15,17 @@ export default function RootLayout() {
     <SafeAreaView style={styles.container}>
       <StatusBar backgroundColor={Colors.outlets.purple} barStyle={"light-content"} />
 
+      <CustomHeader />
+
       <Tabs
         screenOptions={{
-          header: (props) => <CustomHeader {...props} />,
+          headerShown: false,
           tabBarStyle: {
             position: 'absolute',
             height: 62,
             paddingBottom: 10
           },
-          animation: "shift",
+          animation: "none",
         }}
       >
         <Tabs.Screen 

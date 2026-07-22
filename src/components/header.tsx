@@ -1,5 +1,7 @@
 import { View, Text, StyleSheet } from "react-native";
 import { Colors, Fonts } from "../constants/theme";
+import { useEffect } from 'react';
+import { usePathname, useSegments } from 'expo-router';
 
 interface CustomHeaderProps {
     options?: {
@@ -10,9 +12,19 @@ interface CustomHeaderProps {
     };
 }
 
-export default function CustomHeader({ options, route }: CustomHeaderProps) {
-    const title = options?.title ?? route?.name ?? '';
-    const isHome = route?.name === "index";
+export default function CustomHeader() {
+    
+
+    const pathname = usePathname();
+    const segments = useSegments();
+
+    const title = segments[1] ?? '';
+    const isHome = title === "home";
+
+    useEffect(() => {
+    console.log('Route changed to:', pathname);
+    console.log('Current structure segments:', segments);
+    }, [pathname, segments]); 
 
     return (
         <View style={styles.header}>
@@ -34,8 +46,10 @@ export default function CustomHeader({ options, route }: CustomHeaderProps) {
 
 const styles = StyleSheet.create({
   header: {
+    position: 'fixed',
     backgroundColor: Colors.outlets.purple,
     width: "100%",
+    height: 'auto',
     justifyContent: "space-between",
     paddingVertical: 25,
     paddingHorizontal: 10,

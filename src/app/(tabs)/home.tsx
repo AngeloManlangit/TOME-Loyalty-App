@@ -2,17 +2,35 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { StyleSheet, View } from "react-native";
 import StampSection from "../../components/homePage/stampSection";
 import { bgTransparency, Colors } from "../../constants/theme";
+import { useState, useCallback } from 'react';
+import { useFocusEffect } from 'expo-router';
+import Animated, { SlideInRight } from 'react-native-reanimated';
 
 export default function HomeScreen() {
+  // entry animations
+  const [animationKey, setAnimationKey] = useState(0);
+
+  useFocusEffect(
+    useCallback(() => {
+      setAnimationKey((prev) => prev + 1);
+    }, [])
+  );
+
   return (
     <View style={styles.container}>
-      <LinearGradient
-        colors={['#fff', `${Colors.outlets.pink}${bgTransparency}`]}
-        style={styles.mainView}
+      <Animated.View 
+        key={animationKey} 
+        entering={SlideInRight.duration(300)}
+        style={{ flex: 1 }}
       >
-        <StampSection />
-        
-      </LinearGradient>
+        <LinearGradient
+          colors={['#fff', `${Colors.outlets.pink}${bgTransparency}`]}
+          style={styles.mainView}
+        >
+          <StampSection />
+          
+        </LinearGradient>
+      </Animated.View>
     </View>
   );
 }
