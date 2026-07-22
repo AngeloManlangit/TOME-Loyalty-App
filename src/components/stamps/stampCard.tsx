@@ -11,15 +11,15 @@ export default function StampCard({cardDetails}: StampCardProps) {
   
     const itemWidth = `${100 / columns}%` as DimensionValue;
 
-    const hasBGImage = (cardDetails.stampCard_image != null)
+    const hasBGImage = (cardDetails.stampCard_bgImage != null)
 
     const innerContent = (
         <View style={styles.gridContainer}>
           
           {/* Generate an array based on stamp_total and map over it */}
           {Array.from({ length: cardDetails.stamp_total }).map((_, index) => {
-            const isStamped = index < cardDetails.stamp_number;
-            const isReward = cardDetails.stamp_reward_index.includes(index + 1); // + 1 because the indices are the nth position instead of their actual numerical index
+            const isStamped = index < cardDetails.stamp_count;
+            const isReward = cardDetails.stamp_reward_index.includes(index);
 
             return (
               <View key={index} style={[styles.gridItem, {width: itemWidth, height: '35%'}]}>
@@ -40,7 +40,7 @@ export default function StampCard({cardDetails}: StampCardProps) {
         ]}>
             {hasBGImage ? (
                 <ImageBackground
-                    source={{ uri: cardDetails.stampCard_image as string}}
+                    source={{ uri: cardDetails.stampCard_bgImage as string}}
                     style={styles.imageBackgroundWrapper}
                     imageStyle={{ borderRadius: 15 }}
                     resizeMode="cover"

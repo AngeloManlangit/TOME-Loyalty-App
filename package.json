@@ -7,8 +7,10 @@
     "@expo-google-fonts/montserrat": "^0.4.2",
     "@expo/ui": "~57.0.4",
     "@gorhom/bottom-sheet": "^5.2.14",
+    "@react-native-async-storage/async-storage": "2.2.0",
     "expo": "~57.0.4",
     "expo-blur": "~57.0.2",
+    "expo-camera": "~57.0.3",
     "expo-constants": "~57.0.3",
     "expo-device": "~57.0.0",
     "expo-font": "~57.0.1",
@@ -22,6 +24,7 @@
     "expo-symbols": "~57.0.0",
     "expo-system-ui": "~57.0.0",
     "expo-web-browser": "~57.0.0",
+    "firebase": "^12.16.0",
     "lucide-react-native": "^1.24.0",
     "react": "19.2.3",
     "react-dom": "19.2.3",
@@ -45,5 +48,9 @@
     "web": "expo start --web",
     "lint": "expo lint"
   },
-  "private": true
+  "private": true,
+  "allowScripts": {
+    "@firebase/util@1.15.1": true,
+    "protobufjs@7.6.5": true
+  }
 }

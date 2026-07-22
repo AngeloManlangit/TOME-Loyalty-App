@@ -8,9 +8,9 @@ const temp: StampCardDetails = {
   owner: 'John Outlets',
   stamp_ID: 1,
   stampCard_color: '#4cdf7d',
-  stampCard_image: 'https://miro.medium.com/v2/resize:fit:1200/1*zCw9YQICYZzozYZsqeIiYA.png',
+  stampCard_bgImage: 'https://miro.medium.com/v2/resize:fit:1200/1*zCw9YQICYZzozYZsqeIiYA.png',
   stampCard_title: 'my card baby',
-  stamp_number: 4,
+  stamp_count: 4,
   stamp_total: 10,
   stamp_reward_index: [5, 10]
 };
@@ -22,7 +22,7 @@ export default function StampSection() {
 
         <StampCard cardDetails={temp} />
 
-        <Text style={styles.collectedCaption}>{`${temp.stamp_number}/${temp.stamp_total} Collected`}</Text>
+        <Text style={styles.collectedCaption}>{`${temp.stamp_count}/${temp.stamp_total} Collected`}</Text>
     </View>
   );
 }
