@@ -17,18 +17,12 @@ export default function OthersScreen() {
 
   return (
     <View style={styles.container}>
-      <Animated.View 
-        key={animationKey} 
-        entering={SlideInRight.duration(300)}
-        style={{ flex: 1 }}
-      >
         <LinearGradient
             colors={['#fff', `${Colors.outlets.orange}${bgTransparency}`]}
             style={styles.mainView}
         >
             <Text>MAP</Text>
         </LinearGradient>
-      </Animated.View>
     </View>
   );
 }

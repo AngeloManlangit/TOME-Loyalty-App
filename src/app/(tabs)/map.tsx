@@ -35,11 +35,7 @@ export default function MapsScreen() {
 
   return (
     <GestureHandlerRootView style={styles.container}>
-      <Animated.View 
-        key={animationKey} 
-        entering={SlideInRight.duration(300)}
-        style={{ flex: 1 }}
-      >
+      
         <LinearGradient
             colors={['#fff', `${Colors.outlets.blue}${bgTransparency}`]}
             style={styles.gradient}
@@ -72,7 +68,6 @@ export default function MapsScreen() {
                 )}
             </BottomSheetScrollView>
         </BottomSheet>
-      </Animated.View>
     </GestureHandlerRootView>
   );
 }

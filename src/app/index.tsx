@@ -42,6 +42,8 @@ export default function Index() {
             <TouchableOpacity onPress={signUp}>
                 <Text>MAKE ACCOUNT BABY</Text>
             </TouchableOpacity>
+
+            <TouchableOpacity onPress={() => router.replace('/home')}><Text>Touch me</Text></TouchableOpacity>
         </SafeAreaView>
     );
 }

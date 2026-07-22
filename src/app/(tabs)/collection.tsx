@@ -17,18 +17,12 @@ export default function CollectionScreen() {
 
   return (
     <View style={styles.container}>
-      <Animated.View 
-        key={animationKey} 
-        entering={SlideInRight.duration(300)}
-        style={{ flex: 1 }}
-      >
         <LinearGradient
             colors={['#fff', `${Colors.outlets.green}${bgTransparency}`]}
             style={styles.mainView}
         >
             <Text>Colletion</Text>
         </LinearGradient>
-      </Animated.View>
     </View>
   );
 }

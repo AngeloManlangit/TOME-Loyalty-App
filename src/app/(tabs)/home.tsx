@@ -18,11 +18,6 @@ export default function HomeScreen() {
 
   return (
     <View style={styles.container}>
-      <Animated.View 
-        key={animationKey} 
-        entering={SlideInRight.duration(300)}
-        style={{ flex: 1 }}
-      >
         <LinearGradient
           colors={['#fff', `${Colors.outlets.pink}${bgTransparency}`]}
           style={styles.mainView}
@@ -30,7 +25,6 @@ export default function HomeScreen() {
           <StampSection />
           
         </LinearGradient>
-      </Animated.View>
     </View>
   );
 }

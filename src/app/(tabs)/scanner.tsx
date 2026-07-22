@@ -15,13 +15,7 @@ export default function HomeScreen() {
 
   return (
     <View style={styles.container}>
-      <Animated.View 
-        key={animationKey} 
-        entering={SlideInRight.duration(300)}
-        style={{ flex: 1 }}
-      >
         <Image style={styles.mainView} source={{ uri: "https://media.tenor.com/bDmyKRMnKMcAAAAM/like-cat.gif" }} />
-      </Animated.View>
     </View>
   );
 }
