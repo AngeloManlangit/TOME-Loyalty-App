@@ -1,30 +1,66 @@
-import { Image, View, StyleSheet, Text, ScrollView, StatusBar } from "react-native";
-import { LinearGradient } from 'expo-linear-gradient';
-import { bgTransparency, Colors } from "../constants/theme";
-import StampSection from "../components/homePage/stampSection";
+import { Text, TextInput, TouchableOpacity } from 'react-native'
+import { SafeAreaView } from 'react-native-safe-area-context'
+import { useState } from 'react'
+import { auth } from '../../firebase/firebaseConfig'
+import { createUserWithEmailAndPassword, signInWithEmailAndPassword } from 'firebase/auth'
+import { router } from 'expo-router';
 
-export default function HomeScreen() {
-  return (
-    <View style={styles.container}>
-      <LinearGradient
-        colors={['#fff', `${Colors.outlets.pink}${bgTransparency}`]}
-        style={styles.mainView}
-      >
-        <StampSection />
-        
-      </LinearGradient>
-    </View>
-  );
+export default function Index() {
+    const [email, setEmail] = useState('');
+    const [password, setPassword] = useState('');
+    const [loading, setLoading] = useState(false);
+
+    const signIn = async () => {
+        setLoading(true)
+        try {
+            const user = await signInWithEmailAndPassword(auth, email, password);
+            if (user) router.replace('/home');
+            
+        } catch (error: any) {
+            console.log(error);
+            alert('Sign in failed: ' + error.message)
+        } finally {
+            const user = auth.currentUser
+            console.log('Successfully signed in! Welcome user ' + user?.uid);
+            setLoading(false);
+        }
+    }
+
+    const signUp = async () => {
+        try {
+            const user = await createUserWithEmailAndPassword(auth, email, password);
+            if (user) router.replace('/home');
+        } catch (error: any) {
+            console.log(error);
+            alert('Sign in failed: ' + error.message)
+        } finally {
+            const user = auth.currentUser
+            console.log('Successfully signed up! Welcome new user +' + user?.uid);
+            setLoading(false);
+        }
+    }
+
+    return (
+        <SafeAreaView style={{backgroundColor: '#237474', flex: 1}}>
+            <Text>Hi</Text>
+            <TextInput placeholder='email' value={email} onChangeText={setEmail} />
+            <TextInput placeholder='password' value={password} onChangeText={setPassword} />
+
+            <TouchableOpacity onPress={signIn}>
+                <Text>LOGIN BABY</Text>
+            </TouchableOpacity>
+            <TouchableOpacity onPress={signUp}>
+                <Text>MAKE ACCOUNT BABY</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity onPress={() => router.replace('/home')}><Text>Touch me</Text></TouchableOpacity>
+
+            {
+                loading ? 
+                (
+                    <Text>LOADING...</Text>
+                ) : ('')
+            }
+        </SafeAreaView>
+    );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    backgroundColor: "#fff",
-    flex: 1,
-  },
-  mainView: {
-    flex: 1,
-    paddingVertical: 30,
-    paddingHorizontal: 20
-  }
-});

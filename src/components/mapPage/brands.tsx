@@ -34,7 +34,7 @@ const styles = StyleSheet.create({
         alignContent: 'space-evenly',
     },
     brandButton: {
-        width: 100,
+        width: 90,
         padding: 2,
         margin: 10,
         aspectRatio: 1,

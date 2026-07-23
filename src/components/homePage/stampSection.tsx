@@ -2,27 +2,47 @@ import { View, Text, StyleSheet } from "react-native";
 import { Fonts } from "../../constants/theme";
 import { SmallCapsText } from "../custom/smallCapsText"
 import StampCard from "../stamps/stampCard";
-import { StampCardDetails } from "@/assets/classes/stamps";
+import { StampCardDetails, defaultStampCard } from "@/assets/classes/stamps";
 
-const temp: StampCardDetails = {
-  owner: 'John Outlets',
-  stamp_ID: 1,
-  stampCard_color: '#4cdf7d',
-  stampCard_bgImage: 'https://miro.medium.com/v2/resize:fit:1200/1*zCw9YQICYZzozYZsqeIiYA.png',
-  stampCard_title: 'my card baby',
-  stamp_count: 4,
-  stamp_total: 10,
-  stamp_reward_index: [5, 10]
-};
+import { stampService } from "../../services/stampService";
+import { useEffect, useState } from "react";
 
 export default function StampSection() {
+  const [stamps, setStamps] = useState<StampCardDetails[]>([]);
+  const [loading, setLoading] = useState(true);
+  
+  const currentStamp = stamps.length > 0 ? stamps[0] : defaultStampCard;
+  
+  useEffect(() => {
+    const loadStamps = async () => {
+      setLoading(true);
+      const userStamps = await stampService.fetchStamps();
+      if (userStamps) {
+        console.log(userStamps)
+        setStamps(userStamps);
+      }
+
+      setLoading(false);
+    };
+
+    loadStamps();
+  }, []);
+
   return (
     <View style={styles.container}>
         <SmallCapsText baseSize={24} style={styles.headerText}>Stamp Cards</SmallCapsText>
 
-        <StampCard cardDetails={temp} />
-
-        <Text style={styles.collectedCaption}>{`${temp.stamp_count}/${temp.stamp_total} Collected`}</Text>
+        {
+          loading ? (
+            <Text style={{justifyContent: 'center'}}>Loading...</Text>
+          ) : (
+            <View style={styles.cardContainer}>
+              <StampCard cardDetails={currentStamp} />
+      
+              <Text style={styles.collectedCaption}>{`${currentStamp.stamp_count}/${currentStamp.stamp_total} Collected`}</Text>
+            </View>
+          )
+        }
     </View>
   );
 }
@@ -36,6 +56,10 @@ const styles = StyleSheet.create({
   headerText: {
     fontFamily: Fonts.Montserrat,
     alignSelf: 'flex-start'
+  },
+  cardContainer: {
+    width: '100%',
+    alignItems: 'center'
   },
   collectedCaption: {
     marginVertical: 12,

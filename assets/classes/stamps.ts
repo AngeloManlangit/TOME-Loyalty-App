@@ -1,10 +1,33 @@
+interface StampCardConfigs {
+    bgColor: string;
+    bgImage?: string | null;
+    seed: number;
+    title: string;
+}
+
+interface StampHistory {
+    receipt_ID: string;
+    time_stamped: Date;
+}
+
 export interface StampCardDetails {
-    owner: string;
-    stamp_ID: number;
-    stampCard_bgImage?: string | null; // url to bg image
-    stampCard_color: string;
-    stampCard_title: string;
+    owner_ID: string;
+    id?: number;
+    stampCard_configs: StampCardConfigs;
     stamp_count: number;
     stamp_total: number;
     stamp_reward_index: number[];
+    history?: StampHistory[];
+}
+
+export const defaultStampCard: StampCardDetails = {
+    owner_ID: '0',
+    stampCard_configs: {
+        bgColor: '#fff',
+        seed: 1,
+        title: 'Stamp Card'
+    },
+    stamp_count: 0,
+    stamp_reward_index: [4, 9],
+    stamp_total: 10
 }
