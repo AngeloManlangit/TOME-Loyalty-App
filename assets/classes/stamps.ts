@@ -12,10 +12,22 @@ interface StampHistory {
 
 export interface StampCardDetails {
     owner_ID: string;
-    stamp_ID: number;
+    id?: number;
     stampCard_configs: StampCardConfigs;
     stamp_count: number;
     stamp_total: number;
     stamp_reward_index: number[];
     history?: StampHistory[];
+}
+
+export const defaultStampCard: StampCardDetails = {
+    owner_ID: '0',
+    stampCard_configs: {
+        bgColor: '#fff',
+        seed: 1,
+        title: 'Stamp Card'
+    },
+    stamp_count: 0,
+    stamp_reward_index: [4, 9],
+    stamp_total: 10
 }
