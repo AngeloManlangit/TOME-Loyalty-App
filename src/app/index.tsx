@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { auth } from '../../firebase/firebaseConfig'
 import { createUserWithEmailAndPassword, signInWithEmailAndPassword } from 'firebase/auth'
 import { router } from 'expo-router';
+import { userService } from '../services/userService'
 
 export default function Index() {
     const [email, setEmail] = useState('');
@@ -22,6 +23,8 @@ export default function Index() {
         } finally {
             const user = auth.currentUser
             console.log('Successfully signed in! Welcome user ' + user?.uid);
+            const userDetails = await userService.fetchUserDetails();
+            console.log(userDetails);
             setLoading(false);
         }
     }

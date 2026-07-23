@@ -10,11 +10,16 @@ export default function CustomHeader() {
 
     const title = segments[1] ?? '';
     const isHome = title === "home";
+    const isScanner = title === "scanner"
 
     useEffect(() => {
         console.log('Route changed to:', pathname);
         console.log('Current structure segments:', segments);
     }, [pathname, segments]); 
+
+    if (isScanner) {
+        return ('');
+    }
 
     return (
         <Animated.View 
