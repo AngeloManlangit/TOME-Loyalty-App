@@ -51,7 +51,7 @@ export default function CustomHeader() {
                         exiting={FadeOut.duration(200)}
                     >
                         <Text style={styles.headerText}>Good Morning, </Text>
-                        <Text style={[styles.headerText, styles.uppercased]}>{user?.first_name}</Text>
+                        <Text style={[styles.headerText, styles.uppercased]}>{user?.first_name || 'User'}</Text>
                     </Animated.View>
                 ) : 
                 (
@@ -65,7 +65,7 @@ export default function CustomHeader() {
                 )
             }
 
-            <Image source={{ uri: user?.profile_img_url }} style={styles.profileImage} />
+            <Image source={(user) ? { uri: user?.profile_img_url } : require('@/assets/images/fallbackUserProfile.png')} style={styles.profileImage} />
         </Animated.View>
     );
 };

@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react'
 import { auth } from '@/firebase/firebaseConfig'
 import { createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged } from 'firebase/auth'
 import { router } from 'expo-router';
+import { Colors, Fonts } from '@src/constants/theme';
 
 enum LoginScreenOptions {
     Base, SignIn, SignUp
@@ -58,45 +59,85 @@ export default function Index() {
     const renderContent = () => {
         if (screenState === LoginScreenOptions.SignIn) {
             return (
-                <View>
-                    <TextInput placeholder='email' value={email} onChangeText={setEmail} autoCapitalize="none" />
-                    <TextInput placeholder='password' value={password} onChangeText={setPassword} secureTextEntry />
+                <View style={[styles.loginContainer, styles.signContainer]}>
+                    <View style={styles.textInputContainer}>
+                        <TextInput 
+                            placeholder='Email' style={styles.textInput} 
+                            value={email} 
+                            onChangeText={setEmail} 
+                            autoCapitalize="none"
+                            removeClippedSubviews={false} />
+                    </View>
+                    <View style={styles.textInputContainer}>
+                        <TextInput 
+                            placeholder='Password' style={styles.textInput} 
+                            value={password} 
+                            onChangeText={setPassword} 
+                            autoCapitalize="none"
+                            removeClippedSubviews={false}
+                            secureTextEntry />
+                    </View>
 
-                    <TouchableOpacity onPress={signIn}>
-                        <Text>LOGIN BABY</Text>
+                    <TouchableOpacity 
+                        onPress={signIn} 
+                        style={[styles.baseButton, {backgroundColor: Colors.outlets.purple}]}
+                    >
+                        <Text style={[styles.buttonText, {color: '#fff'}]}>LOG IN</Text>
                     </TouchableOpacity>
 
                     <TouchableOpacity onPress={() => setScreenState(LoginScreenOptions.Base)}>
-                        <Text>BACK</Text>
+                        <Text style={styles.back}>BACK</Text>
                     </TouchableOpacity>
                 </View>
             );
         } else if (screenState === LoginScreenOptions.SignUp) {
             return (
-                <View>
-                    <TextInput placeholder='email' value={email} onChangeText={setEmail} autoCapitalize="none" />
-                    <TextInput placeholder='password' value={password} onChangeText={setPassword} secureTextEntry />
+                <View style={[styles.loginContainer, styles.signContainer]}>
+                    <View style={styles.textInputContainer}>
+                        <TextInput 
+                            placeholder='Email' style={styles.textInput} 
+                            value={email} 
+                            onChangeText={setEmail} 
+                            autoCapitalize="none"
+                            removeClippedSubviews={false} />
+                    </View>
+                    <View style={styles.textInputContainer}>
+                        <TextInput 
+                            placeholder='Password' style={styles.textInput} 
+                            value={password} 
+                            onChangeText={setPassword} 
+                            autoCapitalize="none"
+                            removeClippedSubviews={false}
+                            secureTextEntry />
+                    </View>
 
-                    <TouchableOpacity onPress={signUp}>
-                        <Text>MAKE ACCOUNT BABY</Text>
+                    <TouchableOpacity 
+                        onPress={signUp} 
+                        style={[styles.baseButton, {backgroundColor: Colors.outlets.purple}]}
+                    >
+                        <Text style={[styles.buttonText, {color: '#fff'}]}>SIGN UP</Text>
                     </TouchableOpacity>
 
                     <TouchableOpacity onPress={() => setScreenState(LoginScreenOptions.Base)}>
-                        <Text>BACK</Text>
+                        <Text style={styles.back}>BACK</Text>
                     </TouchableOpacity>
                 </View>
             );
         } else {
             return (
-                <View>
-                    <TouchableOpacity onPress={() => setScreenState(LoginScreenOptions.SignIn)}>
-                        <Text>LOG IN</Text>
+                <View style={[styles.loginContainer, styles.baseLoginContainer]}>
+                    <TouchableOpacity 
+                        onPress={() => setScreenState(LoginScreenOptions.SignIn)}
+                        style={[styles.baseButton, {backgroundColor: Colors.outlets.purple}]}
+                    >
+                        <Text style={[styles.buttonText, {color: '#fff'}]}>LOG IN</Text>
                     </TouchableOpacity>
-                    <TouchableOpacity onPress={() => setScreenState(LoginScreenOptions.SignUp)}>
-                        <Text>CREATE ACCOUNT</Text>
-                    </TouchableOpacity>
-                    <TouchableOpacity onPress={() => router.replace('/home')}>
-                        <Text>Touch me (Skip to Home)</Text>
+
+                    <TouchableOpacity 
+                        onPress={() => setScreenState(LoginScreenOptions.SignUp)}
+                        style={styles.baseButton}
+                    >
+                        <Text style={styles.buttonText}>CREATE ACCOUNT</Text>
                     </TouchableOpacity>
                 </View>
             );
@@ -129,5 +170,50 @@ const styles = StyleSheet.create({
         width: '100%',
         height: 'auto',
         aspectRatio: 9 / 8
+    },
+    loginContainer: {
+        width: '100%',
+        flex: 1,
+        alignItems: 'center',
+    },
+    baseLoginContainer: {
+        gap: 20,
+        paddingTop: 50,
+    },
+    baseButton: {
+        width: '70%',
+        justifyContent: 'center',
+        alignItems: 'center',
+        borderRadius: 50,
+        borderColor: Colors.outlets.purple,
+        borderWidth: 2,
+        padding: 10,
+    },
+    buttonText: {
+        fontFamily: Fonts.Lato_Bold,
+        fontSize: 18,
+        color: Colors.outlets.purple
+    },
+    textInputContainer: {
+        width: '80%',
+        height: 50,
+        alignItems: 'flex-start',
+        borderRadius: 10,
+        borderColor: Colors.outlets.purple,
+        borderWidth: 1
+    },
+    textInput: {
+        flex: 1,
+        width: '100%',
+        paddingHorizontal: 10,
+        fontFamily: Fonts.Lato,
+    },
+    signContainer: {
+        gap: 15,
+        paddingTop: 35,
+    },
+    back: {
+        color: '#977390',
+        fontFamily: Fonts.Lato
     }
 })
