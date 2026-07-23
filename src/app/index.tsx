@@ -4,7 +4,6 @@ import { useState } from 'react'
 import { auth } from '../../firebase/firebaseConfig'
 import { createUserWithEmailAndPassword, signInWithEmailAndPassword } from 'firebase/auth'
 import { router } from 'expo-router';
-import { genSeed, getSeededRand } from '../utils/rng'
 
 export default function Index() {
     const [email, setEmail] = useState('');
@@ -37,8 +36,6 @@ export default function Index() {
         } finally {
             const user = auth.currentUser
             console.log('Successfully signed up! Welcome new user +' + user?.uid);
-
-            console.log('Seed: ' + genSeed());
             setLoading(false);
         }
     }

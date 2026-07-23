@@ -11,7 +11,7 @@ export default function StampCard({cardDetails}: StampCardProps) {
   
     const itemWidth = `${100 / columns}%` as DimensionValue;
 
-    const hasBGImage = (cardDetails.stampCard_bgImage != null)
+    const hasBGImage = (cardDetails.stampCard_configs.bgImage != null)
 
     const innerContent = (
         <View style={styles.gridContainer}>
@@ -36,11 +36,11 @@ export default function StampCard({cardDetails}: StampCardProps) {
         <View style={[
             styles.cardLayout, 
             styles.boxWithShadow, 
-            { backgroundColor: cardDetails.stampCard_color }
+            { backgroundColor: cardDetails.stampCard_configs.bgColor }
         ]}>
             {hasBGImage ? (
                 <ImageBackground
-                    source={{ uri: cardDetails.stampCard_bgImage as string}}
+                    source={{ uri: cardDetails.stampCard_configs.bgImage as string}}
                     style={styles.imageBackgroundWrapper}
                     imageStyle={{ borderRadius: 15 }}
                     resizeMode="cover"

@@ -5,14 +5,17 @@ import StampCard from "../stamps/stampCard";
 import { StampCardDetails } from "@/assets/classes/stamps";
 
 const temp: StampCardDetails = {
-  owner: 'John Outlets',
+  owner_ID: 'John Outlets',
   stamp_ID: 1,
-  stampCard_color: '#4cdf7d',
-  stampCard_bgImage: 'https://miro.medium.com/v2/resize:fit:1200/1*zCw9YQICYZzozYZsqeIiYA.png',
-  stampCard_title: 'my card baby',
+  stampCard_configs: {
+   bgColor: '#4cdf7d', 
+   title: 'my card baby',
+   bgImage: 'https://miro.medium.com/v2/resize:fit:1200/1*zCw9YQICYZzozYZsqeIiYA.png',
+   seed: 1213
+  }, 
   stamp_count: 4,
   stamp_total: 10,
-  stamp_reward_index: [4, 9]
+  stamp_reward_index: [4, 9],
 };
 
 import { stampService } from "../../services/stampService";
