@@ -89,7 +89,6 @@ export default function Index() {
         } else {
             return (
                 <View>
-                    {/* Notice the arrow function in the onPress here */}
                     <TouchableOpacity onPress={() => setScreenState(LoginScreenOptions.SignIn)}>
                         <Text>LOG IN</Text>
                     </TouchableOpacity>

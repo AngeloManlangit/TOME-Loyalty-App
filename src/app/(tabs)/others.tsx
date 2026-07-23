@@ -1,8 +1,15 @@
+import { auth } from "@/firebase/firebaseConfig";
 import { Colors, bgTransparency } from "@src/constants/theme";
 import { LinearGradient } from "expo-linear-gradient";
-import { StyleSheet, Text, View } from "react-native";
+import { StyleSheet, Text, View, TouchableOpacity } from "react-native";
+import { getAuth } from 'firebase/auth'
+import { router } from "expo-router";
 
 export default function OthersScreen() {
+
+  getAuth().onAuthStateChanged((user) => {
+    if (!user) router.replace('/');
+  })
 
   return (
     <View style={styles.container}>
@@ -10,7 +17,9 @@ export default function OthersScreen() {
           colors={['#fff', `${Colors.outlets.orange}${bgTransparency}`]}
           style={styles.mainView}
       >
-          <Text>MAP</Text>
+          <TouchableOpacity onPress={() => auth.signOut()}>
+              <Text>Sign Out</Text>
+          </TouchableOpacity>
       </LinearGradient>
     </View>
   );
