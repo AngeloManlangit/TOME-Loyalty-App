@@ -1,6 +1,6 @@
+import { Colors, bgTransparency } from "@src/constants/theme";
 import { LinearGradient } from "expo-linear-gradient";
 import { StyleSheet, Text, View } from "react-native";
-import { Colors, bgTransparency } from "../../constants/theme";
 
 export default function OthersScreen() {
 

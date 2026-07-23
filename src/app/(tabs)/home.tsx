@@ -1,7 +1,7 @@
+import StampSection from "@src/components/homePage/stampSection";
+import { bgTransparency, Colors } from "@src/constants/theme";
 import { LinearGradient } from 'expo-linear-gradient';
 import { StyleSheet, View } from "react-native";
-import StampSection from "../../components/homePage/stampSection";
-import { bgTransparency, Colors } from "../../constants/theme";
 
 export default function HomeScreen() {
 

@@ -1,7 +1,7 @@
-import { getAuth } from "firebase/auth"
-import { db } from "../../firebase/firebaseConfig"
-import { collection, getDoc, doc } from "firebase/firestore";
 import { type UserDetails } from "@/assets/classes/users";
+import { db } from "@/firebase/firebaseConfig";
+import { getAuth } from "firebase/auth";
+import { collection, doc, getDoc } from "firebase/firestore";
 
 const auth = getAuth();
 const userCollection = collection(db, 'users');

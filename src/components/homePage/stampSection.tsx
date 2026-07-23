@@ -1,10 +1,10 @@
-import { View, Text, StyleSheet } from "react-native";
-import { Fonts } from "../../constants/theme";
-import { SmallCapsText } from "../custom/smallCapsText"
-import StampCard from "../stamps/stampCard";
 import { StampCardDetails, defaultStampCard } from "@/assets/classes/stamps";
+import { Fonts } from "@src/constants/theme";
+import { StyleSheet, Text, View } from "react-native";
+import { SmallCapsText } from "../custom/smallCapsText";
+import StampCard from "../stamps/stampCard";
 
-import { stampService } from "../../services/stampService";
+import { stampService } from "@src/services/stampService";
 import { useEffect, useState } from "react";
 
 export default function StampSection() {

@@ -1,5 +1,5 @@
-import { Image, View, StyleSheet } from "react-native";
-import { Colors } from "../../constants/theme";
+import { Colors } from "@src/constants/theme";
+import { Image, StyleSheet, View } from "react-native";
 
 const buttonSize: number = 80;
 

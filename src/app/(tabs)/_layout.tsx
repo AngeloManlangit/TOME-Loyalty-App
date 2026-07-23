@@ -2,11 +2,11 @@ import { Tabs, withLayoutContext } from "expo-router";
 import { EllipsisIcon, HouseIcon, MapIcon, ShapesIcon } from "lucide-react-native";
 import { StatusBar, StyleSheet } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import CustomHeader from "../../components/header";
-import { Colors } from "../../constants/theme";
+import CustomHeader from "@src/components/header";
+import { Colors } from "@src/constants/theme";
 
-import { NoRippleTabBarButton } from "../../components/custom/noRippleButton";
-import ScannerButton from "../../components/scannerPage/scannerButton";
+import { NoRippleTabBarButton } from "@src/components/custom/noRippleButton";
+import ScannerButton from "@src/components/scannerPage/scannerButton";
 import { LinearGradient } from "expo-linear-gradient";
 
 export default function RootLayout() {
