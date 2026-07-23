@@ -17,7 +17,7 @@ export const stampService = {
                 const q = query(stampsCollection, where("owner_ID", "==", user.uid));
                 const data = await getDocs(q);
                 const fetchedStamps = data.docs.map((doc) => ({ ...doc.data(), id: doc.id }));
-
+// make it array of interface
                 return fetchedStamps;
             } catch (error: any) {
                 console.error("Error fetching stamps:", error);

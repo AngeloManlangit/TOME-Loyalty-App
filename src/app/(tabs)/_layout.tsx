@@ -51,8 +51,9 @@ export default function RootLayout() {
               tabBarActiveTintColor: Colors.outlets.green,
               tabBarIcon: ({color, size}) => (
                 <ShapesIcon color={color} size={size} />
-              )
-            }} 
+              ),
+              tabBarItemStyle: { paddingRight: 10 }
+            }}
           />
           <Tabs.Screen
             name="scanner"
@@ -75,7 +76,8 @@ export default function RootLayout() {
               tabBarActiveTintColor: Colors.outlets.blue,
               tabBarIcon: ({color, size}) => (
                 <MapIcon color={color} size={size} />
-              )
+              ),
+              tabBarItemStyle: { paddingLeft: 10 }
             }}
           />
           <Tabs.Screen 
