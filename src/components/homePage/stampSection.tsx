@@ -18,7 +18,7 @@ export default function StampSection() {
       setLoading(true);
       const userStamps = await stampService.fetchStamps();
       if (userStamps) {
-        console.log(userStamps)
+        // console.log(userStamps) // debug purposes
         setStamps(userStamps);
       }
 

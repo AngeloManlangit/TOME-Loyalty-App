@@ -23,8 +23,6 @@ export default function Index() {
         } finally {
             const user = auth.currentUser
             console.log('Successfully signed in! Welcome user ' + user?.uid);
-            const userDetails = await userService.fetchUserDetails();
-            console.log(userDetails);
             setLoading(false);
         }
     }

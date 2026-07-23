@@ -1,8 +1,10 @@
-import { View, Text, StyleSheet } from "react-native";
+import { Image, Text, StyleSheet } from "react-native";
 import { Colors, Fonts } from "../constants/theme";
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { usePathname, useSegments } from 'expo-router';
 import Animated, { LinearTransition, FadeIn, FadeOut } from 'react-native-reanimated';
+import { userService } from "../services/userService";
+import { UserDetails } from "@/assets/classes/users";
 
 export default function CustomHeader() {
     const pathname = usePathname();
@@ -12,15 +14,30 @@ export default function CustomHeader() {
     const isHome = title === "home";
     const isScanner = title === "scanner"
 
+    const [user, setUser] = useState<UserDetails>();
+    const [loading, setLoading] = useState(true);
+
     useEffect(() => {
         console.log('Route changed to:', pathname);
         console.log('Current structure segments:', segments);
+
+        const loadStamps = async () => {
+            setLoading(true);
+            const u = await userService.fetchUserDetails();
+            if (u) {
+                setUser(u);
+            }
+    
+            setLoading(false);
+        };
+    
+        loadStamps();
     }, [pathname, segments]); 
 
     if (isScanner) {
         return ('');
     }
-
+            
     return (
         <Animated.View 
             style={styles.header}
@@ -34,7 +51,7 @@ export default function CustomHeader() {
                         exiting={FadeOut.duration(200)}
                     >
                         <Text style={styles.headerText}>Good Morning, </Text>
-                        <Text style={[styles.headerText, styles.uppercased]}>House!</Text>
+                        <Text style={[styles.headerText, styles.uppercased]}>{user?.first_name}</Text>
                     </Animated.View>
                 ) : 
                 (
@@ -47,6 +64,8 @@ export default function CustomHeader() {
                     </Animated.View>
                 )
             }
+
+            <Image source={{ uri: user?.profile_img_url }} style={styles.profileImage} />
         </Animated.View>
     );
 };
@@ -56,9 +75,11 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.outlets.purple,
     width: "100%",
     height: 'auto',
+    flexDirection: 'row',
     justifyContent: "space-between",
+    alignItems: 'center',
     paddingVertical: 25,
-    paddingHorizontal: 10,
+    paddingHorizontal: 20,
     overflow: 'hidden', 
   },
   headerText: {
@@ -69,5 +90,12 @@ const styles = StyleSheet.create({
   },
   uppercased: {
     textTransform: "uppercase"
+  },
+  profileImage: {
+    width: 70,
+    height: 70,
+    borderRadius: 35,
+    borderColor: '#ffd9f9',
+    borderWidth: 2.5,
   }
 });
