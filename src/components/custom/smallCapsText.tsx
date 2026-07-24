@@ -1,5 +1,4 @@
-import { Text, StyleSheet } from 'react-native';
-import { Fonts } from '../../constants/theme';
+import { StyleSheet, Text } from 'react-native';
 
 interface SmallCapsInterface {
     children?: any;

@@ -1,24 +1,39 @@
-import { View, Text, StyleSheet } from "react-native";
+import { Image, Text, StyleSheet, View, TouchableOpacity } from "react-native";
 import { Colors, Fonts } from "../constants/theme";
-import { useEffect } from 'react';
-import { usePathname, useSegments } from 'expo-router';
-import Animated, { LinearTransition, FadeIn, FadeOut } from 'react-native-reanimated';
+import { useEffect, useState } from 'react';
+import { router, usePathname, useSegments } from 'expo-router';
+import Animated, { LinearTransition, FadeIn, FadeOut, SlideInUp, SlideOutUp } from 'react-native-reanimated';
+import { userService } from "../services/userService";
+import { UserDetails } from "@/assets/classes/users";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+
+import { useUser } from "@src/contexts/userContext";
 
 export default function CustomHeader() {
+    const insets = useSafeAreaInsets();
+    
     const pathname = usePathname();
     const segments = useSegments();
 
     const title = segments[1] ?? '';
     const isHome = title === "home";
+    const hideHeader = title === "scanner" || title === "others"
+
+    const { user, loading } = useUser();
 
     useEffect(() => {
         console.log('Route changed to:', pathname);
         console.log('Current structure segments:', segments);
     }, [pathname, segments]); 
 
+    if (hideHeader) return null;
+            
     return (
         <Animated.View 
-            style={styles.header}
+            // Apply the top inset offset to slide securely under the status bar
+            style={[styles.header, { top: insets.top }]} 
+            entering={SlideInUp.springify().damping(500)} 
+            exiting={SlideOutUp.duration(250)}
             layout={LinearTransition.springify().damping(14)} 
         >
             {
@@ -29,7 +44,7 @@ export default function CustomHeader() {
                         exiting={FadeOut.duration(200)}
                     >
                         <Text style={styles.headerText}>Good Morning, </Text>
-                        <Text style={[styles.headerText, styles.uppercased]}>House!</Text>
+                        <Text style={[styles.headerText, styles.uppercased]}>{user?.first_name || 'User'}</Text>
                     </Animated.View>
                 ) : 
                 (
@@ -42,18 +57,28 @@ export default function CustomHeader() {
                     </Animated.View>
                 )
             }
+
+            <TouchableOpacity onPress={() => router.replace('/others')}>
+                <Image 
+                    source={(user) ? { uri: user?.profile_img_url } : require('@/assets/images/fallbackUserProfile.png')} 
+                    style={styles.profileImage} 
+                />
+            </TouchableOpacity>
         </Animated.View>
     );
 };
 
 const styles = StyleSheet.create({
   header: {
+    position: 'absolute',
+    zIndex: 10,
     backgroundColor: Colors.outlets.purple,
     width: "100%",
-    height: 'auto',
+    flexDirection: 'row',
     justifyContent: "space-between",
+    alignItems: 'center',
     paddingVertical: 25,
-    paddingHorizontal: 10,
+    paddingHorizontal: 20,
     overflow: 'hidden', 
   },
   headerText: {
@@ -64,5 +89,12 @@ const styles = StyleSheet.create({
   },
   uppercased: {
     textTransform: "uppercase"
+  },
+  profileImage: {
+    width: 70,
+    height: 70,
+    borderRadius: 35,
+    borderColor: '#ffd9f9',
+    borderWidth: 2.5,
   }
 });

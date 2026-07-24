@@ -1,7 +1,7 @@
-import { getAuth } from "firebase/auth"
-import { db } from "../../firebase/firebaseConfig"
-import { collection, getDocs, query, where } from "firebase/firestore";
 import { StampCardDetails } from "@/assets/classes/stamps";
+import { db } from "@/firebase/firebaseConfig";
+import { getAuth } from "firebase/auth";
+import { collection, getDocs, query, where } from "firebase/firestore";
 
 const auth = getAuth();
 const stampsCollection = collection(db, 'stamps');

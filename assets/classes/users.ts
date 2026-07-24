@@ -1,4 +1,5 @@
-export interface User {
+export interface UserDetails {
+    id?: string,
     username: string,
     email: string,
     contact_no: string,
@@ -6,5 +7,5 @@ export interface User {
     middle_name: string,
     last_name: string,
     profile_img_url: string,
-    birth_date: Date
+    birth_date: string
 };

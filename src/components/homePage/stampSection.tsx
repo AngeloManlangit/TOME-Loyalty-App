@@ -1,10 +1,10 @@
-import { View, Text, StyleSheet } from "react-native";
-import { Fonts } from "../../constants/theme";
-import { SmallCapsText } from "../custom/smallCapsText"
-import StampCard from "../stamps/stampCard";
 import { StampCardDetails, defaultStampCard } from "@/assets/classes/stamps";
+import { Fonts } from "@src/constants/theme";
+import { StyleSheet, Text, View } from "react-native";
+import { SmallCapsText } from "../custom/smallCapsText";
+import StampCard from "../stamps/stampCard";
 
-import { stampService } from "../../services/stampService";
+import { stampService } from "@src/services/stampService";
 import { useEffect, useState } from "react";
 
 export default function StampSection() {
@@ -18,7 +18,7 @@ export default function StampSection() {
       setLoading(true);
       const userStamps = await stampService.fetchStamps();
       if (userStamps) {
-        console.log(userStamps)
+        // console.log(userStamps) // debug purposes
         setStamps(userStamps);
       }
 
@@ -49,9 +49,10 @@ export default function StampSection() {
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
+    paddingHorizontal: 20,
+    marginBottom: 30,
     alignItems: 'center',
-    gap: 5
+    gap: 5,
   },
   headerText: {
     fontFamily: Fonts.Montserrat,

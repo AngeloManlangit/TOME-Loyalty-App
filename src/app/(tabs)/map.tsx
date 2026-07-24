@@ -1,11 +1,11 @@
 import type { Brand } from "@/assets/classes/maps";
 import BottomSheet, { BottomSheetBackdrop, BottomSheetScrollView } from "@gorhom/bottom-sheet";
+import BrandsList from "@src/components/mapPage/brands";
+import { Colors, Fonts, bgTransparency } from "@src/constants/theme";
 import { LinearGradient } from "expo-linear-gradient";
 import { useCallback, useMemo, useRef, useState } from "react";
 import { Image, ScrollView, StyleSheet, Text } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
-import BrandsList from "../../components/mapPage/brands";
-import { Colors, Fonts, bgTransparency } from "../../constants/theme";
 
 export default function MapsScreen() {
   const [selectedBrand, setSelectedBrand] = useState<Brand | null>(null);
