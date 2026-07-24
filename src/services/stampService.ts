@@ -51,7 +51,7 @@ export const stampService = {
         }
     },
 
-    async addNewDefaultStamp() {
+    async addNewStamp() {
         const user = auth.currentUser;
 
         if (user) {
