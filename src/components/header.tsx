@@ -1,11 +1,13 @@
-import { Image, Text, StyleSheet, View } from "react-native";
+import { Image, Text, StyleSheet, View, TouchableOpacity } from "react-native";
 import { Colors, Fonts } from "../constants/theme";
 import { useEffect, useState } from 'react';
-import { usePathname, useSegments } from 'expo-router';
+import { router, usePathname, useSegments } from 'expo-router';
 import Animated, { LinearTransition, FadeIn, FadeOut, SlideInUp, SlideOutUp } from 'react-native-reanimated';
 import { userService } from "../services/userService";
 import { UserDetails } from "@/assets/classes/users";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+
+import { useUser } from "@src/contexts/userContext";
 
 export default function CustomHeader() {
     const insets = useSafeAreaInsets();
@@ -17,24 +19,11 @@ export default function CustomHeader() {
     const isHome = title === "home";
     const hideHeader = title === "scanner" || title === "others"
 
-    const [user, setUser] = useState<UserDetails>();
-    const [loading, setLoading] = useState(true);
+    const { user, loading } = useUser();
 
     useEffect(() => {
         console.log('Route changed to:', pathname);
         console.log('Current structure segments:', segments);
-
-        const loadStamps = async () => {
-            setLoading(true);
-            const u = await userService.fetchUserDetails();
-            if (u) {
-                setUser(u);
-            }
-    
-            setLoading(false);
-        };
-    
-        loadStamps();
     }, [pathname, segments]); 
 
     if (hideHeader) return null;
@@ -69,10 +58,12 @@ export default function CustomHeader() {
                 )
             }
 
-            <Image 
-                source={(user) ? { uri: user?.profile_img_url } : require('@/assets/images/fallbackUserProfile.png')} 
-                style={styles.profileImage} 
-            />
+            <TouchableOpacity onPress={() => router.replace('/others')}>
+                <Image 
+                    source={(user) ? { uri: user?.profile_img_url } : require('@/assets/images/fallbackUserProfile.png')} 
+                    style={styles.profileImage} 
+                />
+            </TouchableOpacity>
         </Animated.View>
     );
 };
