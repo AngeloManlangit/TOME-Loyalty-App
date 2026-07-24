@@ -1,7 +1,8 @@
-import { StampCardDetails } from "@/assets/classes/stamps";
+import { StampCardDetails, defaultStampCard } from "@/assets/classes/stamps";
 import { db } from "@/firebase/firebaseConfig";
 import { getAuth } from "firebase/auth";
-import { collection, getDocs, query, where } from "firebase/firestore";
+import { addDoc, collection, getDocs, query, where } from "firebase/firestore";
+import { genSeed } from "../utils/rng";
 
 const auth = getAuth();
 const stampsCollection = collection(db, 'stamps');
@@ -48,6 +49,27 @@ export const stampService = {
             console.log('No user logged in!')
             return [];
         }
-    }
+    },
 
+    async addNewDefaultStamp() {
+        const user = auth.currentUser;
+
+        if (user) {
+            try {
+                const docRef = await addDoc(stampsCollection, {
+                    ...defaultStampCard, 
+                    owner_ID: user.uid,
+                    stampCard_configs: { ...defaultStampCard.stampCard_configs, seed: genSeed() }
+                });
+                console.log('Successfully created a new stamp: ' + docRef.id);
+                return true;
+            } catch (error: any) {
+                console.error("Error creating stamp: ", error);
+                return false;
+            }
+        } else {
+            console.log('No user logged in!')
+            return false;
+        }
+    }
 }

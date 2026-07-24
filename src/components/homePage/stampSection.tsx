@@ -1,6 +1,6 @@
 import { StampCardDetails, defaultStampCard } from "@/assets/classes/stamps";
 import { Fonts } from "@src/constants/theme";
-import { StyleSheet, Text, View } from "react-native";
+import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { SmallCapsText } from "../custom/smallCapsText";
 import StampCard from "../stamps/stampCard";
 
@@ -43,6 +43,10 @@ export default function StampSection() {
             </View>
           )
         }
+
+        <TouchableOpacity onPress={() => stampService.addNewDefaultStamp()}>
+          <Text>Make new stamp</Text>
+        </TouchableOpacity>
     </View>
   );
 }
