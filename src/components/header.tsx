@@ -1,18 +1,21 @@
-import { Image, Text, StyleSheet } from "react-native";
+import { Image, Text, StyleSheet, View } from "react-native";
 import { Colors, Fonts } from "../constants/theme";
 import { useEffect, useState } from 'react';
 import { usePathname, useSegments } from 'expo-router';
-import Animated, { LinearTransition, FadeIn, FadeOut } from 'react-native-reanimated';
+import Animated, { LinearTransition, FadeIn, FadeOut, SlideInUp, SlideOutUp } from 'react-native-reanimated';
 import { userService } from "../services/userService";
 import { UserDetails } from "@/assets/classes/users";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 export default function CustomHeader() {
+    const insets = useSafeAreaInsets();
+    
     const pathname = usePathname();
     const segments = useSegments();
 
     const title = segments[1] ?? '';
     const isHome = title === "home";
-    const isScanner = title === "scanner"
+    const hideHeader = title === "scanner" || title === "others"
 
     const [user, setUser] = useState<UserDetails>();
     const [loading, setLoading] = useState(true);
@@ -34,13 +37,14 @@ export default function CustomHeader() {
         loadStamps();
     }, [pathname, segments]); 
 
-    if (isScanner) {
-        return ('');
-    }
+    if (hideHeader) return null;
             
     return (
         <Animated.View 
-            style={styles.header}
+            // Apply the top inset offset to slide securely under the status bar
+            style={[styles.header, { top: insets.top }]} 
+            entering={SlideInUp.springify().damping(500)} 
+            exiting={SlideOutUp.duration(250)}
             layout={LinearTransition.springify().damping(14)} 
         >
             {
@@ -65,16 +69,20 @@ export default function CustomHeader() {
                 )
             }
 
-            <Image source={(user) ? { uri: user?.profile_img_url } : require('@/assets/images/fallbackUserProfile.png')} style={styles.profileImage} />
+            <Image 
+                source={(user) ? { uri: user?.profile_img_url } : require('@/assets/images/fallbackUserProfile.png')} 
+                style={styles.profileImage} 
+            />
         </Animated.View>
     );
 };
 
 const styles = StyleSheet.create({
   header: {
+    position: 'absolute',
+    zIndex: 10,
     backgroundColor: Colors.outlets.purple,
     width: "100%",
-    height: 'auto',
     flexDirection: 'row',
     justifyContent: "space-between",
     alignItems: 'center',

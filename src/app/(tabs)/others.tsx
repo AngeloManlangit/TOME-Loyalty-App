@@ -27,7 +27,7 @@ export default function OthersScreen() {
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: "#fff",
+    backgroundColor: '#fff',
     flex: 1,
   },
   mainView: {

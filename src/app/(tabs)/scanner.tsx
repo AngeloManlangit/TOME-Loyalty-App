@@ -10,7 +10,6 @@ export default function HomeScreen() {
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: "#fdff6f",
     flex: 1,
   },
   mainView: {
