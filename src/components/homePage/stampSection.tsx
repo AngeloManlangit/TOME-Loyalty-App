@@ -49,9 +49,10 @@ export default function StampSection() {
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
+    paddingHorizontal: 20,
+    marginBottom: 30,
     alignItems: 'center',
-    gap: 5
+    gap: 5,
   },
   headerText: {
     fontFamily: Fonts.Montserrat,

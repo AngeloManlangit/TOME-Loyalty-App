@@ -32,7 +32,7 @@ export default function OthersScreen() {
           </View>
 
           <View style={styles.optionsView}>
-            <TouchableOpacity style={styles.optionsButtonContainer} onPress={() => auth.signOut()}>
+            <TouchableOpacity style={styles.optionsButtonContainer} onPress={() => console.log('poop')}>
               <Text style={styles.optionsText}>Edit Profile</Text>
             </TouchableOpacity>
 
@@ -88,7 +88,7 @@ const styles = StyleSheet.create({
     width: "100%",
     borderColor: '#c7c7c7',
     borderTopWidth: 1,
-    paddingVertical: 8,
+    paddingVertical: 10,
     paddingHorizontal: 20
   },
   optionsText: {
