@@ -1,10 +1,13 @@
 import { StampCardDetails } from "@/assets/classes/stamps";
 import StampCard from "@/src/components/stamps/stampCard";
+import StampPopupDetails from "@/src/components/stamps/stampPopupDetails";
 import { stampService } from "@/src/services/stampService";
+import BottomSheet, { BottomSheetBackdrop, BottomSheetScrollView } from "@gorhom/bottom-sheet";
 import { Colors, Fonts, bgTransparency } from "@src/constants/theme";
 import { LinearGradient } from "expo-linear-gradient";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { GestureHandlerRootView } from "react-native-gesture-handler";
 
 export default function CollectionScreen() {
   const [stamps, setStamps] = useState<StampCardDetails[]>([]);
@@ -27,9 +30,24 @@ export default function CollectionScreen() {
 
   const stampList = [];
 
+  // stamp popup
+  const bottomSheetRef = useRef<BottomSheet>(null);
+  const snapPoints = useMemo(() => ['90%', '100%'], []);
+
+  const renderBackdrop = useCallback(
+    (props: any) => <BottomSheetBackdrop disappearsOnIndex={-1} appearsOnIndex={0} {...props} />, []
+  );
+
+  const [selectedStamp, setSelectedStamp] = useState<StampCardDetails | null>(null);
+  function setCurrentStamp(s: StampCardDetails) {
+    console.log(s.id)
+    setSelectedStamp(s);
+    bottomSheetRef.current?.snapToIndex(0);
+  }
+
   for (const s of stamps) {
       stampList.push(
-        <TouchableOpacity key={s.id} style={[styles.cardButtonContainer]} activeOpacity={0.8} onPress={() => console.log(s.stampCard_configs.title)}>
+        <TouchableOpacity key={s.id} style={[styles.cardButtonContainer]} activeOpacity={0.8} onPress={() => setCurrentStamp(s)}>
           <View style={styles.cardContainer}>
             <StampCard cardDetails={s} />
 
@@ -40,7 +58,7 @@ export default function CollectionScreen() {
     }
 
   return (
-    <View style={styles.container}>
+    <GestureHandlerRootView style={styles.container}>
       <LinearGradient
           colors={['#fff', `${Colors.outlets.green}${bgTransparency}`]}
           style={styles.mainView}
@@ -52,7 +70,21 @@ export default function CollectionScreen() {
             </View>
           </ScrollView>
       </LinearGradient>
-    </View>
+
+      <BottomSheet
+          ref={bottomSheetRef}
+          index={-1} // -1 means it starts fully hidden off-screen
+          snapPoints={snapPoints}
+          enablePanDownToClose={true}
+          backdropComponent={renderBackdrop}
+      >
+          <BottomSheetScrollView contentContainerStyle={styles.sheetContent}>
+              {selectedStamp && (
+                  <StampPopupDetails stamp={selectedStamp} />
+              )}
+          </BottomSheetScrollView>
+      </BottomSheet>
+    </GestureHandlerRootView>
   );
 }
 
@@ -94,5 +126,10 @@ const styles = StyleSheet.create({
     marginVertical: 12,
     fontFamily: Fonts.Lato,
     fontSize: 12,
-  }
+  },
+  sheetContent: {
+    flexGrow: 1,
+    alignItems: 'center',
+    padding: 20,
+  },
 });
