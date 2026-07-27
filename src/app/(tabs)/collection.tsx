@@ -79,9 +79,9 @@ const styles = StyleSheet.create({
       flex: 1,
       flexDirection: 'row',
       flexWrap: 'wrap',    
-      justifyContent: 'center',
+      justifyContent: 'flex-start',
       alignItems: 'center',
-      marginTop: 20
+      marginTop: 20,
   },
   cardButtonContainer: {
     marginTop: 10,

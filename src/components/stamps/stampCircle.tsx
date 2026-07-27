@@ -1,32 +1,53 @@
 import { Text, View, StyleSheet } from "react-native";
+import { StarIcon } from "lucide-react-native";
 
 interface StampCircleInterface {
     stamped: boolean;
     reward: boolean;
+    randomizer: number;
 }
 
-export default function StampCircle({stamped = false, reward = false}: StampCircleInterface) {
+export default function StampCircle({stamped = false, reward = false, randomizer}: StampCircleInterface) {
+    // randomized circle position [-2, 3]
+    const randomMarginTop = ((randomizer * 100) % 15) - 3;
+    const randomMarginLeft = ((randomizer * 300) % 15) - 3;
+    
+    // random star positions
+    const randomRotation = Math.round((randomizer * 500) % 360) // by degress
+    const randomStarMarginTop = ((randomizer * 10) % 20) - 3;
+    const randomStarMarginLeft = ((randomizer * 20) % 10) - 3;
+
     return (
-        <View style={[styles.circle, (stamped) ? {backgroundColor: '#000'} : {backgroundColor: '#fff'}]}>
-            <Text style={{ color: '#fff' }}>{`:\)`}</Text>
-            
+        <View style={[
+            styles.circle, 
+            (stamped) ? {backgroundColor: '#000'} : {backgroundColor: '#FFFCF3'},
+            { marginTop: randomMarginTop, marginLeft: randomMarginLeft }  
+        ]}>
             {reward ? (
-                <Text style={styles.reward}>YAY</Text>
-            ) : ''}
+                <View style={[
+                    styles.rewardContainer, 
+                    { transform: [{ rotate: `${randomRotation}deg` }]},
+                    { marginTop: randomStarMarginTop, marginLeft: randomStarMarginLeft }]}>
+                    <StarIcon color={'#ddcf927d'} size={'80%'} />
+                </View>
+            ) : ''}             
         </View>
     );
 }
 
 const styles = StyleSheet.create({
     circle: {
-        flex: 1,
+        position: 'absolute',
+        width: '75%',
         justifyContent: 'center',
         alignItems: 'center',
-        borderRadius: '100%',
+        borderRadius: 100,
         aspectRatio: 1,
     },
-    reward: {
-        fontSize: 20,
-        color: '#f32525'
+    rewardContainer: {
+        width: '100%',
+        height: '100%',
+        justifyContent: 'center',
+        alignItems: 'center'
     }
 })

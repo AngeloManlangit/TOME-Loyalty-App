@@ -1,3 +1,5 @@
+import { Colors } from "@/src/constants/theme";
+
 interface StampCardConfigs {
     bgColor: string;
     bgImage?: string | null;
@@ -23,7 +25,7 @@ export interface StampCardDetails {
 export const defaultStampCard: StampCardDetails = {
     owner_ID: '0',
     stampCard_configs: {
-        bgColor: '#fff',
+        bgColor: '#F3BDFF',
         seed: 1,
         title: 'Stamp Card'
     },
