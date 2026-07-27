@@ -42,3 +42,16 @@ example
 # generated native folders
 /ios
 /android
+
+# cloud functions
+functions/node_modules/
+functions/lib/
+functions/coverage/
+.firebase/
+firebase-debug.log
+firestore-debug.log
+ui-debug.log
+
+# receipt corpus — raw photos are purchase history; only the cached Vision JSON is committed
+functions/__fixtures__/receipts/raw/*
+!functions/__fixtures__/receipts/raw/README.md
