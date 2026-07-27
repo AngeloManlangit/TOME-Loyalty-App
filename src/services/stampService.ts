@@ -1,7 +1,7 @@
 import { StampCardDetails, defaultStampCard } from "@/assets/classes/stamps";
 import { db } from "@/firebase/firebaseConfig";
 import { getAuth } from "firebase/auth";
-import { addDoc, collection, getDocs, query, where } from "firebase/firestore";
+import { addDoc, collection, getDocs, orderBy, query, where } from "firebase/firestore";
 import { genSeed } from "../utils/rng";
 
 const auth = getAuth();
@@ -15,7 +15,7 @@ export const stampService = {
 
         if (user) {
             try {
-                const q = query(stampsCollection, where("owner_ID", "==", user.uid));
+                const q = query(stampsCollection, where("owner_ID", "==", user.uid), orderBy("stamp_count", "desc"));
                 const data = await getDocs(q);
                 const fetchedStamps = data.docs.map((doc) => {
                     const docData = doc.data();
@@ -32,10 +32,15 @@ export const stampService = {
                         }));
                     }
                     
+                    const rawDate = docData.date_created && typeof docData.date_created.toDate === 'function'
+                                ? docData.date_created.toDate()
+                                : new Date(docData.date_created)
+
                     return {
                         id: doc.id,
                         ...docData,
-                        ...(formattedHistory ? { history: formattedHistory } : {})
+                        ...(formattedHistory ? { history: formattedHistory } : {}),
+                        date_created: rawDate
                     } as unknown as StampCardDetails; // unknown because Typescript error can't trust the doc.data() return if empty smh
                 });
 

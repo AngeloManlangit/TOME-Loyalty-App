@@ -10,6 +10,7 @@ interface StampCardConfigs {
 interface StampHistory {
     receipt_ID: string;
     time_stamped: Date;
+    receipt_url: string;
 }
 
 export interface StampCardDetails {
@@ -20,6 +21,7 @@ export interface StampCardDetails {
     stamp_total: number;
     stamp_reward_index: number[];
     history?: StampHistory[];
+    date_created: Date;
 }
 
 export const defaultStampCard: StampCardDetails = {
@@ -31,5 +33,6 @@ export const defaultStampCard: StampCardDetails = {
     },
     stamp_count: 0,
     stamp_reward_index: [4, 9],
-    stamp_total: 10
+    stamp_total: 10,
+    date_created: new Date()
 }
