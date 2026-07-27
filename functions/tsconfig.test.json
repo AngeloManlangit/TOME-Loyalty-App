@@ -1,0 +1,14 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "noEmit": true,
+    "rootDir": ".",
+    "types": ["jest", "node"]
+  },
+  // `exclude` is inherited, not merged, so it MUST be restated here. The base config excludes
+  // __tests__/__fixtures__/scripts (they must not reach the deployed bundle), and without this
+  // override that exclusion would silently win over the include list above and leave every test file
+  // untypechecked and unlintable.
+  "exclude": ["node_modules", "lib", "coverage"],
+  "include": ["src/**/*.ts", "__tests__/**/*.ts", "__fixtures__/**/*.ts", "scripts/**/*.ts"]
+}
