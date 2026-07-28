@@ -2,17 +2,7 @@ import { boundedLevenshtein } from './levenshtein';
 import { alphanumericOnly, normalizeText } from './normalize';
 import type { OcrLine } from './types';
 
-/**
- * Locating label lines ("INVOICE NO", "ACCN", "DATE") within an OCR document.
- *
- * Two things make this harder than a string search:
- *
- *  1. Vision mangles LABELS as often as values — "INVOlCE NO", "ACCIM". An exact search misses real
- *     receipts, so matching is by bounded edit distance.
- *  2. A label may be split across words in ways the alias list does not predict: "INV#" may arrive as
- *     one word or as "INV" + "#", and "NO." carries punctuation the alias does not. Comparison is
- *     therefore on alphanumeric-only forms, over word runs of varying length.
- */
+
 
 export interface AnchorMatch {
   line: OcrLine;
@@ -30,23 +20,12 @@ export interface AnchorMatch {
   labelEndX: number;
 }
 
-/**
- * Edit-distance budget for an alias.
- *
- * Short labels get 1 and longer ones 2. Being more generous with short labels would let "ACCN" match
- * "ACC" and "AMT" indiscriminately; being less generous with long ones would miss the multi-character
- * damage that faded thermal print does to "ACKNOWLEDGEMENT CERTIFICATE".
- */
+
 export function distanceBudget(alias: string): number {
   return alphanumericOnly(alias).length <= 6 ? 1 : 2;
 }
 
-/**
- * Find every line carrying one of `aliases`, best match per line.
- *
- * Results are ordered by edit distance (closest first), then by document order, so the caller's first
- * result is the most trustworthy anchor.
- */
+
 export function findAnchors(lines: readonly OcrLine[], aliases: readonly string[]): AnchorMatch[] {
   const matches: AnchorMatch[] = [];
 
