@@ -1,14 +1,4 @@
-/**
- * Bounded Levenshtein distance with early exit.
- *
- * Used for label matching: Vision mangles LABELS as often as it mangles values ("INVOlCE NO"), so an
- * exact-match anchor search misses real receipts. We only ever ask "is this within k edits?", never
- * "how far apart are these exactly", so the bound lets us bail out of most comparisons after a couple
- * of rows instead of filling an entire DP table.
- *
- * Returns the true distance when it is <= max, and max + 1 as a sentinel when it exceeds max. Callers
- * must therefore compare with <= max, never use the return value as a real distance above the bound.
- */
+
 export function boundedLevenshtein(a: string, b: string, max: number): number {
   const exceeded = max + 1;
 
