@@ -1,21 +1,4 @@
-/**
- * Accuracy benchmark: replay the cached corpus and measure per-field extraction against hand labels.
- *
- *   npm run receipts:benchmark
- *
- * Hermetic, offline and free — it replays cached Vision JSON and never calls the API.
- *
- * This is the number that actually answers "is the OCR good enough", and it is the regression guard
- * on every future change to rules.config.ts. It counts REAL fixtures only: synthetic fixtures prove
- * the code is correct, never that it is accurate, so letting them into this number would make the
- * benchmark lie.
- *
- * Thresholds (architecture doc §9.2):
- *   - clean receipts     >= 95% exact match per field
- *   - degraded receipts  >= 80% exact match per field
- *   - and 100% of the remainder must land in review or rejection, never in a silently-wrong stamp.
- *     That last clause is the one that matters: a miss is acceptable, a confident wrong answer is not.
- */
+
 
 import { existsSync, readdirSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
