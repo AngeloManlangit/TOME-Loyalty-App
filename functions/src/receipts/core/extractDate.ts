@@ -6,17 +6,7 @@ import type { DateRule } from './rules.config';
 import { MAX_CANDIDATES } from './extractField';
 import type { CandidateSource, FieldCandidate, OcrDocument, OcrWord } from './types';
 
-/**
- * Date candidate extraction.
- *
- * Separate from extractField because a date is not a single token: "07/28/2026 14:30" spans two, and
- * "JUL 28, 2026" spans three. So instead of testing tokens against a regex, this slides a window of up
- * to three words and asks dateParse whether the window IS a date — which also means the accepted
- * formats live in exactly one place.
- *
- * Candidate `value` is canonical `YYYY-MM-DD` (plus ` HH:MM:SS` when the receipt printed a time).
- * That form is unambiguous, round-trips through parseDateToken, and is readable in the review UI.
- */
+
 
 const SCORES: Record<CandidateSource, number> = {
   inline: 1.0,
