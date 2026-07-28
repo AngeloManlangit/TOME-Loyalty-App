@@ -1,17 +1,6 @@
 const tseslint = require('typescript-eslint');
 
-/**
- * The rule that matters here is the last block: `src/receipts/core/**` may not import Firebase, the
- * Vision SDK, or any sibling I/O layer.
- *
- * That purity is design decision D3 in docs/ocr-receipt-validation-plan.md, and it buys three things:
- * the client cannot forge fields, parser fixes deploy without an app-store release, and the tests are
- * hermetic. A comment saying "keep this pure" would rot within a month; this fails the build.
- *
- * Type-only imports are banned too (allowTypeImports is left at its default of false). The core defines
- * its own structural Vision types — the real SDK response is structurally assignable to them — so the
- * core stays dependency-free and fixtures stay trivial to write.
- */
+
 module.exports = tseslint.config(
   {
     ignores: ['lib/**', 'node_modules/**', 'coverage/**', 'jest.config.js', 'eslint.config.js'],
