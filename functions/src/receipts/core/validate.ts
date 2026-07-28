@@ -20,20 +20,7 @@ import type {
   ValidationOutcome,
 } from './types';
 
-/**
- * Composes extraction, format rules and the claim window into a single verdict.
- *
- * The mode split is the heart of this file:
- *
- *   scan  — proposes. A field problem is never fatal, because a misread is the user's to fix on the
- *           review screen. Only "there is no receipt here" stops a scan.
- *   claim — decides. The server is the sole authority, so anything not fully valid is rejected with a
- *           specific code.
- *
- * That is what makes a faded receipt land in review rather than in a false rejection, while a
- * genuinely expired one still cannot be claimed. It also means an attacker gains nothing by calling
- * scan repeatedly: scan awards nothing.
- */
+
 
 export interface ValidateInput {
   doc: OcrDocument;
@@ -51,18 +38,7 @@ export interface ValidateInput {
  */
 const MIN_LINES_FOR_RECEIPT = 3;
 
-/**
- * Minimum candidate score that may be accepted as a field value WITHOUT the user confirming it.
- *
- * This sits above the pattern-scan score deliberately. Pattern-scan finds text that merely has the
- * right shape anywhere on the receipt, with no label nearby — and because the format patterns are
- * permissive placeholders (see rules.config.ts), that matches plenty of innocent words. Auto-accepting
- * one would mean a receipt with a torn invoice label silently claims "OUTLETS" as its invoice number:
- * a wrong stamp, awarded with no signal to anyone. Exactly what §2 of the architecture doc forbids.
- *
- * Such candidates are still returned for the review screen's chips — they are just not allowed to
- * become the answer on their own.
- */
+
 const MIN_AUTO_ACCEPT_SCORE = 0.5;
 
 function pickTop(candidates: readonly FieldCandidate[]): FieldCandidate | null {
@@ -76,13 +52,7 @@ interface Resolved {
   corrected: boolean;
 }
 
-/**
- * A user override wins over OCR outright.
- *
- * It is given confidence 1 because a human typed it — the whole purpose of the review screen is that
- * a confirmed value is more trustworthy than a probabilistic one. Forgery is prevented upstream, by
- * checking the override appears in the stored OCR text.
- */
+
 function resolve(
   candidates: readonly FieldCandidate[],
   override: string | undefined,
