@@ -1,15 +1,4 @@
-/**
- * Corpus builder: OCR every raw receipt photo ONCE and cache the raw Vision JSON.
- *
- *   npm run receipts:corpus
- *
- * Caching the response is what makes every downstream test hermetic, offline and free — no test ever
- * calls Vision. It also means the fixtures exercise the true response shape, geometry and confidence
- * values, which hand-written strings cannot.
- *
- * Already-processed images are skipped, so re-running after adding one photo costs exactly one Vision
- * unit. Pass --force to re-OCR everything.
- */
+
 
 import { existsSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { basename, extname, join } from 'node:path';
