@@ -6,6 +6,7 @@ import StampCard from "../stamps/stampCard";
 
 import { stampService } from "@src/services/stampService";
 import { useEffect, useState } from "react";
+import StampSlider from "../stamps/stampSlider";
 
 interface stampEmit {
     chosenStamp: (brand: StampCardDetails) => void;
@@ -40,13 +41,7 @@ export default function StampSection({chosenStamp}: stampEmit) {
           loading ? (
             <Text style={{justifyContent: 'center'}}>Loading...</Text>
           ) : (
-            <View style={styles.cardContainer}>
-              <TouchableOpacity onPress={() => chosenStamp(currentStamp)}>
-                <StampCard cardDetails={currentStamp} />
-              </TouchableOpacity>
-      
-              <Text style={styles.collectedCaption}>{`${currentStamp.stamp_count}/${currentStamp.stamp_total} Collected`}</Text>
-            </View>
+            <StampSlider stampList={stamps} />
           )
         }
 
@@ -71,10 +66,6 @@ const styles = StyleSheet.create({
   headerText: {
     fontFamily: Fonts.Montserrat,
     alignSelf: 'flex-start'
-  },
-  cardContainer: {
-    width: '100%',
-    alignItems: 'center'
   },
   collectedCaption: {
     marginVertical: 12,
