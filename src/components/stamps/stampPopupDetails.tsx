@@ -59,7 +59,6 @@ export default function StampPopupDetails({stamp}: StampPopupDetailsInterface) {
                     <Text style={styles.buttonText}>Delete</Text>
                 </TouchableOpacity>
             </View>
-            
         </View>
     );
 }

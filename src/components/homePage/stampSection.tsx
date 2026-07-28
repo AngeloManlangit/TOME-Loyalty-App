@@ -7,11 +7,15 @@ import StampCard from "../stamps/stampCard";
 import { stampService } from "@src/services/stampService";
 import { useEffect, useState } from "react";
 
-export default function StampSection() {
+interface stampEmit {
+    chosenStamp: (brand: StampCardDetails) => void;
+}
+
+export default function StampSection({chosenStamp}: stampEmit) {
   const [stamps, setStamps] = useState<StampCardDetails[]>([]);
   const [loading, setLoading] = useState(true);
   
-  const currentStamp = stamps.length > 0 ? stamps[2] : defaultStampCard;
+  const currentStamp = stamps.length > 0 ? stamps[0] : defaultStampCard;
   
   useEffect(() => {
     const loadStamps = async () => {
@@ -37,7 +41,9 @@ export default function StampSection() {
             <Text style={{justifyContent: 'center'}}>Loading...</Text>
           ) : (
             <View style={styles.cardContainer}>
-              <StampCard cardDetails={currentStamp} />
+              <TouchableOpacity onPress={() => chosenStamp(currentStamp)}>
+                <StampCard cardDetails={currentStamp} />
+              </TouchableOpacity>
       
               <Text style={styles.collectedCaption}>{`${currentStamp.stamp_count}/${currentStamp.stamp_total} Collected`}</Text>
             </View>
@@ -46,6 +52,10 @@ export default function StampSection() {
 
         <TouchableOpacity onPress={() => stampService.addNewStamp()}>
           <Text>Make new stamp</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity onPress={() => stampService.deleteAllStampsByOwner()}>
+          <Text>Delete all stamps</Text>
         </TouchableOpacity>
     </View>
   );

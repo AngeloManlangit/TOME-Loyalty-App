@@ -1,7 +1,7 @@
 import { StampCardDetails, defaultStampCard } from "@/assets/classes/stamps";
 import { db } from "@/firebase/firebaseConfig";
 import { getAuth } from "firebase/auth";
-import { addDoc, collection, getDocs, orderBy, query, where } from "firebase/firestore";
+import { addDoc, collection, deleteDoc, getDocs, orderBy, query, where } from "firebase/firestore";
 import { genSeed } from "../utils/rng";
 
 const auth = getAuth();
@@ -43,7 +43,14 @@ export const stampService = {
                         date_created: rawDate
                     } as unknown as StampCardDetails; // unknown because Typescript error can't trust the doc.data() return if empty smh
                 });
-
+                
+                // console.log(fetchedStamps.length)
+                if (fetchedStamps.length == 0) {
+                    console.log('No stamps for this user, making new one');
+                    await this.addNewStamp(); 
+                    return await this.fetchStamps();
+                }
+                
                 return fetchedStamps;
             } catch (error: any) {
                 console.error("Error fetching stamps:", error);
@@ -74,6 +81,41 @@ export const stampService = {
             }
         } else {
             console.log('No user logged in!')
+            return false;
+        }
+    },
+    
+    async deleteAllStampsByOwner() {
+        console.log('Deleting all...')
+        const user = auth.currentUser;
+
+        if (user) {
+            try {
+                // 1. Query all documents belonging to the owner in the stamps collection
+                const q = query(stampsCollection, where("owner_ID", "==", user.uid));
+                const snapshot = await getDocs(q);
+
+                if (snapshot.empty) {
+                    console.log('No documents found to delete.');
+                    return true;
+                }
+
+                // 2. Delete each document 
+                // We use Promise.all to delete them concurrently for better performance
+                const deletePromises = snapshot.docs.map((docSnapshot) => {
+                    return deleteDoc(docSnapshot.ref);
+                });
+
+                await Promise.all(deletePromises);
+                
+                console.log(`Successfully deleted all stamps for owner: ${user.uid}`);
+                return true;
+            } catch (error: any) {
+                console.error("Error deleting stamps: ", error);
+                return false;
+            }
+        } else {
+            console.log('No user logged in!');
             return false;
         }
     }

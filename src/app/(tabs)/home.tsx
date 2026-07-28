@@ -1,7 +1,12 @@
+import { StampCardDetails } from "@/assets/classes/stamps";
+import StampPopupDetails from "@/src/components/stamps/stampPopupDetails";
+import BottomSheet, { BottomSheetBackdrop, BottomSheetScrollView } from "@gorhom/bottom-sheet";
 import StampSection from "@src/components/homePage/stampSection";
 import { bgTransparency, Colors } from "@src/constants/theme";
 import { LinearGradient } from 'expo-linear-gradient';
+import { useCallback, useMemo, useRef, useState } from "react";
 import { Alert, Linking, Image, StyleSheet, TouchableOpacity, View } from "react-native";
+import { GestureHandlerRootView } from "react-native-gesture-handler";
 
 export default function HomeScreen() {
   const handleAdPress = async () => {
@@ -17,13 +22,28 @@ export default function HomeScreen() {
     }
   };
 
+  // stamp popup
+  const bottomSheetRef = useRef<BottomSheet>(null);
+  const snapPoints = useMemo(() => ['90%', '100%'], []);
+
+  const renderBackdrop = useCallback(
+    (props: any) => <BottomSheetBackdrop disappearsOnIndex={-1} appearsOnIndex={0} {...props} />, []
+  );
+
+  const [selectedStamp, setSelectedStamp] = useState<StampCardDetails | null>(null);
+  function setCurrentStamp(s: StampCardDetails) {
+    console.log(s.id)
+    setSelectedStamp(s);
+    bottomSheetRef.current?.snapToIndex(0);
+  }
+
   return (
-    <View style={styles.container}>
+    <GestureHandlerRootView style={styles.container}>
       <LinearGradient
         colors={['#fff', `${Colors.outlets.pink}${bgTransparency}`]}
         style={styles.mainView}
       >
-        <StampSection />
+        <StampSection chosenStamp={setCurrentStamp} />
 
         <TouchableOpacity onPress={handleAdPress}>
           <Image 
@@ -31,9 +51,23 @@ export default function HomeScreen() {
             style={styles.adImage}  
           />
         </TouchableOpacity>
+
+        <BottomSheet
+            ref={bottomSheetRef}
+            index={-1} // -1 means it starts fully hidden off-screen
+            snapPoints={snapPoints}
+            enablePanDownToClose={true}
+            backdropComponent={renderBackdrop}
+        >
+            <BottomSheetScrollView contentContainerStyle={styles.sheetContent}>
+                {selectedStamp && (
+                    <StampPopupDetails stamp={selectedStamp} />
+                )}
+            </BottomSheetScrollView>
+        </BottomSheet>
         
       </LinearGradient>
-    </View>
+    </GestureHandlerRootView>
   );
 }
 
@@ -50,5 +84,10 @@ const styles = StyleSheet.create({
     width: '100%',
     height: 'auto',
     aspectRatio: 2.7 / 1
-  }
+  },
+  sheetContent: {
+    flexGrow: 1,
+    alignItems: 'center',
+    padding: 20,
+  },
 });
