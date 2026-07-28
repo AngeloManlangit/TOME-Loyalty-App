@@ -261,16 +261,16 @@ describe('buildReceiptKey', () => {
   });
 
   it.each([
-    ['', 'INV1', 'ACCN_MISSING'],
-    ['   ', 'INV1', 'ACCN_MISSING'],
+    ['', 'INV1', 'MIN_MISSING'],
+    ['   ', 'INV1', 'MIN_MISSING'],
     ['123', '', 'INVOICE_MISSING'],
     ['123', '   ', 'INVOICE_MISSING'],
-  ])('rejects empty components (%s, %s)', (accn, invoice, reject) => {
-    expect(buildReceiptKey(accn, invoice)).toEqual({ ok: false, reject });
+  ])('rejects empty components (%s, %s)', (min, invoice, reject) => {
+    expect(buildReceiptKey(min, invoice)).toEqual({ ok: false, reject });
   });
 
   it('rejects a slash, which would become a collection path rather than an error', () => {
-    expect(buildReceiptKey('12/3', 'INV1')).toEqual({ ok: false, reject: 'ACCN_MALFORMED' });
+    expect(buildReceiptKey('12/3', 'INV1')).toEqual({ ok: false, reject: 'MIN_MALFORMED' });
     expect(buildReceiptKey('123', 'IN/V1')).toEqual({ ok: false, reject: 'INVOICE_MALFORMED' });
   });
 

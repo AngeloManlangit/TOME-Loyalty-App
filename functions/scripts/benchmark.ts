@@ -14,11 +14,18 @@ const THRESHOLDS: Record<string, number> = { clean: 0.95, degraded: 0.8 };
 interface Expected {
   label: 'clean' | 'degraded' | 'negative';
   invoice_no: string | null;
+  /** Half of the uniqueness key — measured, because a wrong MIN is a wrong receipt identity. */
+  min: string | null;
   accn: string | null;
+  /** Identifies the business for the accreditation whitelist. */
+  tin: string | null;
   receipt_date: string | null;
   expectReject?: string;
   notes?: string;
 }
+
+/** Every field the benchmark scores. MIN and TIN were absent and are the two that gate a claim. */
+const MEASURED: ReceiptFieldName[] = ['invoice_no', 'min', 'accn', 'tin', 'receipt_date'];
 
 interface FieldTally {
   correct: number;
@@ -60,6 +67,26 @@ function sameDate(expected: string, got: string): boolean {
   return got.slice(0, 10) === expected.slice(0, 10);
 }
 
+/**
+ * Noon Manila on the most recent day any fixture was issued, so every fixture sits inside the claim
+ * window regardless of when the benchmark runs. Deterministic: the same corpus always scores the
+ * same, and a drop is always a real regression.
+ */
+function corpusClock(corpus: Array<{ expected: Expected }>): number {
+  const days = corpus
+    .map((c) => c.expected.receipt_date)
+    .filter((d): d is string => typeof d === 'string' && d.length >= 10)
+    .map((d) => d.slice(0, 10))
+    .sort();
+
+  const latest = days[days.length - 1];
+  if (latest === undefined) return Date.now();
+
+  const [year, month, day] = latest.split('-').map(Number) as [number, number, number];
+  // 12:00 Manila is 04:00 UTC — the offset is fixed, PH has had no DST since 1978.
+  return Date.UTC(year, month - 1, day, 12 - receiptRules.date.utcOffsetMinutes / 60, 0, 0);
+}
+
 function main(): void {
   const corpus = loadCorpus();
 
@@ -77,8 +104,10 @@ function main(): void {
   let negativesTotal = 0;
   let silentlyWrong = 0;
 
-  // Fixed clock so the window check never makes the benchmark drift over time.
-  const nowMs = Date.now();
+  // Clock derived from the corpus, NOT Date.now(). With a wall clock, every fixture eventually
+  // falls out of the 7-day claim window and the benchmark starts failing on the calendar rather
+  // than on a regression — which says nothing about whether extraction still works.
+  const nowMs = corpusClock(corpus);
 
   for (const { name, vision, expected } of corpus) {
     const doc = visionToOcrDocument(vision);
@@ -95,26 +124,23 @@ function main(): void {
     }
 
     if (!tallies.has(expected.label)) {
-      tallies.set(
-        expected.label,
-        new Map([
-          ['invoice_no', newTally()],
-          ['accn', newTally()],
-          ['receipt_date', newTally()],
-        ]),
-      );
+      tallies.set(expected.label, new Map(MEASURED.map((f) => [f, newTally()])));
     }
     const byField = tallies.get(expected.label)!;
 
     const resolved: Record<ReceiptFieldName, string | null> = {
       invoice_no: null,
+      min: null,
       accn: null,
+      tin: null,
       receipt_date: null,
     };
 
     if (outcome.status !== 'rejected') {
       resolved.invoice_no = outcome.fields.invoice_no ?? null;
+      resolved.min = outcome.fields.min ?? null;
       resolved.accn = outcome.fields.accn ?? null;
+      resolved.tin = outcome.fields.tin ?? null;
       resolved.receipt_date =
         outcome.fields.receipt_date_ms !== undefined
           ? new Date(outcome.fields.receipt_date_ms + receiptRules.date.utcOffsetMinutes * 60_000)
@@ -123,8 +149,8 @@ function main(): void {
           : null;
     }
 
-    for (const field of ['invoice_no', 'accn', 'receipt_date'] as ReceiptFieldName[]) {
-      const want = expected[field === 'receipt_date' ? 'receipt_date' : field];
+    for (const field of MEASURED) {
+      const want = expected[field];
       if (!want) continue;
 
       const got = resolved[field];

@@ -1,4 +1,12 @@
-
+/**
+ * Core types. PURE — no Firebase, no SDK imports (design decision D3, enforced by eslint.config.js).
+ *
+ * The Vision* interfaces hand-mirror the subset of DOCUMENT_TEXT_DETECTION we consume rather than
+ * importing @google-cloud/vision: it keeps core dependency-free, and copying the protobuf types'
+ * all-optional/nullable shape forces the adapter to handle the missing geometry and confidence that
+ * degraded receipts actually produce. The real SDK response is structurally assignable to
+ * VisionResponse.
+ */
 
 // --- Vision wire shape (structural mirror) --------------------------------------------------------
 
@@ -95,8 +103,8 @@ export interface OcrLine {
 }
 
 /**
- * What every downstream extractor consumes. Nothing below this point knows Vision exists —
- * swapping OCR provider means rewriting visionAdapter.ts and nothing else.
+ * What every downstream extractor consumes. Nothing past here knows Vision exists, so swapping OCR
+ * provider means rewriting visionAdapter.ts and nothing else.
  */
 export interface OcrDocument {
   lines: OcrLine[];
@@ -109,7 +117,7 @@ export interface OcrDocument {
 
 // --- Extraction results ---------------------------------------------------------------------------
 
-/** Where a candidate came from. Recorded because it is the single most useful debugging signal. */
+/** Where a candidate came from. The most useful debugging signal there is. */
 export type CandidateSource = 'inline' | 'below' | 'pattern-scan';
 
 export interface FieldCandidate {
@@ -126,20 +134,19 @@ export interface FieldCandidate {
   lineIndex: number;
 }
 
-export type ReceiptFieldName = 'invoice_no' | 'accn' | 'receipt_date';
+export type ReceiptFieldName = 'invoice_no' | 'min' | 'accn' | 'tin' | 'receipt_date';
 
 export interface FieldCandidates {
   invoice_no: FieldCandidate[];
+  min: FieldCandidate[];
   accn: FieldCandidate[];
+  tin: FieldCandidate[];
   receipt_date: FieldCandidate[];
 }
 
 // --- Reject codes ---------------------------------------------------------------------------------
 
-/**
- * Every rejection carries one of these. No bare booleans anywhere in the validation path — that is
- * what makes the test suite assertable and the UI copy specific.
- */
+/** Every rejection carries one of these — no bare booleans in the validation path. */
 export type RejectCode =
   // criterion 1 — invoice
   | 'INVOICE_MISSING'
@@ -150,10 +157,14 @@ export type RejectCode =
   | 'DATE_UNPARSEABLE'
   | 'DATE_FUTURE'
   | 'DATE_EXPIRED'
-  // criterion 3 — ACCN
+  // criterion 3 — MIN, the terminal identity and first half of the uniqueness key
+  | 'MIN_MISSING'
+  | 'MIN_MALFORMED'
+  // corroboration and accreditation
   | 'ACCN_MISSING'
   | 'ACCN_MALFORMED'
   | 'ACCN_NOT_ACCREDITED'
+  | 'MERCHANT_NOT_ACCREDITED'
   // OCR / input
   | 'OCR_NO_TEXT'
   | 'NOT_A_RECEIPT'
@@ -168,19 +179,27 @@ export type RejectCode =
 
 export interface ReceiptFields {
   invoice_no: string;
-  accn: string;
+  /** BIR Machine Identification Number. First half of the uniqueness key. */
+  min: string;
   /** Milliseconds since epoch for the receipt's local wall-clock instant, resolved in Asia/Manila. */
   receipt_date_ms: number;
+  /** POS vendor's Acknowledgement Certificate Control Number. Corroborating evidence, not identity. */
+  accn?: string;
+  /** Business VAT registration TIN, for the accreditation whitelist. */
+  tin?: string;
 }
 
-
+/**
+ * `scan` never hard-rejects on a field problem — a misread is the user's to fix on review. `claim`
+ * is the authority and rejects anything not fully valid.
+ */
 export type ValidationMode = 'scan' | 'claim';
 
 export type ValidationOutcome =
   | {
       status: 'valid';
       fields: ReceiptFields;
-      /** The {accn}__{invoice_no} uniqueness key. Firestore-safe by construction. */
+      /** The {min}__{invoice_no} uniqueness key. Firestore-safe by construction. */
       key: string;
       candidates: FieldCandidates;
       confidence: number;

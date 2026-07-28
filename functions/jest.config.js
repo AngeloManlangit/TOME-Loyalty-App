@@ -21,11 +21,21 @@ module.exports = {
       ...base,
       displayName: 'functions',
       testMatch: ['<rootDir>/__tests__/functions/**/*.test.ts'],
+      // firebase-admin pulls in jwks-rsa -> jose, which ships ESM only and Jest cannot parse.
+      // Token verification is not what these tests exercise, so it is stubbed out.
+      moduleNameMapper: {
+        '^jose$': '<rootDir>/__tests__/mocks/jose.ts',
+        '^jose/(.*)$': '<rootDir>/__tests__/mocks/jose.ts',
+      },
     },
     {
       ...base,
       displayName: 'rules',
       testMatch: ['<rootDir>/__tests__/rules/**/*.test.ts'],
+      moduleNameMapper: {
+        '^jose$': '<rootDir>/__tests__/mocks/jose.ts',
+        '^jose/(.*)$': '<rootDir>/__tests__/mocks/jose.ts',
+      },
     },
   ],
 
