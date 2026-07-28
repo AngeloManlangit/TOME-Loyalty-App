@@ -44,17 +44,8 @@ const docOf = (lines: string[], confidence = 0.95): OcrDocument =>
     }),
   );
 
-const validate = (
-  lines: string[],
-  overrides: Partial<Parameters<typeof validateReceipt>[0]> = {},
-): ValidationOutcome =>
-  validateReceipt({
-    doc: docOf(lines),
-    rules: receiptRules,
-    nowMs: NOW,
-    mode: 'claim',
-    ...overrides,
-  });
+const validate = (lines: string[], confidence = 0.95): ValidationOutcome =>
+  validateReceipt({ doc: docOf(lines, confidence), rules: receiptRules, nowMs: NOW });
 
 describe('validateReceipt — the happy path', () => {
   it('accepts a well-formed receipt and builds the uniqueness key', () => {
@@ -73,11 +64,7 @@ describe('validateReceipt — the happy path', () => {
 
   it('keys on BOTH fields, so two terminals may both issue invoice 00000001', () => {
     const a = validate(minimal('DATE 07/28/2026', '00000001'));
-    const b = validate([
-      'MIN 25090417305924929',
-      'INVOICE NO 00000001',
-      'DATE 07/28/2026',
-    ]);
+    const b = validate(['MIN 25090417305924929', 'INVOICE NO 00000001', 'DATE 07/28/2026']);
 
     expect(a.status).toBe('valid');
     expect(b.status).toBe('valid');
@@ -88,8 +75,7 @@ describe('validateReceipt — the happy path', () => {
   it('accepts a receipt with no readable ACCN, which the Robinsons fixture is', () => {
     // requireAccn is off by default: the ACCN prints in the small vendor footer and is the first
     // thing lost to a fold, a crop or a faded edge.
-    const result = validate(minimal('DATE 07/28/2026'));
-    expect(result.status).toBe('valid');
+    expect(validate(minimal('DATE 07/28/2026')).status).toBe('valid');
   });
 });
 
@@ -99,7 +85,6 @@ describe('validateReceipt — no receipt at all', () => {
       doc: visionToOcrDocument({}),
       rules: receiptRules,
       nowMs: NOW,
-      mode: 'claim',
     });
     expect(result).toMatchObject({ status: 'rejected', reject: 'OCR_NO_TEXT' });
   });
@@ -120,6 +105,103 @@ describe('validateReceipt — no receipt at all', () => {
   });
 });
 
+// ─────────────────────────────────────────────────────────────────────────────────────────────────
+// The gates that make "the OCR must be sure" real. Scanned values are not editable, so a shaky read
+// has no route to becoming correct: every one of these is a retake, never a stamp.
+describe('validateReceipt — the OCR must be sure', () => {
+  it('rejects a blurry photo outright, before trusting any field it produced', () => {
+    // A photo this poor still yields plausible-looking values. Running the rest of the pipeline on
+    // them only manufactures a confident answer out of an unreadable image.
+    expect(validate(GOOD_RECEIPT, 0.5)).toMatchObject({
+      status: 'rejected',
+      reject: 'IMAGE_UNCLEAR',
+    });
+  });
+
+  it('rejects a field read below the confidence floor', () => {
+    // 0.65 clears the whole-document floor (0.60) but not the per-field one (0.70), so the two
+    // gates are shown to be independent rather than one masking the other.
+    expect(validate(GOOD_RECEIPT, 0.65)).toMatchObject({
+      status: 'rejected',
+      reject: 'LOW_CONFIDENCE',
+    });
+  });
+
+  it('accepts a field read at exactly the confidence floor', () => {
+    expect(validate(GOOD_RECEIPT, receiptRules.confidence.minFieldConfidence).status).toBe('valid');
+  });
+
+  it('rejects two equally plausible candidates rather than picking one', () => {
+    // The failure mode this exists for: the ranking picks one, nothing looks unusual, and the user
+    // has no way to say it was the other one. That is a confidently wrong stamp.
+    const result = validate([
+      `MIN ${MIN}`,
+      `INVOICE NO ${INVOICE}`,
+      'INVOICE NO 00022492',
+      'DATE 07/28/2026',
+    ]);
+    expect(result).toMatchObject({ status: 'rejected', reject: 'AMBIGUOUS_FIELD' });
+  });
+
+  it('accepts a clear winner over a weak runner-up', () => {
+    // The labelled value scores 1.0 against a pattern-scan match at 0.25 — a margin of 0.75.
+    expect(validate(minimal('DATE 07/28/2026')).status).toBe('valid');
+  });
+
+  it('will not accept an unlabelled invoice number, however well it matches the format', () => {
+    // The single most important correctness rule in the file: a receipt whose invoice label is torn
+    // must not silently claim a random number off the page as its invoice number.
+    expect(validate([`MIN ${MIN}`, INVOICE, 'DATE 07/28/2026'])).toMatchObject({
+      status: 'rejected',
+      reject: 'INVOICE_MISSING',
+    });
+  });
+
+  it('DOES accept an unlabelled MIN, whose 17-digit shape is discriminating on its own', () => {
+    const result = validate([MIN, `INVOICE NO ${INVOICE}`, 'DATE 07/28/2026']);
+    expect(result.status).toBe('valid');
+    if (result.status !== 'valid') return;
+    expect(result.fields.min).toBe(MIN);
+  });
+
+  it('reports the weakest field confidence, not an average that would hide it', () => {
+    const response = makeVisionResponse({
+      rows: [
+        { y: 100, cells: [{ text: `MIN ${MIN}`, x: 50, confidence: 0.99 }] },
+        { y: 130, cells: [{ text: `INVOICE NO ${INVOICE}`, x: 50, confidence: 0.86 }] },
+        { y: 160, cells: [{ text: 'DATE 07/28/2026', x: 50, confidence: 0.99 }] },
+      ],
+    });
+    const result = validateReceipt({
+      doc: visionToOcrDocument(response),
+      rules: receiptRules,
+      nowMs: NOW,
+    });
+    expect(result.status).toBe('valid');
+    expect(result.confidence).toBeCloseTo(0.86, 5);
+  });
+
+  it('omits a shakily-read TIN rather than deciding accreditation on it', () => {
+    // TIN identifies the business. A guess here points the whitelist lookup at the wrong company.
+    const response = makeVisionResponse({
+      rows: [
+        { y: 100, cells: [{ text: `VAT REG TIN ${TIN}`, x: 50, confidence: 0.62 }] },
+        { y: 130, cells: [{ text: `MIN ${MIN}`, x: 50, confidence: 0.99 }] },
+        { y: 160, cells: [{ text: `INVOICE NO ${INVOICE}`, x: 50, confidence: 0.99 }] },
+        { y: 190, cells: [{ text: 'DATE 07/28/2026', x: 50, confidence: 0.99 }] },
+      ],
+    });
+    const result = validateReceipt({
+      doc: visionToOcrDocument(response),
+      rules: receiptRules,
+      nowMs: NOW,
+    });
+    expect(result.status).toBe('valid');
+    if (result.status !== 'valid') return;
+    expect(result.fields.tin).toBeUndefined();
+  });
+});
+
 describe('validateReceipt — criterion 1, invoice number', () => {
   it('reports INVOICE_MISSING when no invoice number is present', () => {
     expect(validate([`MIN ${MIN}`, 'DATE 07/28/2026', 'TOTAL 500.00'])).toMatchObject({
@@ -127,19 +209,13 @@ describe('validateReceipt — criterion 1, invoice number', () => {
     });
   });
 
-  it('reports INVOICE_MALFORMED for a corrected value that does not fit the format', () => {
-    expect(validate(GOOD_RECEIPT, { overrides: { invoice_no: '!!' } })).toMatchObject({
-      reject: 'INVOICE_MALFORMED',
-    });
-  });
-
-  it('will not accept an unlabelled invoice number, however well it matches the format', () => {
-    // The single most important correctness rule in the file: a receipt whose invoice label is torn
-    // must not silently claim a random number as its invoice. It goes to review instead.
-    const result = validate([`MIN ${MIN}`, '00021838', 'DATE 07/28/2026'], { mode: 'scan' });
-    expect(result.status).toBe('needs_review');
-    if (result.status !== 'needs_review') return;
-    expect(result.softRejects).toContain('INVOICE_MISSING');
+  it('never proposes a word as an invoice number', () => {
+    const result = validate([
+      `MIN ${MIN}`,
+      'THIS SERVES AS AN OFFICIAL SALES INVOICE',
+      'DATE 07/28/2026',
+    ]);
+    expect(result).toMatchObject({ status: 'rejected', reject: 'INVOICE_MISSING' });
   });
 });
 
@@ -162,10 +238,7 @@ describe('validateReceipt — criterion 2, date and the claim window', () => {
 
   it('rejects a receipt printed later TODAY when a time is actually printed', () => {
     // A bare date asserts a calendar DAY and is fine all day; 18:00 with now at 12:00 is not.
-    const result = validate(minimal('DATE 07/28/2026 18:00'));
-    expect(result.status).toBe('rejected');
-    if (result.status !== 'rejected') return;
-    expect(result.reject).toBe('DATE_FUTURE');
+    expect(validate(minimal('DATE 07/28/2026 18:00'))).toMatchObject({ reject: 'DATE_FUTURE' });
   });
 
   it('accepts a bare date printed today, because it asserts a calendar day', () => {
@@ -173,10 +246,7 @@ describe('validateReceipt — criterion 2, date and the claim window', () => {
   });
 
   it('accepts a timed receipt within the clock-skew tolerance', () => {
-    const doc = docOf(minimal('DATE 07/28/2026 12:01'));
-    expect(
-      validateReceipt({ doc, rules: receiptRules, nowMs: NOW, mode: 'claim' }).status,
-    ).toBe('valid');
+    expect(validate(minimal('DATE 07/28/2026 12:01')).status).toBe('valid');
   });
 
   it('rejects a timed receipt beyond the clock-skew tolerance', () => {
@@ -189,33 +259,31 @@ describe('validateReceipt — criterion 2, date and the claim window', () => {
     });
   });
 
-  it('reports DATE_UNPARSEABLE for a corrected date that is not a date', () => {
-    expect(validate(GOOD_RECEIPT, { overrides: { receipt_date: 'NOT A DATE' } })).toMatchObject({
-      reject: 'DATE_UNPARSEABLE',
-    });
-  });
-
-  it('rejects an impossible calendar date supplied as a correction', () => {
-    expect(validate(GOOD_RECEIPT, { overrides: { receipt_date: '02/30/2026' } })).toMatchObject({
-      reject: 'DATE_UNPARSEABLE',
+  it('never proposes an impossible calendar date, so it cannot reach the window check', () => {
+    // 30 February parses as nothing, so it is not a candidate at all and the receipt simply has no
+    // date. Rejecting impossible dates rather than clamping them is what makes that true.
+    expect(validate([`MIN ${MIN}`, `INVOICE NO ${INVOICE}`, 'DATE 02/30/2026'])).toMatchObject({
+      reject: 'DATE_MISSING',
     });
   });
 
   it('is decided by the SERVER clock, so rolling the device clock forward changes nothing', () => {
     // The device clock is not an input to this function at all — there is nowhere to inject one.
     const rolledForward = Date.UTC(2027, 0, 1);
-    const doc = docOf(GOOD_RECEIPT);
     expect(
-      validateReceipt({ doc, rules: receiptRules, nowMs: rolledForward, mode: 'claim' }),
+      validateReceipt({ doc: docOf(GOOD_RECEIPT), rules: receiptRules, nowMs: rolledForward }),
     ).toMatchObject({ reject: 'DATE_EXPIRED' });
   });
 
   it('handles the window across a year boundary', () => {
     const newYear = Date.UTC(2027, 0, 2, 4, 0, 0);
-    const doc = docOf(minimal('DATE 12/28/2026'));
-    expect(validateReceipt({ doc, rules: receiptRules, nowMs: newYear, mode: 'claim' }).status).toBe(
-      'valid',
-    );
+    expect(
+      validateReceipt({
+        doc: docOf(minimal('DATE 12/28/2026')),
+        rules: receiptRules,
+        nowMs: newYear,
+      }).status,
+    ).toBe('valid');
   });
 });
 
@@ -226,17 +294,10 @@ describe('validateReceipt — criterion 3, MIN', () => {
     });
   });
 
-  it('reports MIN_MALFORMED for a corrected value that does not fit the format', () => {
-    expect(validate(GOOD_RECEIPT, { overrides: { min: 'ABC' } })).toMatchObject({
-      reject: 'MIN_MALFORMED',
+  it('does not mistake a short number for a MIN', () => {
+    expect(validate(['MIN 1234', `INVOICE NO ${INVOICE}`, 'DATE 07/28/2026'])).toMatchObject({
+      reject: 'MIN_MISSING',
     });
-  });
-
-  it('accepts an unlabelled MIN, whose 17-digit shape is discriminating on its own', () => {
-    const result = validate([MIN, `INVOICE NO ${INVOICE}`, 'DATE 07/28/2026']);
-    expect(result.status).toBe('valid');
-    if (result.status !== 'valid') return;
-    expect(result.fields.min).toBe(MIN);
   });
 });
 
@@ -247,23 +308,19 @@ describe('validateReceipt — ACCN is corroboration, not identity', () => {
   };
 
   it('reports ACCN_MISSING when required and absent', () => {
-    const doc = docOf(minimal('DATE 07/28/2026'));
-    expect(validateReceipt({ doc, rules: requiring, nowMs: NOW, mode: 'claim' })).toMatchObject({
-      reject: 'ACCN_MISSING',
-    });
-  });
-
-  it('reports ACCN_MALFORMED when required and the value does not fit the format', () => {
-    const doc = docOf(GOOD_RECEIPT);
     expect(
       validateReceipt({
-        doc,
+        doc: docOf(minimal('DATE 07/28/2026')),
         rules: requiring,
         nowMs: NOW,
-        mode: 'claim',
-        overrides: { accn: '123' },
       }),
-    ).toMatchObject({ reject: 'ACCN_MALFORMED' });
+    ).toMatchObject({ reject: 'ACCN_MISSING' });
+  });
+
+  it('accepts the receipt when required and present', () => {
+    expect(
+      validateReceipt({ doc: docOf(GOOD_RECEIPT), rules: requiring, nowMs: NOW }).status,
+    ).toBe('valid');
   });
 
   it('rejects an ACCN outside the accredited vendor list', () => {
@@ -274,10 +331,9 @@ describe('validateReceipt — ACCN is corroboration, not identity', () => {
         allowedVendorAccns: ['9999107191682022121668'],
       },
     };
-    const doc = docOf(GOOD_RECEIPT);
-    expect(validateReceipt({ doc, rules: whitelisted, nowMs: NOW, mode: 'claim' })).toMatchObject({
-      reject: 'ACCN_NOT_ACCREDITED',
-    });
+    expect(
+      validateReceipt({ doc: docOf(GOOD_RECEIPT), rules: whitelisted, nowMs: NOW }),
+    ).toMatchObject({ reject: 'ACCN_NOT_ACCREDITED' });
   });
 
   it('accepts any well-formed ACCN when the vendor list is empty', () => {
@@ -294,164 +350,38 @@ describe('validateReceipt — reject precedence is deterministic', () => {
   });
 });
 
-describe('validateReceipt — scan mode proposes, claim mode decides', () => {
-  it('scan does not hard-reject a missing field; it asks for review', () => {
-    const result = validate([`MIN ${MIN}`, 'DATE 07/28/2026', 'TOTAL 500.00'], { mode: 'scan' });
-
-    expect(result.status).toBe('needs_review');
-    if (result.status !== 'needs_review') return;
-    expect(result.softRejects).toContain('INVOICE_MISSING');
-    expect(result.fields.min).toBe(MIN);
-  });
-
-  it('omits a field that is present but malformed from the partial result', () => {
-    // The user must re-enter it; handing back a value we know is invalid would invite them to
-    // just confirm it.
-    const result = validate(GOOD_RECEIPT, { mode: 'scan', overrides: { min: 'NOT-A-MIN' } });
-
-    expect(result.status).toBe('needs_review');
-    if (result.status !== 'needs_review') return;
-    expect(result.softRejects).toContain('MIN_MALFORMED');
-    expect(result.fields.min).toBeUndefined();
-    expect(result.fields.invoice_no).toBe(INVOICE);
-  });
-
-  it('omits an out-of-window date from the partial result', () => {
-    const result = validate(minimal('DATE 01/02/2026'), { mode: 'scan' });
-    expect(result.status).toBe('needs_review');
-    if (result.status !== 'needs_review') return;
-    expect(result.fields.receipt_date_ms).toBeUndefined();
-  });
-
-  it('scan surfaces an expired date as a soft reject, so a MISREAD date can still be corrected', () => {
-    const result = validate(minimal('DATE 01/02/2026'), { mode: 'scan' });
-    expect(result.status).toBe('needs_review');
-    if (result.status !== 'needs_review') return;
-    expect(result.softRejects).toContain('DATE_EXPIRED');
-  });
-
-  it('claim rejects that same expired receipt outright — the server is the authority', () => {
-    expect(validate(minimal('DATE 01/02/2026'), { mode: 'claim' })).toMatchObject({
-      status: 'rejected',
-      reject: 'DATE_EXPIRED',
-    });
-  });
-
-  it('scan still hard-rejects when there is no text at all', () => {
-    expect(
-      validateReceipt({
-        doc: visionToOcrDocument({}),
-        rules: receiptRules,
-        nowMs: NOW,
-        mode: 'scan',
-      }),
-    ).toMatchObject({ status: 'rejected', reject: 'OCR_NO_TEXT' });
-  });
-});
-
-describe('validateReceipt — low confidence', () => {
-  const lowConfidence = (mode: 'scan' | 'claim'): ValidationOutcome =>
-    validateReceipt({
-      doc: docOf(GOOD_RECEIPT, 0.4),
-      rules: receiptRules,
-      nowMs: NOW,
-      mode,
-    });
-
-  it('sends a valid but weakly-read receipt to review rather than awarding on a guess', () => {
-    const result = lowConfidence('scan');
-    expect(result.status).toBe('needs_review');
-    if (result.status !== 'needs_review') return;
-    expect(result.softRejects).toEqual([]); // nothing is WRONG, it just needs confirming
-    expect(result.fields.invoice_no).toBe(INVOICE);
-  });
-
-  it('accepts it at claim time, because the user has confirmed the fields by then', () => {
-    expect(lowConfidence('claim').status).toBe('valid');
-  });
-
-  it('reports the weakest field confidence, not an average that would hide it', () => {
-    const response = makeVisionResponse({
-      rows: [
-        { y: 100, cells: [{ text: `MIN ${MIN}`, x: 50, confidence: 0.99 }] },
-        { y: 130, cells: [{ text: `INVOICE NO ${INVOICE}`, x: 50, confidence: 0.3 }] },
-        { y: 160, cells: [{ text: 'DATE 07/28/2026', x: 50, confidence: 0.99 }] },
-      ],
-    });
-    const result = validateReceipt({
-      doc: visionToOcrDocument(response),
-      rules: receiptRules,
-      nowMs: NOW,
-      mode: 'claim',
-    });
-    expect(result.confidence).toBeCloseTo(0.3, 5);
-  });
-});
-
-describe('validateReceipt — corrections', () => {
-  it('a correction overrides OCR and is trusted', () => {
-    const result = validate([`MIN ${MIN}`, 'DATE 07/28/2026', 'TOTAL 500.00'], {
-      overrides: { invoice_no: INVOICE },
-    });
-
-    expect(result.status).toBe('valid');
-    if (result.status !== 'valid') return;
-    expect(result.fields.invoice_no).toBe(INVOICE);
-    // Overall confidence stays the WEAKEST field's, not the corrected one's — a human-confirmed
-    // invoice number says nothing about how well the MIN was read.
-    expect(result.confidence).toBeCloseTo(0.95, 5);
-  });
-
-  it('gives the corrected field itself full confidence', () => {
-    const result = validate([`MIN ${MIN}`, 'DATE 07/28/2026', 'TOTAL 500.00'], {
-      overrides: { invoice_no: INVOICE, min: MIN, receipt_date: '2026-07-28' },
-    });
-    expect(result.confidence).toBe(1);
-  });
-
-  it('normalizes a correction the same way OCR output is normalized', () => {
-    const result = validate(GOOD_RECEIPT, { overrides: { min: ' 26O13OO956OO86199 ' } });
-    expect(result.status).toBe('valid');
-    if (result.status !== 'valid') return;
-    expect(result.fields.min).toBe(MIN);
-  });
-
-  it('treats a correction that normalizes to nothing as missing', () => {
-    expect(validate(GOOD_RECEIPT, { overrides: { invoice_no: '  :::  ' } })).toMatchObject({
-      reject: 'INVOICE_MISSING',
-    });
-  });
-
-  it('lets corrections rescue a document with no extractable fields at all', () => {
-    const result = validate(['HELLO', 'WORLD'], {
-      overrides: { invoice_no: INVOICE, min: MIN, receipt_date: '2026-07-28' },
-    });
-    expect(result.status).toBe('valid');
-  });
-});
-
 describe('validateReceipt — document id safety', () => {
-  it('rejects field values that would produce an illegal Firestore document id', () => {
-    // A slash would silently create a subcollection path rather than failing.
-    const result = validate(GOOD_RECEIPT, { overrides: { invoice_no: '000/21838' } });
+  it('rejects a value that would turn the document id into a collection path', () => {
+    // Needs a pattern permissive enough to let a slash through extraction, which the shipped
+    // digits-only rule does not. buildReceiptKey is the backstop either way.
+    const loose: ReceiptRules = {
+      ...receiptRules,
+      invoice: { ...receiptRules.invoice, pattern: /^[0-9/]{4,20}$/ },
+    };
+    const result = validateReceipt({
+      doc: docOf([`MIN ${MIN}`, 'INVOICE NO 000/21838', 'DATE 07/28/2026']),
+      rules: loose,
+      nowMs: NOW,
+    });
     expect(result.status).toBe('rejected');
     if (result.status !== 'rejected') return;
-    // The format rule catches it first; either way it never reaches Firestore.
     expect(['INVOICE_MALFORMED', 'RECEIPT_KEY_INVALID']).toContain(result.reject);
   });
 
   it('rejects an over-long key', () => {
-    const rules: ReceiptRules = {
+    const loose: ReceiptRules = {
       ...receiptRules,
-      invoice: { ...receiptRules.invoice, pattern: /^[A-Z0-9-]+$/ },
-      min: { ...receiptRules.min, pattern: /^[0-9-]+$/ },
+      invoice: { ...receiptRules.invoice, pattern: /^[0-9]+$/ },
+      min: { ...receiptRules.min, pattern: /^[0-9]+$/ },
     };
     const result = validateReceipt({
-      doc: docOf(GOOD_RECEIPT),
-      rules,
+      doc: docOf([
+        `MIN ${'1'.repeat(800)}`,
+        `INVOICE NO ${'2'.repeat(800)}`,
+        'DATE 07/28/2026',
+      ]),
+      rules: loose,
       nowMs: NOW,
-      mode: 'claim',
-      overrides: { invoice_no: 'A'.repeat(800), min: '1'.repeat(800) },
     });
     expect(result).toMatchObject({ status: 'rejected', reject: 'RECEIPT_KEY_INVALID' });
   });
@@ -497,7 +427,6 @@ describe('validateReceipt — degraded but real receipts', () => {
       doc: visionToOcrDocument(response),
       rules: receiptRules,
       nowMs: NOW,
-      mode: 'claim',
     });
 
     expect(result.status).toBe('valid');
@@ -505,14 +434,10 @@ describe('validateReceipt — degraded but real receipts', () => {
     expect(result.key).toBe(`${MIN}__${INVOICE}`);
   });
 
-  it('handles a receipt with the invoice line torn off', () => {
-    const result = validate(
-      ['OUTLETS MALL', `MIN ${MIN}`, 'DATE 07/28/2026', 'TOTAL 500.00'],
-      { mode: 'scan' },
-    );
-    expect(result.status).toBe('needs_review');
-    if (result.status !== 'needs_review') return;
-    expect(result.softRejects).toContain('INVOICE_MISSING');
+  it('rejects a receipt with the invoice line torn off, rather than guessing', () => {
+    expect(
+      validate(['OUTLETS MALL', `MIN ${MIN}`, 'DATE 07/28/2026', 'TOTAL 500.00']),
+    ).toMatchObject({ status: 'rejected', reject: 'INVOICE_MISSING' });
   });
 });
 
@@ -524,12 +449,10 @@ describe('validateReceipt — rules are data', () => {
     };
     const doc = docOf(minimal('DATE 07/27/2026'));
 
-    expect(validateReceipt({ doc, rules: strict, nowMs: NOW, mode: 'claim' })).toMatchObject({
+    expect(validateReceipt({ doc, rules: strict, nowMs: NOW })).toMatchObject({
       reject: 'DATE_EXPIRED',
     });
-    expect(validateReceipt({ doc, rules: receiptRules, nowMs: NOW, mode: 'claim' }).status).toBe(
-      'valid',
-    );
+    expect(validateReceipt({ doc, rules: receiptRules, nowMs: NOW }).status).toBe('valid');
   });
 
   it('honours a DMY locale order without any code change', () => {
@@ -539,15 +462,23 @@ describe('validateReceipt — rules are data', () => {
     };
     const doc = visionToOcrDocument(makeSimpleReceipt(minimal('DATE 07/08/2026')));
 
-    const result = validateReceipt({
-      doc,
-      rules: dmy,
-      nowMs: Date.UTC(2026, 7, 8, 4),
-      mode: 'claim',
-    });
+    const result = validateReceipt({ doc, rules: dmy, nowMs: Date.UTC(2026, 7, 8, 4) });
     expect(result.status).toBe('valid');
     if (result.status !== 'valid') return;
     // 07/08 read as 7 August, not 8 July.
     expect(new Date(result.fields.receipt_date_ms).toISOString()).toBe('2026-08-06T16:00:00.000Z');
+  });
+
+  it('honours a relaxed confidence floor without any code change', () => {
+    const lenient: ReceiptRules = {
+      ...receiptRules,
+      confidence: { ...receiptRules.confidence, minFieldConfidence: 0.5 },
+    };
+    const doc = docOf(GOOD_RECEIPT, 0.65);
+
+    expect(validateReceipt({ doc, rules: receiptRules, nowMs: NOW })).toMatchObject({
+      reject: 'LOW_CONFIDENCE',
+    });
+    expect(validateReceipt({ doc, rules: lenient, nowMs: NOW }).status).toBe('valid');
   });
 });

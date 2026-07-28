@@ -11,7 +11,7 @@ export default function StampSection() {
   const [stamps, setStamps] = useState<StampCardDetails[]>([]);
   const [loading, setLoading] = useState(true);
   
-  const currentStamp = stamps.length > 0 ? stamps[2] : defaultStampCard;
+  const currentStamp = stamps.length > 0 ? stamps[0] : defaultStampCard;
   
   useEffect(() => {
     const loadStamps = async () => {

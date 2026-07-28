@@ -44,10 +44,20 @@ const REJECT_COPY: Record<RejectCode, RejectCopy> = {
         body: "This scan timed out. Please photograph the receipt again — it only takes a moment.",
         retryLabel: "RETAKE PHOTO",
     },
-    CORRECTION_NOT_IN_OCR: {
-        title: "That does not match",
-        body: "One of your corrections does not appear on the receipt you photographed. Please check it against the paper.",
-        retryLabel: "TRY AGAIN",
+    LOW_CONFIDENCE: {
+        title: "Could not read it clearly",
+        body: "We are not sure enough about what this receipt says to award a stamp. Try again with more light and the receipt flat.",
+        retryLabel: "RETAKE PHOTO",
+    },
+    AMBIGUOUS_FIELD: {
+        title: "Could not tell which is which",
+        body: "This photo has more than one possible match for a detail we need. Try again with just the receipt in frame.",
+        retryLabel: "RETAKE PHOTO",
+    },
+    IMAGE_UNCLEAR: {
+        title: "Photo is too blurry",
+        body: "Hold the phone steady and make sure the receipt is in focus before taking the photo.",
+        retryLabel: "RETAKE PHOTO",
     },
     MERCHANT_NOT_ACCREDITED: {
         title: "Store not in the programme",

@@ -1,7 +1,6 @@
 import type {
     ClaimResult,
     ReceiptError,
-    ReceiptFieldName,
     ReceiptRecord,
     RejectCode,
     ScanResult,
@@ -79,21 +78,22 @@ export const receiptService = {
     },
 
     
-    async claimReceipt(
-        sessionId: string,
-        corrections?: Partial<Record<ReceiptFieldName, string>>,
-    ): Promise<ClaimResult> {
+    /**
+     * Claim the stamp for a scanned receipt.
+     *
+     * The session id is the ONLY argument, deliberately. Scanned values are not editable, so there
+     * is nothing else to send — the server re-derives every field from the OCR text it stored at
+     * scan time, and a client cannot influence what gets claimed.
+     */
+    async claimReceipt(sessionId: string): Promise<ClaimResult> {
         const user = auth.currentUser;
         if (!user) {
             throw { code: null, message: "You must be signed in to claim.", offline: false } as ReceiptError;
         }
 
         try {
-            const call = httpsCallable<
-                { sessionId: string; corrections?: Partial<Record<ReceiptFieldName, string>> },
-                ClaimResult
-            >(functions, "claimReceipt");
-            const response = await call({ sessionId, corrections });
+            const call = httpsCallable<{ sessionId: string }, ClaimResult>(functions, "claimReceipt");
+            const response = await call({ sessionId });
             return response.data;
         } catch (error) {
             throw toReceiptError(error);

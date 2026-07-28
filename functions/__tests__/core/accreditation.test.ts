@@ -33,7 +33,7 @@ const RECEIPT = [
 ];
 
 const run = (lines: string[], rules: ReceiptRules = receiptRules): ValidationOutcome =>
-  validateReceipt({ doc: docOf(lines), rules, nowMs: NOW, mode: 'claim' });
+  validateReceipt({ doc: docOf(lines), rules, nowMs: NOW });
 
 // ─────────────────────────────────────────────────────────────────────────────────────────────────
 describe('splitGluedLabel', () => {
@@ -240,15 +240,14 @@ describe('ACCN as corroboration, not identity', () => {
     });
   });
 
-  it('rejects a malformed ACCN once requireAccn is enabled', () => {
-    const result = validateReceipt({
-      doc: docOf(RECEIPT),
-      rules: requiring,
-      nowMs: NOW,
-      mode: 'claim',
-      overrides: { accn: '123' },
+  it('treats an ACCN that does not fit the format as absent, not as a value to check', () => {
+    // A candidate only exists if it already matched the pattern, so a mangled ACCN never becomes a
+    // value at all — it is simply missing. There is no "malformed but present" state to report.
+    const mangled = RECEIPT.map((l) => (l.startsWith('ACCN') ? 'ACCN 123' : l));
+    expect(run(mangled, requiring)).toMatchObject({
+      status: 'rejected',
+      reject: 'ACCN_MISSING',
     });
-    expect(result).toMatchObject({ status: 'rejected', reject: 'ACCN_MALFORMED' });
   });
 
   it('accepts an ACCN on the vendor allowlist', () => {
@@ -280,25 +279,18 @@ describe('ACCN as corroboration, not identity', () => {
 });
 
 // ─────────────────────────────────────────────────────────────────────────────────────────────────
-describe('scan-mode partial results carry corroborating fields', () => {
-  it('returns ACCN and TIN alongside a partial result', () => {
+describe('a receipt is claimed whole, or not at all', () => {
+  it('rejects when the invoice is missing, rather than returning the fields it did read', () => {
+    // There used to be a partial result here for the user to complete. With values non-editable a
+    // partial read is of no use to anyone, so a missing field is simply a rejection.
     const noInvoice = RECEIPT.filter((l) => !l.startsWith('INV#'));
-    const result = validateReceipt({
-      doc: docOf(noInvoice),
-      rules: receiptRules,
-      nowMs: NOW,
-      mode: 'scan',
+    expect(run(noInvoice)).toMatchObject({
+      status: 'rejected',
+      reject: 'INVOICE_MISSING',
     });
-
-    expect(result.status).toBe('needs_review');
-    if (result.status !== 'needs_review') return;
-    expect(result.softRejects).toContain('INVOICE_MISSING');
-    expect(result.fields.accn).toBe(VENDOR_ACCN);
-    expect(result.fields.tin).toBe('003-583-915-00006');
-    expect(result.fields.min).toBe('26013009560086199');
   });
 
-  it('omits a rejected ACCN from the partial result', () => {
+  it('rejects an unaccredited ACCN outright', () => {
     const requiring: ReceiptRules = {
       ...receiptRules,
       accreditation: {
@@ -307,16 +299,9 @@ describe('scan-mode partial results carry corroborating fields', () => {
         allowedVendorAccns: ['9999999999999999999999'],
       },
     };
-    const result = validateReceipt({
-      doc: docOf(RECEIPT),
-      rules: requiring,
-      nowMs: NOW,
-      mode: 'scan',
+    expect(run(RECEIPT, requiring)).toMatchObject({
+      status: 'rejected',
+      reject: 'ACCN_NOT_ACCREDITED',
     });
-
-    expect(result.status).toBe('needs_review');
-    if (result.status !== 'needs_review') return;
-    expect(result.softRejects).toContain('ACCN_NOT_ACCREDITED');
-    expect(result.fields.accn).toBeUndefined();
   });
 });

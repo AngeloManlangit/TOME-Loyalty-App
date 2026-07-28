@@ -104,6 +104,15 @@ function main(): void {
   let negativesTotal = 0;
   let silentlyWrong = 0;
 
+  /**
+   * How many good receipts the confidence gates accept versus bounce back for a retake.
+   *
+   * This is the number to watch when tuning rules.config.confidence. Accuracy alone cannot tell you
+   * whether the thresholds are set sensibly: gates strict enough to reject everything score a
+   * perfect 0 wrong answers while being useless in a shop.
+   */
+  const outcomes = new Map<string, { accepted: number; retake: number; retakeCodes: string[] }>();
+
   // Clock derived from the corpus, NOT Date.now(). With a wall clock, every fixture eventually
   // falls out of the 7-day claim window and the benchmark starts failing on the calendar rather
   // than on a regression — which says nothing about whether extraction still works.
@@ -111,11 +120,11 @@ function main(): void {
 
   for (const { name, vision, expected } of corpus) {
     const doc = visionToOcrDocument(vision);
-    const outcome = validateReceipt({ doc, rules: receiptRules, nowMs, mode: 'scan' });
+    const outcome = validateReceipt({ doc, rules: receiptRules, nowMs });
 
     if (expected.label === 'negative') {
       negativesTotal++;
-      if (outcome.status === 'rejected' || outcome.status === 'needs_review') negativesCorrect++;
+      if (outcome.status === 'rejected') negativesCorrect++;
       else {
         silentlyWrong++;
         console.log(`  ✗ ${name}: expected rejection, got '${outcome.status}'`);
@@ -125,8 +134,17 @@ function main(): void {
 
     if (!tallies.has(expected.label)) {
       tallies.set(expected.label, new Map(MEASURED.map((f) => [f, newTally()])));
+      outcomes.set(expected.label, { accepted: 0, retake: 0, retakeCodes: [] });
     }
     const byField = tallies.get(expected.label)!;
+    const split = outcomes.get(expected.label)!;
+
+    if (outcome.status === 'valid') {
+      split.accepted++;
+    } else {
+      split.retake++;
+      split.retakeCodes.push(`${name}: ${outcome.reject}`);
+    }
 
     const resolved: Record<ReceiptFieldName, string | null> = {
       invoice_no: null,
@@ -195,6 +213,21 @@ function main(): void {
     }
     console.log('');
   }
+
+  // ── accept / retake split ───────────────────────────────────────────────────────────────────────
+  // A good receipt bounced here is a real user asked to take the photo again. Zero wrong stamps is
+  // the requirement; this is what it costs.
+  console.log('── accept / retake split ──');
+  for (const [label, split] of outcomes) {
+    const total = split.accepted + split.retake;
+    if (total === 0) continue;
+    const rate = ((split.accepted / total) * 100).toFixed(1);
+    console.log(`  ${label.padEnd(10)} ${split.accepted}/${total} accepted first try (${rate}%)`);
+    for (const code of split.retakeCodes) {
+      console.log(`      retake → ${code}`);
+    }
+  }
+  console.log('');
 
   if (negativesTotal > 0) {
     const ok = negativesCorrect === negativesTotal;

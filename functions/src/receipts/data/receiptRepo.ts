@@ -17,8 +17,12 @@ export interface ReceiptDoc {
   accn?: string;
   tin?: string;
   ocr_confidence: number;
+  /**
+   * Always false. Retained so existing documents and readers keep a consistent shape, and as a
+   * standing record that no claimed receipt was ever hand-edited: scanned values are not editable,
+   * so a claim is derived entirely from the stored OCR text.
+   */
   was_manually_corrected: boolean;
-  corrected_fields?: string[];
   /**
    * The wallet. An unused receipt IS a stamp the user holds; the balance is the count of these.
    *
@@ -37,7 +41,6 @@ export interface ClaimInput {
   key: string;
   fields: ReceiptFields;
   confidence: number;
-  correctedFields: string[];
   nowMs: number;
   utcOffsetMinutes: number;
   scansPerDay: number;
@@ -120,7 +123,7 @@ export async function claimReceipt(input: ClaimInput): Promise<ClaimResult> {
       claimed_at: claimedAt,
       stamp_card_ID: stampRef.id,
       ocr_confidence: input.confidence,
-      was_manually_corrected: input.correctedFields.length > 0,
+      was_manually_corrected: false,
       // The stamp the user just earned, unspent. Decision D-1: scanning fills the WALLET; the
       // future "Stamp this card" press is what moves a stamp onto the card and flips this to true.
       // Incrementing stamp_count here as well would count the same stamp twice once that ships.
@@ -128,7 +131,6 @@ export async function claimReceipt(input: ClaimInput): Promise<ClaimResult> {
     };
     if (input.fields.accn !== undefined) receipt.accn = input.fields.accn;
     if (input.fields.tin !== undefined) receipt.tin = input.fields.tin;
-    if (input.correctedFields.length > 0) receipt.corrected_fields = input.correctedFields;
 
     // `create` rather than `set`: "already exists" becomes a precondition failure enforced by
     // Firestore itself, not a read-then-write race we hand-roll.

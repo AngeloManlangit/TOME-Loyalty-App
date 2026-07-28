@@ -42,8 +42,12 @@ async function scan(uid: string, lines = GOOD_RECEIPT_LINES, nowMs = NOW) {
   });
 }
 
-async function claim(uid: string, sessionId: string, corrections?: unknown, nowMs = NOW) {
-  return handleClaimReceipt(callable({ sessionId, corrections }, uid), { nowMs });
+/**
+ * `extra` exists only so tests can prove that anything a client bolts onto the payload is ignored.
+ * The real call takes a session id and nothing else.
+ */
+async function claim(uid: string, sessionId: string, nowMs = NOW, extra?: object) {
+  return handleClaimReceipt(callable({ sessionId, ...extra }, uid), { nowMs });
 }
 
 beforeEach(async () => {
@@ -54,8 +58,8 @@ beforeEach(async () => {
 describe('the happy path', () => {
   it('scans and claims, awarding exactly one stamp', async () => {
     const scanned = await scan(ALICE);
-    expect(scanned.status).toBe('valid');
     expect(scanned.sessionId).toBeTruthy();
+    expect(scanned.fields.invoice_no).toBe('00021838');
 
     const result = await claim(ALICE, scanned.sessionId);
     expect(result.receiptId).toBe('26013009560086199__00021838');
@@ -208,7 +212,7 @@ describe('rate limiting — a billing control', () => {
       count: 20,
       updated_at: new Date(),
     });
-    await expect(scan(ALICE)).resolves.toMatchObject({ status: 'valid' });
+    await expect(scan(ALICE)).resolves.toMatchObject({ fields: { invoice_no: '00021838' } });
   });
 
   it('increments the counter on a successful claim', async () => {
@@ -230,7 +234,7 @@ describe('sessions', () => {
   it('rejects an expired session, using the SERVER clock', async () => {
     const scanned = await scan(ALICE);
     const sixteenMinutesLater = NOW + 16 * 60_000;
-    expect(await rejectCodeOf(() => claim(ALICE, scanned.sessionId, undefined, sixteenMinutesLater))).toBe(
+    expect(await rejectCodeOf(() => claim(ALICE, scanned.sessionId, sixteenMinutesLater))).toBe(
       'SESSION_EXPIRED',
     );
   });
@@ -256,46 +260,47 @@ describe('sessions', () => {
 });
 
 // ─────────────────────────────────────────────────────────────────────────────────────────────────
-describe('corrections', () => {
-  it('accepts a correction whose value appears in the stored OCR text', async () => {
-    const torn = GOOD_RECEIPT_LINES.map((l) => (l === 'INV#00021838' ? 'INV#' : l));
-    const scanned = await scan(ALICE, torn);
-    expect(scanned.status).toBe('needs_review');
-
-    // "00021838" is not on this receipt, so it must be rejected...
-    expect(
-      await rejectCodeOf(() => claim(ALICE, scanned.sessionId, { invoice_no: '00021838' })),
-    ).toBe('CORRECTION_NOT_IN_OCR');
-  });
-
-  it('rejects a correction that does NOT appear in the stored OCR text', async () => {
+// ─────────────────────────────────────────────────────────────────────────────────────────────────
+// Scanned values are not editable. There is no correction payload to police any more, which makes
+// the forgery question trivial: a session id is the only input the server reads, so the strongest
+// thing a compromised client can do is choose which of its own scans to submit.
+describe('the client cannot influence what is claimed', () => {
+  it('ignores a corrections payload smuggled onto the request', async () => {
     const scanned = await scan(ALICE);
-    expect(
-      await rejectCodeOf(() => claim(ALICE, scanned.sessionId, { invoice_no: '99999999' })),
-    ).toBe('CORRECTION_NOT_IN_OCR');
-  });
+    const result = await claim(ALICE, scanned.sessionId, NOW, {
+      corrections: { invoice_no: '99999999', min: '99999999999999999' },
+    });
 
-  it('accepts a correction that differs only in separators', async () => {
-    const scanned = await scan(ALICE);
-    const result = await claim(ALICE, scanned.sessionId, { min: '26013009560086199' });
+    // The receipt claimed is the one that was photographed, not the one that was asked for.
     expect(result.receiptId).toBe('26013009560086199__00021838');
   });
 
-  it('records which fields the user corrected', async () => {
+  it('ignores forged field values sent at the top level', async () => {
     const scanned = await scan(ALICE);
-    await claim(ALICE, scanned.sessionId, { min: '26013009560086199' });
+    const result = await claim(ALICE, scanned.sessionId, NOW, {
+      invoice_no: '99999999',
+      min: '99999999999999999',
+      fields: { invoice_no: '99999999' },
+    });
+
+    expect(result.receiptId).toBe('26013009560086199__00021838');
+  });
+
+  it('records that no claimed receipt was ever hand-edited', async () => {
+    const scanned = await scan(ALICE);
+    await claim(ALICE, scanned.sessionId);
 
     const doc = await testDb()
       .collection(COLLECTIONS.receipts)
       .doc('26013009560086199__00021838')
       .get();
-    expect(doc.data()!.was_manually_corrected).toBe(true);
-    expect(doc.data()!.corrected_fields).toEqual(['min']);
+    expect(doc.data()!.was_manually_corrected).toBe(false);
+    expect(doc.data()!.corrected_fields).toBeUndefined();
   });
 
-  it('rejects a non-string correction', async () => {
-    const scanned = await scan(ALICE);
-    await expect(claim(ALICE, scanned.sessionId, { invoice_no: 12345 })).rejects.toThrow(/must be text/i);
+  it('rejects a receipt whose invoice label was torn off, instead of offering it for correction', async () => {
+    const torn = GOOD_RECEIPT_LINES.map((l) => (l === 'INV#00021838' ? 'INV#' : l));
+    expect(await rejectCodeOf(() => scan(ALICE, torn))).toBe('INVOICE_MISSING');
   });
 });
 
@@ -306,28 +311,44 @@ describe('the date window is decided by the server', () => {
     const elevenDaysLater = NOW + 11 * 86_400_000;
     // Session TTL would also fail here, so assert the session is still what stops it — then a fresh
     // scan of the same old receipt proves the window itself.
-    expect(await rejectCodeOf(() => claim(ALICE, scanned.sessionId, undefined, elevenDaysLater))).toBe(
+    expect(await rejectCodeOf(() => claim(ALICE, scanned.sessionId, elevenDaysLater))).toBe(
       'SESSION_EXPIRED',
     );
 
-    const old = await handleScanReceipt(callable({ imageBase64: IMAGE }, ALICE), {
-      vision: fakeVision([receiptVision()]),
-      nowMs: elevenDaysLater,
-    });
-    expect(old.status).toBe('needs_review');
-    expect(await rejectCodeOf(() => claim(ALICE, old.sessionId, undefined, elevenDaysLater))).toBe(
-      'DATE_EXPIRED',
-    );
+    // A fresh scan of the same old receipt proves the window itself. It is now refused at SCAN
+    // time rather than surviving to the claim: with no way to correct a misread date, there is
+    // nothing to be gained by carrying an out-of-window receipt further.
+    expect(
+      await rejectCodeOf(() =>
+        handleScanReceipt(callable({ imageBase64: IMAGE }, ALICE), {
+          vision: fakeVision([receiptVision()]),
+          nowMs: elevenDaysLater,
+        }),
+      ),
+    ).toBe('DATE_EXPIRED');
   });
 
   it('rejects a future-dated receipt', async () => {
+    // Refused at scan time, so no session is ever created for it.
     const earlier = Date.UTC(2026, 6, 20, 4, 0, 0);
-    const scanned = await handleScanReceipt(callable({ imageBase64: IMAGE }, ALICE), {
-      vision: fakeVision([receiptVision()]),
-      nowMs: earlier,
-    });
-    expect(await rejectCodeOf(() => claim(ALICE, scanned.sessionId, undefined, earlier))).toBe(
-      'DATE_FUTURE',
+    expect(
+      await rejectCodeOf(() =>
+        handleScanReceipt(callable({ imageBase64: IMAGE }, ALICE), {
+          vision: fakeVision([receiptVision()]),
+          nowMs: earlier,
+        }),
+      ),
+    ).toBe('DATE_FUTURE');
+  });
+
+  it('still refuses a claim whose receipt fell out of the window after scanning', async () => {
+    // The server re-derives and re-checks at claim time, so a session held open past the window
+    // cannot be cashed in — the scan-time verdict is not trusted.
+    const scanned = await scan(ALICE);
+    const nineDaysLater = NOW + 9 * 86_400_000;
+
+    expect(await rejectCodeOf(() => claim(ALICE, scanned.sessionId, nineDaysLater))).toBe(
+      'SESSION_EXPIRED',
     );
   });
 });

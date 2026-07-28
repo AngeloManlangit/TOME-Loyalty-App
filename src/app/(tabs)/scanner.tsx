@@ -1,7 +1,7 @@
 import { View, StyleSheet, ActivityIndicator } from "react-native";
 import { useScanner } from "@src/features/receipts/useScanner";
 import CameraCapture from "@src/components/scannerPage/cameraCapture";
-import ReviewFields from "@src/components/scannerPage/reviewFields";
+import ConfirmFields from "@src/components/scannerPage/confirmFields";
 import { ResultSuccess, ResultRejected, ResultOffline } from "@src/components/scannerPage/resultScreens";
 import { Colors } from "@src/constants/theme";
 
@@ -14,9 +14,9 @@ export default function ScannerScreen() {
             case 'processing':
                 return (
                     <View style={styles.container}>
-                        <CameraCapture 
-                            onCaptured={scanner.capture} 
-                            busy={scanner.state.phase === 'processing'} 
+                        <CameraCapture
+                            onCaptured={scanner.capture}
+                            busy={scanner.state.phase === 'processing'}
                         />
                         {scanner.state.phase === 'processing' && (
                             <View style={styles.overlay}>
@@ -25,13 +25,12 @@ export default function ScannerScreen() {
                         )}
                     </View>
                 );
-            case 'review':
+            case 'confirm':
             case 'submitting':
                 return (
-                    <ReviewFields 
-                        scanner={scanner} 
-                        candidates={scanner.state.scan.candidates} 
-                        submitting={scanner.state.phase === 'submitting'} 
+                    <ConfirmFields
+                        scanner={scanner}
+                        submitting={scanner.state.phase === 'submitting'}
                     />
                 );
             case 'success':

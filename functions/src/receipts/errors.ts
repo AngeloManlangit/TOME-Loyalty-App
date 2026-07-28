@@ -67,6 +67,21 @@ const MAPPINGS: Record<RejectCode, Mapping> = {
   },
   NOT_A_RECEIPT: { status: 'invalid-argument', message: 'That does not look like a receipt.' },
 
+  // the OCR was not sure enough to answer — the user retakes the photo. These are the codes that
+  // replace the old "here is a guess, fix it yourself" path.
+  LOW_CONFIDENCE: {
+    status: 'invalid-argument',
+    message: 'We could not read that clearly enough to be sure. Please take the photo again.',
+  },
+  AMBIGUOUS_FIELD: {
+    status: 'invalid-argument',
+    message: 'We found more than one possible match on this receipt. Please take the photo again.',
+  },
+  IMAGE_UNCLEAR: {
+    status: 'invalid-argument',
+    message: 'That photo is too blurry to read. Hold steady and try again.',
+  },
+
   // flow / abuse
   RATE_LIMITED: {
     status: 'resource-exhausted',
@@ -75,10 +90,6 @@ const MAPPINGS: Record<RejectCode, Mapping> = {
   SESSION_EXPIRED: {
     status: 'failed-precondition',
     message: 'This scan expired. Please take the photo again.',
-  },
-  CORRECTION_NOT_IN_OCR: {
-    status: 'invalid-argument',
-    message: 'That correction does not appear on the receipt you photographed.',
   },
 
   // key safety

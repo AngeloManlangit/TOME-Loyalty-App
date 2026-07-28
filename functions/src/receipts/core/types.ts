@@ -168,10 +168,13 @@ export type RejectCode =
   // OCR / input
   | 'OCR_NO_TEXT'
   | 'NOT_A_RECEIPT'
+  // the OCR was not sure enough to answer — the user retakes the photo
+  | 'LOW_CONFIDENCE'
+  | 'AMBIGUOUS_FIELD'
+  | 'IMAGE_UNCLEAR'
   // flow / abuse
   | 'RATE_LIMITED'
   | 'SESSION_EXPIRED'
-  | 'CORRECTION_NOT_IN_OCR'
   // key safety
   | 'RECEIPT_KEY_INVALID';
 
@@ -190,11 +193,13 @@ export interface ReceiptFields {
 }
 
 /**
- * `scan` never hard-rejects on a field problem — a misread is the user's to fix on review. `claim`
- * is the authority and rejects anything not fully valid.
+ * Validation has no modes.
+ *
+ * There used to be a `scan` mode that proposed partial results for the user to fix and a strict
+ * `claim` mode that decided. Scanned values are not editable now, so a partial read is of no use to
+ * anyone: both calls run the same strict rules, and `claimReceipt` re-deriving the same answer from
+ * the stored OCR text is what makes the server the authority.
  */
-export type ValidationMode = 'scan' | 'claim';
-
 export type ValidationOutcome =
   | {
       status: 'valid';
@@ -202,15 +207,6 @@ export type ValidationOutcome =
       /** The {min}__{invoice_no} uniqueness key. Firestore-safe by construction. */
       key: string;
       candidates: FieldCandidates;
-      confidence: number;
-    }
-  | {
-      status: 'needs_review';
-      /** Whatever could be resolved. Missing entries are what the user must supply. */
-      fields: Partial<ReceiptFields>;
-      candidates: FieldCandidates;
-      /** Why review is needed. Drives the per-field flags in the UI. */
-      softRejects: RejectCode[];
       confidence: number;
     }
   | {

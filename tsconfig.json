@@ -2,6 +2,10 @@
   "extends": "expo/tsconfig.base",
   "compilerOptions": {
     "strict": true,
+    // Jest globals (describe/it/expect/jest) for the suites under src/**/__tests__. Listed
+    // explicitly because setting "types" at all disables automatic @types discovery, so expo's own
+    // ambient types have to be named here too.
+    "types": ["jest", "expo"],
     "paths": {
       "@firebase/auth": ["./node_modules/@firebase/auth/dist/index.rn.d.ts"],
       "@/*": [

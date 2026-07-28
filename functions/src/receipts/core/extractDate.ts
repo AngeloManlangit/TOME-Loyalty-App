@@ -100,6 +100,20 @@ function collect(doc: OcrDocument, anchors: readonly AnchorMatch[], order: 'MDY'
   return found;
 }
 
+/**
+ * A date candidate carries its resolved instant, so validate never re-parses.
+ *
+ * Structurally still a FieldCandidate, so it flows into FieldCandidates unchanged. The point is that
+ * a candidate's canonical value is parseable BY CONSTRUCTION — re-parsing it downstream created an
+ * "unparseable date" branch that nothing could ever reach.
+ */
+export interface DateCandidate extends FieldCandidate {
+  /** Epoch ms of the receipt's wall-clock instant, resolved at the configured offset. */
+  ms: number;
+  /** Whether a time was printed, not just a calendar day. Decides how the window is compared. */
+  hasTime: boolean;
+}
+
 interface Ranked {
   candidate: FieldCandidate;
   ms: number;
@@ -130,23 +144,24 @@ export function extractDateCandidates(
   doc: OcrDocument,
   rule: DateRule,
   nowMs: number,
-): FieldCandidate[] {
+): DateCandidate[] {
   const anchors = findAnchors(doc.lines, rule.labels);
   const found = collect(doc, anchors, rule.localeOrder);
 
-  const byValue = new Map<string, FieldCandidate>();
-  const instantOf = new Map<string, number>();
+  const byValue = new Map<string, DateCandidate>();
 
   for (const item of found) {
     const value = canonicalDate(item.parts);
 
-    const candidate: FieldCandidate = {
+    const candidate: DateCandidate = {
       value,
       raw: item.words.map((w) => w.text).join(' '),
       score: SCORES[item.source],
       confidence: meanConfidence(item.words),
       source: item.source,
       lineIndex: item.lineIndex,
+      ms: partsToUtcMs(item.parts, rule.utcOffsetMinutes),
+      hasTime: item.parts.hasTime,
     };
 
     const existing = byValue.get(value);
@@ -156,13 +171,10 @@ export function extractDateCandidates(
       (candidate.score === existing.score && candidate.confidence > existing.confidence)
     ) {
       byValue.set(value, candidate);
-      instantOf.set(value, partsToUtcMs(item.parts, rule.utcOffsetMinutes));
     }
   }
 
   return [...byValue.values()]
-    .map((candidate) => ({ candidate, ms: instantOf.get(candidate.value)! }))
-    .sort((a, b) => compareDateCandidates(a, b, nowMs))
-    .map((x) => x.candidate)
+    .sort((a, b) => compareDateCandidates({ candidate: a, ms: a.ms }, { candidate: b, ms: b.ms }, nowMs))
     .slice(0, MAX_CANDIDATES);
 }

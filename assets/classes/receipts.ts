@@ -47,18 +47,21 @@ export type RejectCode =
     | 'ACCN_MISSING' | 'ACCN_MALFORMED' | 'ACCN_NOT_ACCREDITED'
     | 'MERCHANT_NOT_ACCREDITED'
     | 'OCR_NO_TEXT' | 'NOT_A_RECEIPT'
-    | 'RATE_LIMITED' | 'SESSION_EXPIRED' | 'CORRECTION_NOT_IN_OCR'
+    | 'LOW_CONFIDENCE' | 'AMBIGUOUS_FIELD' | 'IMAGE_UNCLEAR'
+    | 'RATE_LIMITED' | 'SESSION_EXPIRED'
     | 'RECEIPT_KEY_INVALID';
 
-/** What `scanReceipt` returns. The session id is what `claimReceipt` needs. */
+/**
+ * What `scanReceipt` returns: a confident, complete read of the three fields that gate a claim.
+ *
+ * There is no partial or "needs review" variant. The values are shown to the user read-only for
+ * confirmation, so a field the OCR could not read confidently has no route to becoming correct —
+ * the scan is rejected with a code telling the user what to fix about the photo instead.
+ */
 export interface ScanResult {
     sessionId: string;
-    status: 'valid' | 'needs_review';
-    fields: Partial<ReceiptFields>;
-    candidates: FieldCandidates;
+    fields: ReceiptFields;
     confidence: number;
-    /** Why review is needed. Empty with status 'needs_review' means "fine, but read weakly". */
-    softRejects: RejectCode[];
 }
 
 /** What `claimReceipt` returns on success. */

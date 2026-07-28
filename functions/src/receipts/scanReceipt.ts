@@ -6,19 +6,21 @@ import { createSession } from './data/sessionRepo';
 import { rejectionError, requireAuth } from './errors';
 import { validateReceipt } from './core/validate';
 import { visionToOcrDocument } from './core/visionAdapter';
-import type { FieldCandidates, ReceiptFields, RejectCode } from './core/types';
+import type { ReceiptFields } from './core/types';
 import type { VisionClient } from './vision/client';
 import { createVisionClient } from './vision/client';
 
 
 
+/**
+ * A confident, complete read. There is no partial variant: scanned values are not editable, so a
+ * field the OCR could not read confidently has no path to becoming correct and the scan is rejected
+ * with a code telling the user what to fix about the photo.
+ */
 export interface ScanResponse {
   sessionId: string;
-  status: 'valid' | 'needs_review';
-  fields: Partial<ReceiptFields>;
-  candidates: FieldCandidates;
+  fields: ReceiptFields;
   confidence: number;
-  softRejects: RejectCode[];
 }
 
 /** Exported for tests: the handler without the onCall wrapper, Vision client injected. */
@@ -60,8 +62,8 @@ export async function handleScanReceipt(
     throw new HttpsError('invalid-argument', 'That image contains too much text to be a receipt.');
   }
 
-  const outcome = validateReceipt({ doc, rules, nowMs: deps.nowMs, mode: 'scan' });
-  if (outcome.status === 'rejected') throw rejectionError(outcome.reject);
+  const outcome = validateReceipt({ doc, rules, nowMs: deps.nowMs });
+  if (outcome.status !== 'valid') throw rejectionError(outcome.reject);
 
   const sessionId = await createSession({
     ownerId: uid,
@@ -72,11 +74,8 @@ export async function handleScanReceipt(
 
   return {
     sessionId,
-    status: outcome.status,
     fields: outcome.fields,
-    candidates: outcome.candidates,
     confidence: outcome.confidence,
-    softRejects: outcome.status === 'needs_review' ? outcome.softRejects : [],
   };
 }
 
