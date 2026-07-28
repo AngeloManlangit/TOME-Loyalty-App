@@ -1,17 +1,4 @@
-/**
- * Receipt date parsing, with the timezone handled explicitly.
- *
- * THE TRAP THIS FILE EXISTS TO AVOID: Cloud Functions run in UTC. Receipt dates are Asia/Manila
- * wall-clock. `new Date("07/28/2026")` parses as UTC midnight, which is 08:00 Manila — every receipt
- * silently shifts by eight hours, and the claim window starts rejecting evening transactions near the
- * edge of the window for no visible reason. It is the classic failure mode here, so `new Date(string)`
- * is never used anywhere in this file.
- *
- * Instead: parse to explicit calendar parts, validate them as a real calendar date, then build the
- * instant arithmetically from a fixed offset. The Philippines has observed no DST since 1978 and sits
- * at a constant UTC+08:00, so the fixed offset is exact rather than approximate — and the core needs
- * no timezone database.
- */
+
 
 export interface DateParts {
   year: number;
@@ -20,14 +7,7 @@ export interface DateParts {
   hour: number;
   minute: number;
   second: number;
-  /**
-   * Whether the receipt actually printed a time.
-   *
-   * This matters: a date with no time is a statement about a CALENDAR DAY, and comparing it as an
-   * instant at 00:00 would make "today's receipt" look like it was issued hours ago, and a receipt
-   * dated today in the future-check would be fine while one dated today at 23:00 would not. The
-   * window checks branch on this.
-   */
+  
   hasTime: boolean;
 }
 
@@ -72,12 +52,7 @@ export function daysInMonth(year: number, month: number): number {
   }
 }
 
-/**
- * Reject impossible calendar dates rather than letting them roll over.
- *
- * Date.UTC silently normalizes Feb 30 into Mar 2, which would turn an OCR misread into a plausible-
- * looking receipt date. Month 13 and Feb 29 in a non-leap year are the other two cases tested.
- */
+
 export function isValidCalendarDate(year: number, month: number, day: number): boolean {
   if (!Number.isInteger(year) || !Number.isInteger(month) || !Number.isInteger(day)) return false;
   if (year < 1900 || year > 2999) return false;
@@ -89,13 +64,7 @@ function isValidTime(hour: number, minute: number, second: number): boolean {
   return hour >= 0 && hour <= 23 && minute >= 0 && minute <= 59 && second >= 0 && second <= 59;
 }
 
-/**
- * Expand a two-digit year.
- *
- * 70-99 map to the 1900s and 00-69 to the 2000s. Receipts are always recent, so any year this
- * resolves to outside the claim window is rejected by the window check anyway — the pivot only needs
- * to be unsurprising, not clever.
- */
+
 function expandYear(raw: string): number {
   const n = Number(raw);
   if (raw.length <= 2) return n >= 70 ? 1900 + n : 2000 + n;
@@ -139,12 +108,7 @@ const MONTHNAME_DAY_YEAR_RE = /^([A-Z]{3,9})[-\s/.](\d{1,2}),?[-\s/.](\d{2,4})$/
 /** Purely numeric with separators: 07/28/2026, 28-07-26, 7.28.2026 */
 const NUMERIC_RE = /^(\d{1,2})[-/.](\d{1,2})[-/.](\d{2,4})$/;
 
-/**
- * Parse a date token (optionally with a trailing time) into calendar parts.
- *
- * Returns null when the text is not a date at all, or when it is a date that cannot exist. Callers
- * turn null into DATE_UNPARSEABLE — this function never throws and never guesses.
- */
+
 export function parseDateToken(input: string, localeOrder: 'MDY' | 'DMY'): DateParts | null {
   const upper = input.trim().toUpperCase();
   if (upper.length === 0) return null;
@@ -193,11 +157,7 @@ export function parseDateToken(input: string, localeOrder: 'MDY' | 'DMY'): DateP
   return null;
 }
 
-/**
- * Convert wall-clock parts in the receipt's timezone to a UTC epoch-millisecond instant.
- *
- * Built arithmetically from Date.UTC minus the fixed offset. Never via `new Date(string)`.
- */
+
 export function partsToUtcMs(parts: DateParts, utcOffsetMinutes: number): number {
   const asUtc = Date.UTC(
     parts.year,
