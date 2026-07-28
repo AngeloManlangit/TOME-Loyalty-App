@@ -2,7 +2,7 @@ import { HttpsError, onCall } from 'firebase-functions/v2/https';
 import type { CallableRequest } from 'firebase-functions/v2/https';
 import { activeRules, RUNTIME_OPTS } from '../config';
 import { isAccredited } from './data/merchantRepo';
-import { claimReceipt as runClaimTransaction } from './data/receiptRepo';
+import { claimReceipt as runClaimTransaction, countUnusedReceipts } from './data/receiptRepo';
 import { rejectionError, requireAuth } from './errors';
 import { alphanumericOnly } from './core/normalize';
 import { buildReceiptKey } from './core/receiptKey';
@@ -25,9 +25,11 @@ const CORRECTABLE: readonly ReceiptFieldName[] = [
 export interface ClaimResponse {
   receiptId: string;
   stampCardId: string;
+  /** Unspent stamps the user now holds — the wallet balance, including the one just earned. */
+  balance: number;
+  /** The card's progress. A claim does not advance it; the future press does. See decision D-1. */
   stampCount: number;
   stampTotal: number;
-  rewardReached: boolean;
 }
 
 
@@ -120,12 +122,16 @@ export async function handleClaimReceipt(
 
   if (!result.ok) throw rejectionError(result.reject);
 
+  // Read after the transaction commits, so the count includes the receipt just written. A failed
+  // claim never reaches here, so the balance is never reported for a stamp that was not awarded.
+  const balance = await countUnusedReceipts(uid);
+
   return {
     receiptId: result.receiptId,
     stampCardId: result.stampCardId,
+    balance,
     stampCount: result.stampCount,
     stampTotal: result.stampTotal,
-    rewardReached: result.stampCount >= result.stampTotal,
   };
 }
 

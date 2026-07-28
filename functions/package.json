@@ -17,6 +17,7 @@
     "test:functions": "jest --selectProjects functions",
     "receipts:corpus": "tsx scripts/buildCorpus.ts",
     "receipts:benchmark": "tsx scripts/benchmark.ts",
+    "receipts:backfill": "tsx scripts/backfillIsUsed.ts",
     "serve": "npm run build && firebase emulators:start --only functions,firestore,auth"
   },
   "dependencies": {

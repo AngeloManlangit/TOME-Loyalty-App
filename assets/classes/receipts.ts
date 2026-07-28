@@ -65,9 +65,11 @@ export interface ScanResult {
 export interface ClaimResult {
     receiptId: string;
     stampCardId: string;
+    /** Unspent stamps the user now holds — the wallet balance, including the one just earned. */
+    balance: number;
+    /** The card's progress. A claim does not advance it; the future "stamp this card" press does. */
     stampCount: number;
     stampTotal: number;
-    rewardReached: boolean;
 }
 
 /** A claimed receipt, as read back from Firestore for history. */
@@ -84,6 +86,10 @@ export interface ReceiptRecord {
     ocr_confidence: number;
     was_manually_corrected: boolean;
     corrected_fields?: string[];
+    /** False while the stamp is unspent. The wallet balance counts these. Server-written only. */
+    is_used: boolean;
+    /** When the stamp was spent onto a card. Absent until the future press flow writes it. */
+    used_at?: Date;
 }
 
 

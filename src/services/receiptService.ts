@@ -9,7 +9,7 @@ import type {
 import { db, functions } from "@/firebase/firebaseConfig";
 import { httpsCallable } from "firebase/functions";
 import { getAuth } from "firebase/auth";
-import { collection, getDocs, orderBy, query, where } from "firebase/firestore";
+import { collection, getCountFromServer, getDocs, orderBy, query, where } from "firebase/firestore";
 import { ImageManipulator, SaveFormat } from "expo-image-manipulator";
 
 const auth = getAuth();
@@ -97,6 +97,31 @@ export const receiptService = {
             return response.data;
         } catch (error) {
             throw toReceiptError(error);
+        }
+    },
+
+    /**
+     * The user's stamp balance: claimed receipts not yet spent on a card.
+     *
+     * An aggregate over the ledger rather than a stored counter — there is nothing to drift. Needs
+     * the (owner_ID, is_used) composite index; the owner_ID filter is also what makes the query
+     * satisfiable under firestore.rules.
+     */
+    async fetchStampBalance(): Promise<number> {
+        const user = auth.currentUser;
+        if (!user) return 0;
+
+        try {
+            const q = query(
+                receiptsCollection,
+                where("owner_ID", "==", user.uid),
+                where("is_used", "==", false),
+            );
+            const snapshot = await getCountFromServer(q);
+            return snapshot.data().count;
+        } catch (error) {
+            console.error("Error counting unused receipts:", error);
+            return 0;
         }
     },
 

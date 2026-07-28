@@ -53,7 +53,11 @@ beforeEach(async () => {
     await setDoc(doc(db, 'stamps', 'alice-card'), { owner_ID: ALICE, stamp_count: 3 });
     await setDoc(doc(db, 'stamps', 'bob-card'), { owner_ID: BOB, stamp_count: 7 });
 
-    await setDoc(doc(db, 'receipts', '116__SI-1'), { owner_ID: ALICE, accn: '116' });
+    await setDoc(doc(db, 'receipts', '116__SI-1'), {
+      owner_ID: ALICE,
+      accn: '116',
+      is_used: false,
+    });
     await setDoc(doc(db, 'scan_sessions', 'sess-1'), { owner_ID: ALICE, ocr_text: 'X' });
     await setDoc(doc(db, 'rate_limits', ALICE), { day_key: 20260728, count: 1 });
     await setDoc(doc(db, 'merchants', '116'), { name: 'Outlets', active: true });
@@ -133,6 +137,46 @@ describe('server-owned collections are read-only to clients', () => {
 
   it('a client cannot raise its own rate limit', async () => {
     await assertFails(updateDoc(doc(asAlice(), 'rate_limits', ALICE), { count: 0 }));
+  });
+});
+
+// ─────────────────────────────────────────────────────────────────────────────────────────────────
+// is_used IS THE STAMP WALLET. The balance is the count of receipts with is_used == false, so a
+// client that can write this field can mint unlimited stamps by flipping spent ones back.
+//
+// These tests exist to fail loudly if the future "Stamp this card" press is implemented by opening
+// up receipts writes instead of going through a Cloud Function. If you are here because one of them
+// broke: that is the point. Move the write server-side.
+describe('is_used cannot be written by a client — it is money', () => {
+  it('the owner cannot spend a stamp directly', async () => {
+    await assertFails(
+      updateDoc(doc(asAlice(), 'receipts', '116__SI-1'), { is_used: true }),
+    );
+  });
+
+  it('the owner cannot un-spend a stamp, which would mint one', async () => {
+    await assertFails(
+      updateDoc(doc(asAlice(), 'receipts', '116__SI-1'), { is_used: false }),
+    );
+  });
+
+  it('another user cannot touch it either', async () => {
+    await assertFails(updateDoc(doc(asBob(), 'receipts', '116__SI-1'), { is_used: false }));
+  });
+
+  it('a client cannot create a receipt that arrives already unspent', async () => {
+    await assertFails(
+      setDoc(doc(asAlice(), 'receipts', '999__FAKE-2'), {
+        owner_ID: ALICE,
+        min: '999',
+        invoice_no: 'FAKE-2',
+        is_used: false,
+      }),
+    );
+  });
+
+  it('the owner CAN still read it, which the balance query needs', async () => {
+    await assertSucceeds(getDoc(doc(asAlice(), 'receipts', '116__SI-1')));
   });
 });
 

@@ -58,7 +58,7 @@ const styles = StyleSheet.create({
         backgroundColor: "#fff",
     },
     overlay: {
-        ...StyleSheet.absoluteFillObject,
+        ...StyleSheet.absoluteFill,
         backgroundColor: 'rgba(0,0,0,0.4)',
         justifyContent: 'center',
         alignItems: 'center',

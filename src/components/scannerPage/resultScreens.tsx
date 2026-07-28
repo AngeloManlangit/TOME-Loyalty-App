@@ -137,20 +137,22 @@ export function ResultSuccess({ result, onDone }: { result: ClaimResult; onDone:
         opacity: opacity.value,
     }));
 
-    const complete = result.rewardReached;
+    // The badge shows the WALLET, not the card. A claim adds an unspent stamp; putting it on the
+    // card is a separate, deliberate action the user takes later.
+    const { balance } = result;
 
     return (
         <View style={styles.container}>
             <Animated.View style={[styles.badge, badgeStyle]}>
-                <Text style={styles.badgeCount}>{result.stampCount}</Text>
-                <Text style={styles.badgeTotal}>of {result.stampTotal}</Text>
+                <Text style={styles.badgeCount}>{balance}</Text>
+                <Text style={styles.badgeTotal}>{balance === 1 ? "stamp" : "stamps"}</Text>
             </Animated.View>
 
-            <Text style={styles.title}>{complete ? "Card complete!" : "Stamp earned"}</Text>
+            <Text style={styles.title}>Stamp earned</Text>
             <Text style={styles.body}>
-                {complete
-                    ? "You have filled your stamp card. Head to the store to claim your reward."
-                    : `${result.stampTotal - result.stampCount} more to go until your next reward.`}
+                {balance === 1
+                    ? "You have 1 stamp ready to use."
+                    : `You have ${balance} stamps ready to use.`}
             </Text>
 
             <Pressable style={styles.primaryButton} onPress={onDone}>

@@ -1,4 +1,4 @@
-import { FieldValue, Timestamp } from 'firebase-admin/firestore';
+import { Timestamp } from 'firebase-admin/firestore';
 import { COLLECTIONS, DEFAULT_STAMP_CARD } from '../../config';
 import { db } from '../../firebase';
 import type { ReceiptFields, RejectCode } from '../core/types';
@@ -19,6 +19,16 @@ export interface ReceiptDoc {
   ocr_confidence: number;
   was_manually_corrected: boolean;
   corrected_fields?: string[];
+  /**
+   * The wallet. An unused receipt IS a stamp the user holds; the balance is the count of these.
+   *
+   * ⚠️ This field is money. A client able to set it back to false mints unlimited stamps, so
+   * `receipts` denies all client writes in firestore.rules and the future "Stamp this card" press
+   * must flip it through a Cloud Function, never a loosened rule.
+   */
+  is_used: boolean;
+  /** When the stamp was spent onto a card. Absent until the future press flow writes it. */
+  used_at?: Timestamp;
 }
 
 export interface ClaimInput {
@@ -34,8 +44,33 @@ export interface ClaimInput {
 }
 
 export type ClaimResult =
-  | { ok: true; receiptId: string; stampCardId: string; stampCount: number; stampTotal: number }
+  | {
+      ok: true;
+      receiptId: string;
+      stampCardId: string;
+      /** The card's progress. Unchanged by a claim — only the future press advances it. */
+      stampCount: number;
+      stampTotal: number;
+    }
   | { ok: false; reject: RejectCode };
+
+/**
+ * The user's stamp balance: how many claimed receipts are still unspent.
+ *
+ * An aggregate over the ledger rather than a denormalized counter, because a counter can drift out
+ * of agreement with the receipts it claims to count and an aggregate cannot. Billed as one read per
+ * 1,000 index entries. Needs the (owner_ID, is_used) composite index.
+ */
+export async function countUnusedReceipts(uid: string): Promise<number> {
+  const snapshot = await db()
+    .collection(COLLECTIONS.receipts)
+    .where('owner_ID', '==', uid)
+    .where('is_used', '==', false)
+    .count()
+    .get();
+
+  return snapshot.data().count;
+}
 
 export async function claimReceipt(input: ClaimInput): Promise<ClaimResult> {
   const firestore = db();
@@ -76,7 +111,6 @@ export async function claimReceipt(input: ClaimInput): Promise<ClaimResult> {
       : ((cards.docs[0]!.data().stamp_total as number) ?? DEFAULT_STAMP_CARD.stamp_total);
 
     const claimedAt = Timestamp.fromMillis(input.nowMs);
-    const historyEntry = { receipt_ID: input.key, time_stamped: claimedAt };
 
     const receipt: ReceiptDoc = {
       owner_ID: input.uid,
@@ -87,6 +121,10 @@ export async function claimReceipt(input: ClaimInput): Promise<ClaimResult> {
       stamp_card_ID: stampRef.id,
       ocr_confidence: input.confidence,
       was_manually_corrected: input.correctedFields.length > 0,
+      // The stamp the user just earned, unspent. Decision D-1: scanning fills the WALLET; the
+      // future "Stamp this card" press is what moves a stamp onto the card and flips this to true.
+      // Incrementing stamp_count here as well would count the same stamp twice once that ships.
+      is_used: false,
     };
     if (input.fields.accn !== undefined) receipt.accn = input.fields.accn;
     if (input.fields.tin !== undefined) receipt.tin = input.fields.tin;
@@ -97,18 +135,13 @@ export async function claimReceipt(input: ClaimInput): Promise<ClaimResult> {
     tx.create(receiptRef, receipt);
 
     if (cards.empty) {
-      // A user's first valid receipt creates their card, so a new account is not silently denied its
-      // first stamp.
+      // A user's first valid receipt creates their card, so stamp_card_ID always points at a real
+      // document and the future press has a target. It starts empty — the receipt is the stamp.
       tx.create(stampRef, {
         ...DEFAULT_STAMP_CARD,
         owner_ID: input.uid,
-        stamp_count: 1,
-        history: [historyEntry],
-      });
-    } else {
-      tx.update(stampRef, {
-        stamp_count: FieldValue.increment(1),
-        history: FieldValue.arrayUnion(historyEntry),
+        stamp_count: 0,
+        history: [],
       });
     }
 
@@ -119,7 +152,7 @@ export async function claimReceipt(input: ClaimInput): Promise<ClaimResult> {
       ok: true,
       receiptId: input.key,
       stampCardId: stampRef.id,
-      stampCount: priorCount + 1,
+      stampCount: priorCount,
       stampTotal,
     };
   });

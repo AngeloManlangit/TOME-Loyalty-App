@@ -59,11 +59,10 @@ describe('the happy path', () => {
 
     const result = await claim(ALICE, scanned.sessionId);
     expect(result.receiptId).toBe('26013009560086199__00021838');
-    expect(result.stampCount).toBe(1);
+    // One stamp earned, held in the wallet as an unspent receipt.
+    expect(result.balance).toBe(1);
 
     const card = await testDb().collection(COLLECTIONS.stamps).doc(result.stampCardId).get();
-    expect(card.data()!.stamp_count).toBe(1);
-    expect(card.data()!.history).toHaveLength(1);
     expect(card.data()!.owner_ID).toBe(ALICE);
   });
 
@@ -83,6 +82,7 @@ describe('the happy path', () => {
       tin: '003-583-915-00006',
       accn: '0810107191682022121668',
       was_manually_corrected: false,
+      is_used: false,
     });
   });
 });
@@ -117,9 +117,13 @@ describe('duplicate claims', () => {
     const receipts = await testDb().collection(COLLECTIONS.receipts).get();
     expect(receipts.size).toBe(1);
 
-    const cards = await testDb().collection(COLLECTIONS.stamps).get();
-    const totalStamps = cards.docs.reduce((sum, d) => sum + (d.data().stamp_count as number), 0);
-    expect(totalStamps).toBe(1);
+    // Exactly one wallet entry across both users — the receipt IS the stamp, so one receipt
+    // document is one stamp and there is no separate counter that could disagree with it.
+    const unspent = await testDb()
+      .collection(COLLECTIONS.receipts)
+      .where('is_used', '==', false)
+      .get();
+    expect(unspent.size).toBe(1);
   });
 
   it('lets a DIFFERENT receipt from the same terminal through', async () => {
@@ -133,7 +137,7 @@ describe('duplicate claims', () => {
     const result = await claim(ALICE, second.sessionId);
 
     expect(result.receiptId).toBe('26013009560086199__00022492');
-    expect(result.stampCount).toBe(2);
+    expect(result.balance).toBe(2);
   });
 
   it('lets two merchants issue the same invoice number', async () => {
@@ -148,7 +152,7 @@ describe('duplicate claims', () => {
     const result = await claim(ALICE, second.sessionId);
 
     expect(result.receiptId).toBe('25090417305924929__00021838');
-    expect(result.stampCount).toBe(2);
+    expect(result.balance).toBe(2);
   });
 });
 
@@ -412,16 +416,31 @@ describe('merchant accreditation', () => {
 });
 
 // ─────────────────────────────────────────────────────────────────────────────────────────────────
-describe('stamp integrity', () => {
-  it('creates a card for a user who has none', async () => {
-    const scanned = await scan(ALICE);
-    const result = await claim(ALICE, scanned.sessionId);
+describe('the stamp wallet', () => {
+  /** Claim n distinct receipts from the same terminal. */
+  const claimMany = async (uid: string, invoices: string[]): Promise<void> => {
+    for (const invoice of invoices) {
+      const lines = GOOD_RECEIPT_LINES.map((l) => (l.startsWith('INV#') ? invoice : l));
+      const scanned = await scan(uid, lines);
+      await claim(uid, scanned.sessionId);
+    }
+  };
 
-    const card = await testDb().collection(COLLECTIONS.stamps).doc(result.stampCardId).get();
-    expect(card.data()).toMatchObject({ owner_ID: ALICE, stamp_count: 1, stamp_total: 10 });
+  it('writes every claimed receipt into the wallet as unspent', async () => {
+    const scanned = await scan(ALICE);
+    await claim(ALICE, scanned.sessionId);
+
+    const doc = await testDb()
+      .collection(COLLECTIONS.receipts)
+      .doc('26013009560086199__00021838')
+      .get();
+
+    expect(doc.data()!.is_used).toBe(false);
   });
 
-  it('adds to the existing card rather than creating a second one', async () => {
+  it('does NOT advance the card on a claim — only the future press does that', async () => {
+    // Decision D-1. If claiming also incremented stamp_count, the press would count the same stamp
+    // a second time and the wallet balance would stop meaning anything.
     await testDb()
       .collection(COLLECTIONS.stamps)
       .doc('alice-card')
@@ -431,25 +450,70 @@ describe('stamp integrity', () => {
     const result = await claim(ALICE, scanned.sessionId);
 
     expect(result.stampCardId).toBe('alice-card');
-    expect(result.stampCount).toBe(4);
-    expect((await testDb().collection(COLLECTIONS.stamps).get()).size).toBe(1);
-  });
-
-  it('keeps stamp_count and history in step — they cannot desync', async () => {
-    await testDb()
-      .collection(COLLECTIONS.stamps)
-      .doc('alice-card')
-      .set({ owner_ID: ALICE, stamp_count: 0, stamp_total: 10, history: [] });
-
-    for (const invoice of ['INV#00021838', 'INV#00022492', 'INV#00023000']) {
-      const lines = GOOD_RECEIPT_LINES.map((l) => (l.startsWith('INV#') ? invoice : l));
-      const scanned = await scan(ALICE, lines);
-      await claim(ALICE, scanned.sessionId);
-    }
+    expect(result.stampCount).toBe(3); // unchanged
+    expect(result.balance).toBe(1); // the stamp went to the wallet
 
     const card = await testDb().collection(COLLECTIONS.stamps).doc('alice-card').get();
     expect(card.data()!.stamp_count).toBe(3);
-    expect(card.data()!.history).toHaveLength(3);
+    expect(card.data()!.history).toHaveLength(0);
+  });
+
+  it('grows the balance by exactly one per claimed receipt', async () => {
+    await claimMany(ALICE, ['INV#00021838', 'INV#00022492', 'INV#00023000']);
+
+    const receipts = await testDb()
+      .collection(COLLECTIONS.receipts)
+      .where('owner_ID', '==', ALICE)
+      .where('is_used', '==', false)
+      .get();
+
+    expect(receipts.size).toBe(3);
+  });
+
+  it('counts only UNSPENT receipts, so a spent stamp leaves the balance', async () => {
+    await claimMany(ALICE, ['INV#00021838', 'INV#00022492']);
+
+    // Simulate the future press having spent one.
+    await testDb()
+      .collection(COLLECTIONS.receipts)
+      .doc('26013009560086199__00021838')
+      .update({ is_used: true });
+
+    const scanned = await scan(ALICE, GOOD_RECEIPT_LINES.map((l) => (l.startsWith('INV#') ? 'INV#00023000' : l)));
+    const result = await claim(ALICE, scanned.sessionId);
+
+    // 3 claimed, 1 spent.
+    expect(result.balance).toBe(2);
+  });
+
+  it('keeps each user’s wallet separate', async () => {
+    await claimMany(ALICE, ['INV#00021838', 'INV#00022492']);
+
+    const scanned = await scan(BOB, GOOD_RECEIPT_LINES.map((l) => (l.startsWith('INV#') ? 'INV#00023000' : l)));
+    const result = await claim(BOB, scanned.sessionId);
+
+    expect(result.balance).toBe(1);
+  });
+
+  it('creates a card for a user who has none, left empty for the press to fill', async () => {
+    const scanned = await scan(ALICE);
+    const result = await claim(ALICE, scanned.sessionId);
+
+    const card = await testDb().collection(COLLECTIONS.stamps).doc(result.stampCardId).get();
+    expect(card.data()).toMatchObject({ owner_ID: ALICE, stamp_count: 0, stamp_total: 10 });
+  });
+
+  it('reuses the existing card rather than creating a second one', async () => {
+    await testDb()
+      .collection(COLLECTIONS.stamps)
+      .doc('alice-card')
+      .set({ owner_ID: ALICE, stamp_count: 3, stamp_total: 10, history: [] });
+
+    const scanned = await scan(ALICE);
+    const result = await claim(ALICE, scanned.sessionId);
+
+    expect(result.stampCardId).toBe('alice-card');
+    expect((await testDb().collection(COLLECTIONS.stamps).get()).size).toBe(1);
   });
 
   it('never touches another user’s card', async () => {
@@ -464,17 +528,5 @@ describe('stamp integrity', () => {
     expect(result.stampCardId).not.toBe('bob-card');
     const bob = await testDb().collection(COLLECTIONS.stamps).doc('bob-card').get();
     expect(bob.data()!.stamp_count).toBe(5);
-  });
-
-  it('reports the reward milestone when the card fills', async () => {
-    await testDb()
-      .collection(COLLECTIONS.stamps)
-      .doc('alice-card')
-      .set({ owner_ID: ALICE, stamp_count: 9, stamp_total: 10, history: [] });
-
-    const scanned = await scan(ALICE);
-    const result = await claim(ALICE, scanned.sessionId);
-    expect(result.stampCount).toBe(10);
-    expect(result.rewardReached).toBe(true);
   });
 });

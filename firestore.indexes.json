@@ -7,6 +7,14 @@
         { "fieldPath": "owner_ID", "order": "ASCENDING" },
         { "fieldPath": "claimed_at", "order": "DESCENDING" }
       ]
+    },
+    {
+      "collectionGroup": "receipts",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "owner_ID", "order": "ASCENDING" },
+        { "fieldPath": "is_used", "order": "ASCENDING" }
+      ]
     }
   ],
   "fieldOverrides": []

@@ -41,7 +41,7 @@ service cloud.firestore {
     }
 
     // --- stamps ------------------------------------------------------------------------------------
-    // Owner read only. stamp_count and history are awarded exclusively by claimReceipt, in a
+    // Owner read only. stamp_count and history are advanced exclusively server-side, in a
     // transaction. A client that could write here could mint stamps for free.
     match /stamps/{stampId} {
       allow read: if ownsResource();
@@ -49,7 +49,13 @@ service cloud.firestore {
     }
 
     // --- receipts ----------------------------------------------------------------------------------
-    // Doc ID is the {accn}__{invoice_no} uniqueness key. Create-once, never updated, never deleted.
+    // Doc ID is the {min}__{invoice_no} uniqueness key. Create-once; only is_used ever changes, and
+    // only server-side.
+    //
+    // is_used IS THE STAMP WALLET. The user's balance is the count of receipts with is_used == false,
+    // so a client able to write here could set it back to false and mint unlimited stamps. Writes stay
+    // denied outright — the future "Stamp this card" press must go through a Cloud Function, NOT a
+    // relaxation of this rule. functions/__tests__/rules/ asserts this and will fail if it is loosened.
     match /receipts/{receiptId} {
       allow read: if ownsResource();
       allow write: if false;
