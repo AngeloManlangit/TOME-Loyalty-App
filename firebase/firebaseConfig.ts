@@ -26,3 +26,5 @@ export const auth = initializeAuth(app, {
 });
 // export const analytics = getAnalytics(app);
 export const db = getFirestore(app);
+import { getFunctions } from "firebase/functions";
+export const functions = getFunctions(app, "asia-southeast1");
