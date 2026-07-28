@@ -7,19 +7,7 @@ import type {
   VisionWord,
 } from '../../src/receipts/core/types';
 
-/**
- * Builds a STRUCTURALLY FAITHFUL Cloud Vision DOCUMENT_TEXT_DETECTION response from a compact layout
- * spec — real pages -> blocks -> paragraphs -> words -> symbols nesting, real boundingBox vertices,
- * per-symbol confidence, real detectedBreak markers.
- *
- * Why this exists: the extraction machinery (adapter, anchors, geometry search, date parsing) can be
- * built and exhaustively covered before a single real receipt photo is available. Hand-written strings
- * would not exercise the geometry or the block-splitting behaviour that the adapter exists to solve,
- * so they would prove nothing about the code that actually matters.
- *
- * IMPORTANT: synthetic fixtures prove the code is CORRECT. They never prove it is ACCURATE — only
- * real receipts do that, and the benchmark (scripts/benchmark.ts) counts real fixtures only.
- */
+
 
 export interface SynthCell {
   text: string;
@@ -45,11 +33,7 @@ export interface SynthRow {
 export type BlockStrategy =
   /** Each visual row is its own Vision block. The easy case. */
   | 'per-row'
-  /**
-   * Each COLUMN becomes its own Vision block — labels in one block, values in another. This is what
-   * Vision actually does on a two-column receipt, and it is the case that defeats any parser relying
-   * on fullTextAnnotation.text newlines.
-   */
+  
   | 'per-column'
   /** Everything in a single block, one paragraph per row. */
   | 'single';
