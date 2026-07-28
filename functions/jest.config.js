@@ -1,12 +1,4 @@
-/**
- * Three Jest projects, deliberately separated because they have very different requirements:
- *
- *   core      — pure unit tests. No network, no emulator, no Java. Runs anywhere, instantly.
- *   functions — callable handlers against the Firestore emulator. Needs Java + `firebase emulators:exec`.
- *   rules     — security rules via @firebase/rules-unit-testing. Also needs the emulator.
- *
- * `npm test` runs all three; `npm run test:core` is the fast inner loop used while building Phase D.
- */
+
 
 /** @type {import('ts-jest').JestConfigWithTsJest} */
 const base = {
