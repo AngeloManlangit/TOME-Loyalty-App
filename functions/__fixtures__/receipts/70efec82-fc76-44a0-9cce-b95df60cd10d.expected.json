@@ -1,0 +1,10 @@
+{
+  "label": "clean",
+  "merchant": "Cozy Hour Cafe / Tita M. Coquilla (ZenPOS)",
+  "invoice_no": "00012126",
+  "min": "25090417305924929",
+  "accn": "0810107191682022121668",
+  "tin": "666-910-241-000",
+  "receipt_date": "2026-07-21",
+  "notes": "Same vendor ACCN as the Harbour City receipts despite being an unrelated business - this fixture is the evidence that ACCN cannot key uniqueness. NON VAT REG TIN."
+}
