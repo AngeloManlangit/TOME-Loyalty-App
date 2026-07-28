@@ -8,10 +8,11 @@ import { Fonts } from "@/src/constants/theme";
 
 interface StampSliderInterface {
     stampList: StampCardDetails[];
+    chosenStamp: (stamp: StampCardDetails) => void;
 }
 
 
-export default function StampSlider({stampList}: StampSliderInterface) {
+export default function StampSlider({stampList, chosenStamp}: StampSliderInterface) {
     const { width } = useWindowDimensions();
     
     // Subtract the 40px of total padding (20px left + 20px right) applied in StampSection
@@ -47,7 +48,7 @@ export default function StampSlider({stampList}: StampSliderInterface) {
                 renderItem={({item, index}) => 
                     // Use the adjusted itemWidth instead of the full screen width
                     <View style={[{ width: itemWidth }, styles.itemContainer]}>
-                        <StampSliderItem item={item} index={index} scrollX={scrollX} />
+                        <StampSliderItem item={item} chosenStamp={chosenStamp} />
                     </View>
                 } 
                 horizontal

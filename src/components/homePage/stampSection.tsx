@@ -15,9 +15,7 @@ interface stampEmit {
 export default function StampSection({chosenStamp}: stampEmit) {
   const [stamps, setStamps] = useState<StampCardDetails[]>([]);
   const [loading, setLoading] = useState(true);
-  
-  const currentStamp = stamps.length > 0 ? stamps[0] : defaultStampCard;
-  
+    
   useEffect(() => {
     const loadStamps = async () => {
       setLoading(true);
@@ -41,7 +39,7 @@ export default function StampSection({chosenStamp}: stampEmit) {
           loading ? (
             <Text style={{justifyContent: 'center'}}>Loading...</Text>
           ) : (
-            <StampSlider stampList={stamps} />
+            <StampSlider stampList={stamps} chosenStamp={chosenStamp} />
           )
         }
 

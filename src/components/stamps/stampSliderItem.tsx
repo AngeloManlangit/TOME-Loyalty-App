@@ -1,18 +1,17 @@
 import { StampCardDetails } from '@/assets/classes/stamps';
-import { StyleSheet, Text, useWindowDimensions, View } from 'react-native'
+import { StyleSheet, Text, TouchableOpacity, useWindowDimensions, View } from 'react-native'
 import StampCard from './stampCard';
 import { SharedValue } from 'react-native-reanimated';
 
 interface ItemProps {
     item: StampCardDetails;
-    index: number;
-    scrollX: SharedValue<number>;
+    chosenStamp: (stamp: StampCardDetails) => void;
 }
 
-export default function StampSliderItem({item, index, scrollX}: ItemProps) {    
+export default function StampSliderItem({item, chosenStamp}: ItemProps) {    
     return (
-      <View>
-        <StampCard cardDetails={item} />
-      </View>
+      <TouchableOpacity onPress={() => chosenStamp(item)}>
+        <StampCard cardDetails={item}  />
+      </TouchableOpacity>
     );
 }
