@@ -1,17 +1,4 @@
-/**
- * Core types. PURE — no Firebase, no SDK imports (design decision D3, enforced by eslint.config.js).
- *
- * The Vision* interfaces below are a deliberate hand-written structural mirror of the subset of
- * Google Cloud Vision's DOCUMENT_TEXT_DETECTION response that we consume. They are NOT imported from
- * @google-cloud/vision, for two reasons:
- *
- *   1. It keeps core dependency-free, so the whole parser runs in a plain Node test with no SDK.
- *   2. The real protobuf-generated response type has every field optional and nullable. Mirroring that
- *      faithfully means the adapter is forced to handle missing geometry and missing confidence, which
- *      is exactly what real degraded receipts produce.
- *
- * The real SDK response is structurally assignable to VisionResponse.
- */
+
 
 // --- Vision wire shape (structural mirror) --------------------------------------------------------
 
@@ -186,13 +173,7 @@ export interface ReceiptFields {
   receipt_date_ms: number;
 }
 
-/**
- * `scan` never hard-rejects on a field problem — a misread is the user's to fix on the review screen.
- * `claim` is the authority and rejects anything not fully valid.
- *
- * This split is why a faded receipt lands in review rather than in a false rejection, while a genuinely
- * expired one still cannot be claimed.
- */
+
 export type ValidationMode = 'scan' | 'claim';
 
 export type ValidationOutcome =
