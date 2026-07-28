@@ -11,25 +11,7 @@ import type {
   VisionWord,
 } from './types';
 
-/**
- * Vision DOCUMENT_TEXT_DETECTION -> engine-agnostic OcrDocument.
- *
- * This is the ONLY file that knows Vision's response shape. Swapping OCR provider means rewriting
- * this file and nothing else.
- *
- * The non-obvious part is line reconstruction. Vision's own `fullTextAnnotation.text` newlines follow
- * its BLOCK structure, and on a receipt the label column and the value column are frequently separate
- * blocks. Trusting those newlines gives you:
- *
- *     ACCN                       <- one line
- *     116-000123456789           <- a different line, possibly far away in reading order
- *
- * ...and "the value to the right of the ACCN label" becomes unfindable. So we rebuild lines by
- * GEOMETRY: split on Vision's detected breaks to get raw runs, then merge runs that occupy the same
- * visual row, then sort each row left to right. That reunites the two columns into:
- *
- *     ACCN 116-000123456789
- */
+
 
 /** Fraction of the shorter box's height that two runs must share to count as the same visual row. */
 const ROW_MERGE_THRESHOLD = 0.5;
@@ -66,12 +48,7 @@ function endsLine(word: VisionWord): boolean {
   return t !== null && LINE_ENDING_BREAKS.has(t);
 }
 
-/**
- * A word plus the geometry we could actually recover for it.
- *
- * `box` is the real page geometry and is what we emit. `deskewed` is the same box with page skew
- * removed, and is used ONLY for row grouping and ordering — consumers get true coordinates.
- */
+
 interface StagedWord {
   text: string;
   box: Box | null;
@@ -158,11 +135,7 @@ function collectRawRuns(response: VisionResponse): RawRun[] {
   return runs;
 }
 
-/**
- * Estimate page skew from every word we have geometry for, then record a deskewed box on each word
- * and run. Nothing is rotated in the emitted output — this only levels the coordinates that row
- * grouping and left-to-right ordering are computed from.
- */
+
 function applyDeskew(runs: RawRun[]): void {
   const wordBoxes: Box[] = [];
   for (const run of runs) {
@@ -183,16 +156,7 @@ function applyDeskew(runs: RawRun[]): void {
   }
 }
 
-/**
- * Merge raw runs that occupy the same visual row.
- *
- * Operates on DESKEWED geometry — see deskew.ts for why a threshold alone cannot separate "same row,
- * skewed" from "different rows".
- *
- * Runs without recoverable geometry cannot be compared, so they pass through as their own row rather
- * than being dropped — losing a line because Vision omitted a bounding box would be a silent data
- * loss, and that line might be the one carrying the invoice number.
- */
+
 function mergeIntoRows(runs: RawRun[]): RawRun[][] {
   const positioned = runs.filter((r) => r.deskewed !== null);
   const unpositioned = runs.filter((r) => r.deskewed === null);
@@ -217,11 +181,7 @@ function mergeIntoRows(runs: RawRun[]): RawRun[][] {
 }
 
 function buildLine(row: RawRun[], index: number): OcrLine {
-  // Left-to-right within the row.
-  //
-  // Only multi-run rows need sorting, and mergeIntoRows only ever groups POSITIONED runs together —
-  // a run without geometry is emitted as a row of its own. So whenever this comparator runs, both
-  // sides are guaranteed to have a deskewed box.
+  
   const ordered = row.length > 1 ? [...row].sort((a, b) => a.deskewed!.x0 - b.deskewed!.x0) : row;
   const words: StagedWord[] = ordered.flatMap((r) => r.words);
 
@@ -247,13 +207,7 @@ function buildLine(row: RawRun[], index: number): OcrLine {
   };
 }
 
-/**
- * Build an OcrDocument from a Vision response.
- *
- * Returns an empty document (no lines, no words, meanConfidence 0) when Vision found no text at all.
- * Callers turn that into OCR_NO_TEXT — this function does not throw, because "the photo had no text"
- * is an expected outcome, not an error.
- */
+
 export function visionToOcrDocument(response: VisionResponse): OcrDocument {
   const runs = collectRawRuns(response);
   applyDeskew(runs);
