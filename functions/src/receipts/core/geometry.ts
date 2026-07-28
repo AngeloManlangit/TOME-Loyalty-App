@@ -35,16 +35,7 @@ export function unionAll(boxes: readonly Box[]): Box | null {
   return acc;
 }
 
-/**
- * Vertical overlap as a fraction of the SHORTER box's height.
- *
- * Using the shorter box as the denominator is what makes this work on receipts: a tall label like
- * "TRANSACTION" and a short value like "0012" sit on the same visual row, and dividing by the taller
- * box would under-report their overlap and split the row in two.
- *
- * Returns 0 when either box has no height, so degenerate geometry can never merge everything into
- * one line.
- */
+
 export function verticalOverlapRatio(a: Box, b: Box): number {
   const ha = height(a);
   const hb = height(b);
@@ -54,17 +45,7 @@ export function verticalOverlapRatio(a: Box, b: Box): number {
   return overlap / Math.min(ha, hb);
 }
 
-/**
- * Convert a Vision boundingPoly to a normalized axis-aligned Box.
- *
- * Vision returns four vertices which are only axis-aligned for a perfectly square-on photo; any skew
- * makes them a rotated quad. We take the axis-aligned hull, which is the right call for row grouping
- * (a slightly generous box merges a skewed row correctly) and harmless for left-to-right ordering.
- *
- * Returns null when the poly is absent or carries no usable vertices — Vision does omit geometry on
- * low-confidence symbols, and silently substituting {0,0,0,0} would drag every such word to the top
- * left corner and corrupt row grouping.
- */
+
 export function boxFromPoly(poly: VisionBoundingPoly | null | undefined): Box | null {
   const vertices = poly?.vertices;
   if (!vertices || vertices.length === 0) return null;
