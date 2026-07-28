@@ -18,11 +18,7 @@ function mulberry32(a: any) {
     }
 }
 
-/*
-How to use:
-let rand = getSeededRand(seed);
-console.log(rand()) <- follows the same sequence each time
-*/
+
 export function getSeededRand(seed: any) {
     return mulberry32(seed);
 }
