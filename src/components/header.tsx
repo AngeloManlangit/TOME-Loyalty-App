@@ -8,6 +8,7 @@ import { UserDetails } from "@/assets/classes/users";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { useUser } from "@src/contexts/userContext";
+import StampBalancePill from "./stampBalancePill";
 
 export default function CustomHeader() {
     const insets = useSafeAreaInsets();
@@ -58,12 +59,16 @@ export default function CustomHeader() {
                 )
             }
 
-            <TouchableOpacity onPress={() => router.replace('/others')}>
-                <Image 
-                    source={(user) ? { uri: user?.profile_img_url } : require('@/assets/images/fallbackUserProfile.png')} 
-                    style={styles.profileImage} 
-                />
-            </TouchableOpacity>
+            <View style={styles.rightCluster}>
+                <StampBalancePill />
+
+                <TouchableOpacity onPress={() => router.replace('/others')}>
+                    <Image
+                        source={(user) ? { uri: user?.profile_img_url } : require('@/assets/images/fallbackUserProfile.png')}
+                        style={styles.profileImage}
+                    />
+                </TouchableOpacity>
+            </View>
         </Animated.View>
     );
 };
@@ -89,6 +94,11 @@ const styles = StyleSheet.create({
   },
   uppercased: {
     textTransform: "uppercase"
+  },
+  rightCluster: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
   },
   profileImage: {
     width: 70,

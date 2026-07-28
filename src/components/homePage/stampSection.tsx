@@ -1,32 +1,18 @@
-import { StampCardDetails, defaultStampCard } from "@/assets/classes/stamps";
+import { defaultStampCard } from "@/assets/classes/stamps";
 import { Fonts } from "@src/constants/theme";
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { SmallCapsText } from "../custom/smallCapsText";
 import StampCard from "../stamps/stampCard";
 
 import { stampService } from "@src/services/stampService";
-import { useEffect, useState } from "react";
+import { useStamps } from "@src/contexts/stampContext";
 
 export default function StampSection() {
-  const [stamps, setStamps] = useState<StampCardDetails[]>([]);
-  const [loading, setLoading] = useState(true);
-  
+  // Reads the shared context rather than fetching its own copy. The old local useEffect fetched
+  // once on mount, so a stamp earned by a scan never appeared until the app restarted.
+  const { stamps, loading } = useStamps();
+
   const currentStamp = stamps.length > 0 ? stamps[0] : defaultStampCard;
-  
-  useEffect(() => {
-    const loadStamps = async () => {
-      setLoading(true);
-      const userStamps = await stampService.fetchStamps();
-      if (userStamps) {
-        // console.log(userStamps) // debug purposes
-        setStamps(userStamps);
-      }
-
-      setLoading(false);
-    };
-
-    loadStamps();
-  }, []);
 
   return (
     <View style={styles.container}>
