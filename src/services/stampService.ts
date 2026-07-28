@@ -1,7 +1,8 @@
-import { StampCardDetails } from "@/assets/classes/stamps";
+import { StampCardDetails, defaultStampCard } from "@/assets/classes/stamps";
 import { db } from "@/firebase/firebaseConfig";
 import { getAuth } from "firebase/auth";
-import { collection, getDocs, query, where } from "firebase/firestore";
+import { addDoc, collection, getDocs, orderBy, query, where } from "firebase/firestore";
+import { genSeed } from "../utils/rng";
 
 const auth = getAuth();
 const stampsCollection = collection(db, 'stamps');
@@ -14,7 +15,7 @@ export const stampService = {
 
         if (user) {
             try {
-                const q = query(stampsCollection, where("owner_ID", "==", user.uid));
+                const q = query(stampsCollection, where("owner_ID", "==", user.uid), orderBy("stamp_count", "desc"));
                 const data = await getDocs(q);
                 const fetchedStamps = data.docs.map((doc) => {
                     const docData = doc.data();
@@ -31,10 +32,15 @@ export const stampService = {
                         }));
                     }
                     
+                    const rawDate = docData.date_created && typeof docData.date_created.toDate === 'function'
+                                ? docData.date_created.toDate()
+                                : new Date(docData.date_created)
+
                     return {
                         id: doc.id,
                         ...docData,
-                        ...(formattedHistory ? { history: formattedHistory } : {})
+                        ...(formattedHistory ? { history: formattedHistory } : {}),
+                        date_created: rawDate
                     } as unknown as StampCardDetails; // unknown because Typescript error can't trust the doc.data() return if empty smh
                 });
 
@@ -48,6 +54,27 @@ export const stampService = {
             console.log('No user logged in!')
             return [];
         }
-    }
+    },
 
+    async addNewStamp() {
+        const user = auth.currentUser;
+
+        if (user) {
+            try {
+                const docRef = await addDoc(stampsCollection, {
+                    ...defaultStampCard, 
+                    owner_ID: user.uid,
+                    stampCard_configs: { ...defaultStampCard.stampCard_configs, seed: genSeed() }
+                });
+                console.log('Successfully created a new stamp: ' + docRef.id);
+                return true;
+            } catch (error: any) {
+                console.error("Error creating stamp: ", error);
+                return false;
+            }
+        } else {
+            console.log('No user logged in!')
+            return false;
+        }
+    }
 }

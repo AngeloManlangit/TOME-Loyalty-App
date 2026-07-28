@@ -1,6 +1,7 @@
 import { View, StyleSheet, Text, DimensionValue, ImageBackground } from "react-native";
 import type { StampCardDetails } from "@/assets/classes/stamps";
 import StampCircle from "./stampCircle";
+import { getSeededRand } from "@/src/utils/rng";
 
 interface StampCardProps {
     cardDetails: StampCardDetails;
@@ -13,6 +14,8 @@ export default function StampCard({cardDetails}: StampCardProps) {
 
     const hasBGImage = (cardDetails.stampCard_configs.bgImage != null)
 
+    let rand = getSeededRand(cardDetails.stampCard_configs.seed);
+
     const innerContent = (
         <View style={styles.gridContainer}>
           
@@ -24,7 +27,7 @@ export default function StampCard({cardDetails}: StampCardProps) {
             return (
               <View key={index} style={[styles.gridItem, {width: itemWidth, height: '35%'}]}>
                 
-                <StampCircle stamped={isStamped} reward={isReward} />
+                <StampCircle stamped={isStamped} reward={isReward} randomizer={rand()} />
 
               </View>
             );
@@ -80,10 +83,12 @@ const styles = StyleSheet.create({
         flexWrap: 'wrap',    
         justifyContent: 'flex-start',
         alignItems: 'center',
-        alignContent: 'space-evenly'
+        alignContent: 'space-evenly',
+        rowGap: 10,
     },
     gridItem: {
         justifyContent: 'center',
         alignItems: 'center',
+        position: 'relative'
     },
 });

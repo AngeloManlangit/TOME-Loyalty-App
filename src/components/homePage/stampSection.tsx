@@ -1,6 +1,6 @@
 import { StampCardDetails, defaultStampCard } from "@/assets/classes/stamps";
 import { Fonts } from "@src/constants/theme";
-import { StyleSheet, Text, View } from "react-native";
+import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { SmallCapsText } from "../custom/smallCapsText";
 import StampCard from "../stamps/stampCard";
 
@@ -11,7 +11,7 @@ export default function StampSection() {
   const [stamps, setStamps] = useState<StampCardDetails[]>([]);
   const [loading, setLoading] = useState(true);
   
-  const currentStamp = stamps.length > 0 ? stamps[0] : defaultStampCard;
+  const currentStamp = stamps.length > 0 ? stamps[2] : defaultStampCard;
   
   useEffect(() => {
     const loadStamps = async () => {
@@ -43,6 +43,10 @@ export default function StampSection() {
             </View>
           )
         }
+
+        <TouchableOpacity onPress={() => stampService.addNewStamp()}>
+          <Text>Make new stamp</Text>
+        </TouchableOpacity>
     </View>
   );
 }
