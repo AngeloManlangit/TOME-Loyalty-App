@@ -1,18 +1,4 @@
-/**
- * Receipt formats, label aliases and windows as DATA, not code.
- *
- * Design decision: a new merchant receipt format should be a config entry, not a refactor — and
- * because parsing runs server-side (D3), changing anything here ships by deploying a function, with no
- * app-store round trip.
- *
- * ⚠️ THE PATTERNS BELOW ARE PLACEHOLDERS pending real receipt samples (open question Q-B).
- * They are deliberately PERMISSIVE. That is the safe direction to be wrong in: an over-permissive
- * pattern lets a malformed value reach the review screen where a human sees it, and the server still
- * enforces uniqueness, the date window and accreditation regardless. An over-strict pattern would
- * reject valid receipts outright, which is the failure users actually notice.
- *
- * Tighten these in Phase D.3 once fixtures exist.
- */
+
 
 export interface FieldRule {
   /** Label texts to search for. Matched with bounded edit distance, so OCR may mangle them. */
@@ -33,12 +19,7 @@ export interface DateRule {
    * exceeds 12; a value above 12 identifies the day on its own.
    */
   readonly localeOrder: 'MDY' | 'DMY';
-  /**
-   * Fixed offset of the receipt's wall-clock timezone, in minutes east of UTC.
-   *
-   * Asia/Manila is UTC+08:00 and has observed no DST since 1978, so a constant is not an
-   * approximation here — it is exact, and it keeps the core free of any timezone database.
-   */
+  
   readonly utcOffsetMinutes: number;
 }
 
