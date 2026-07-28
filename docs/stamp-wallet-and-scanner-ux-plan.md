@@ -430,7 +430,75 @@ merchants, and deliberately degraded ones (faded, creased, glare, angled) — dr
 
 ---
 
-## 6. What I am *not* doing
+## 6. Progress log — Phases 0–7 complete *(2026-07-28)*
+
+### Gate results
+
+```
+app        lint       0 errors (16 pre-existing warnings)
+           typecheck  0 errors          ← first clean run this session
+           tests      28 passed
+           bundle     expo export --platform android  OK
+functions  lint       clean (incl. the core-purity rule)
+           typecheck  clean (src + tests)
+           build      lib/ emitted
+           tests      416 passed  (core 336 · adversarial 41 · rules 39)
+           coverage   100% statements · branches · functions · lines  (core/)
+           benchmark  invoice · MIN · ACCN · TIN · date all 100%
+                      4/4 accepted first try · 0 silently-wrong
+```
+
+### Delivered per phase
+
+| Phase | Outcome |
+|---|---|
+| 0 | Lost MIN-keyed core reconstructed from `functions/lib/`; 3 rolled-back test suites rewritten; two benchmark defects fixed; `jose` mapping restored |
+| 1 | `is_used` wallet, aggregate balance, composite index, backfill script, 5 rules tests, 7 adversarial tests |
+| 2 | Correction path removed end to end; four confidence gates; `LOW_CONFIDENCE` / `AMBIGUOUS_FIELD` / `IMAGE_UNCLEAR`; app test tooling installed |
+| 3 | FAB ⇄ shutter morph, `scannerUiContext`, per-phase mode table, capture flash |
+| 4 | Exit chevron with `canGoBack` fallback and hardware-back parity |
+| 5 | Header balance pill; `StampProvider` finally mounted; `stampSection` moved onto it |
+| 6 | Full gate green in both packages; device matrix below |
+| 7 | [AGENTS.md](../AGENTS.md) rewritten with the invariants, the emulator/JDK 21 requirement, and the deploy order |
+
+### Three things worth flagging
+
+**1. The 0.85 confidence floor was wrong, and the benchmark is what proved it.** Decision D-4 chose
+"strict", and 0.85 sounded strict. Measured, it rejected a *correct* read of the faded fixture whose
+date Vision returns at 0.73 — and a faded receipt does not get sharper on the second attempt, so the
+retake prompt was advice that could never work. Set to 0.70 from what correct reads actually score.
+
+**2. The ambiguity rule initially rejected every real receipt.** Comparing raw candidate scores
+overrode the extractors' domain ranking — date plausibility, and `preferEarliest` picking the
+merchant's TIN over the POS vendor's. Those ties are *resolved*, not ambiguous. Now scoped to fields
+where the label is the only evidence.
+
+Neither would have been caught by accuracy alone: a gate that rejects everything scores zero wrong
+answers. The accept/retake split added to the benchmark is what made both visible.
+
+**3. Dead branches were removed rather than ignored.** Making values non-editable made several checks
+unreachable — the date re-parse, the `*_MALFORMED` pattern tests, `ValidationMode`. Deleting them
+kept the 100% branch gate honest instead of parking `istanbul ignore` comments on code that can no
+longer run.
+
+### Manual device matrix — **not yet run, and it cannot be automated**
+
+Everything above is emulator and unit level. The OCR half of this feature is only validated on real
+paper:
+
+- **Light** good / dim / direct glare / flash · **Paper** flat / creased / curled / folded ·
+  **Angle** 0° / 15° / 30° · **Print** fresh thermal / faded
+- **False-retake rate** — how often a good receipt is bounced. The number that says whether the
+  confidence gates are set right; 4 fixtures cannot answer it.
+- **Shutter feel** — FAB morph entering the scanner, press response, flash, return transition
+- Duplicate receipt → distinct, clear rejection
+- Airplane mode before submit · connection dropped mid-upload · app killed mid-request →
+  **receipt not burned** in all three
+- Same receipt on two phones simultaneously → **exactly one stamp**
+
+---
+
+## 7. What I am *not* doing
 
 - The "Stamp this card" press flow — explicitly out of scope. `is_used` and `used_at` are shaped for
   it; nothing writes `true`.
