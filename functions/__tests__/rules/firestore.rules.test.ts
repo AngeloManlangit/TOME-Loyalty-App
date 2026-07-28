@@ -18,18 +18,7 @@ import {
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 
-/**
- * Security rules suite for firestore.rules.
- *
- * The most important tests here are the REGRESSION ones. The project ran with a wide-open ruleset
- * (`allow read, write: if request.auth != null` on `/{document=**}`), so deploying a real ruleset can
- * only break things by being too strict. The app performs exactly two Firestore operations, both
- * reads, and both are asserted below. If those two pass, the deploy is safe for this client.
- *
- * The rest prove the anti-fraud property the OCR feature depends on: a client cannot write stamps,
- * receipts, sessions or rate limits under any circumstances. Cloud Functions use the Admin SDK, which
- * bypasses rules entirely, so denying clients outright costs the feature nothing.
- */
+
 
 const PROJECT_ID = 'tome-rules-test';
 const ALICE = 'alice-uid';
