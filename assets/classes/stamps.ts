@@ -1,6 +1,6 @@
 import { Colors } from "@/src/constants/theme";
 
-interface StampCardConfigs {
+export interface StampCardConfigs {
     bgColor: string;
     bgImage?: string | null;
     seed: number;

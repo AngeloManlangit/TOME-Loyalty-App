@@ -10,7 +10,7 @@ interface ItemProps {
 
 export default function StampSliderItem({item, chosenStamp}: ItemProps) {    
     return (
-      <TouchableOpacity onPress={() => chosenStamp(item)}>
+      <TouchableOpacity style={{padding: 10}} onPress={() => chosenStamp(item)}>
         <StampCard cardDetails={item}  />
       </TouchableOpacity>
     );
