@@ -3,6 +3,7 @@ import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-nati
 import StampCard from "./stampCard";
 import { Colors, Fonts } from "@/src/constants/theme";
 import { EditIcon, TrashIcon } from "lucide-react-native";
+import { router } from "expo-router";
 
 interface StampPopupDetailsInterface {
     stamp: StampCardDetails;
@@ -28,6 +29,18 @@ export default function StampPopupDetails({stamp}: StampPopupDetailsInterface) {
         }
     }
 
+    const handleEditPress = (stampCardDetails: StampCardDetails) => {
+        if (stampCardDetails.id){
+            router.push({
+                pathname: "/edit/stamp/[stamp_ID]",
+                params: {
+                    stamp_ID: stampCardDetails.id,
+                    details: JSON.stringify(stampCardDetails), 
+                },
+            });
+        }
+    };
+
     return (
         <View style={styles.container}>
             <Text style={styles.title}>{stamp.stampCard_configs.title}</Text>
@@ -49,7 +62,7 @@ export default function StampPopupDetails({stamp}: StampPopupDetailsInterface) {
             }
             
             <View style={{flexDirection: 'row', alignItems: 'center', gap: 10}}>
-                <TouchableOpacity style={styles.button}>
+                <TouchableOpacity style={styles.button} onPress={() => handleEditPress(stamp)}>
                     <EditIcon color={'#fff'} />
                     <Text style={styles.buttonText}>Edit</Text>
                 </TouchableOpacity>
@@ -59,7 +72,6 @@ export default function StampPopupDetails({stamp}: StampPopupDetailsInterface) {
                     <Text style={styles.buttonText}>Delete</Text>
                 </TouchableOpacity>
             </View>
-            
         </View>
     );
 }

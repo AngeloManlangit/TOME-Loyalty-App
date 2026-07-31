@@ -6,13 +6,16 @@ import StampCard from "../stamps/stampCard";
 
 import { stampService } from "@src/services/stampService";
 import { useEffect, useState } from "react";
+import StampSlider from "../stamps/stampSlider";
 
-export default function StampSection() {
+interface stampEmit {
+    chosenStamp: (brand: StampCardDetails) => void;
+}
+
+export default function StampSection({chosenStamp}: stampEmit) {
   const [stamps, setStamps] = useState<StampCardDetails[]>([]);
   const [loading, setLoading] = useState(true);
-  
-  const currentStamp = stamps.length > 0 ? stamps[2] : defaultStampCard;
-  
+    
   useEffect(() => {
     const loadStamps = async () => {
       setLoading(true);
@@ -36,16 +39,16 @@ export default function StampSection() {
           loading ? (
             <Text style={{justifyContent: 'center'}}>Loading...</Text>
           ) : (
-            <View style={styles.cardContainer}>
-              <StampCard cardDetails={currentStamp} />
-      
-              <Text style={styles.collectedCaption}>{`${currentStamp.stamp_count}/${currentStamp.stamp_total} Collected`}</Text>
-            </View>
+            <StampSlider stampList={stamps} chosenStamp={chosenStamp} />
           )
         }
 
         <TouchableOpacity onPress={() => stampService.addNewStamp()}>
           <Text>Make new stamp</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity onPress={() => stampService.deleteAllStampsByOwner()}>
+          <Text>Delete all stamps</Text>
         </TouchableOpacity>
     </View>
   );
@@ -61,10 +64,6 @@ const styles = StyleSheet.create({
   headerText: {
     fontFamily: Fonts.Montserrat,
     alignSelf: 'flex-start'
-  },
-  cardContainer: {
-    width: '100%',
-    alignItems: 'center'
   },
   collectedCaption: {
     marginVertical: 12,

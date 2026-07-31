@@ -1,8 +1,9 @@
 import { StampCardDetails, defaultStampCard } from "@/assets/classes/stamps";
 import { db } from "@/firebase/firebaseConfig";
 import { getAuth } from "firebase/auth";
-import { addDoc, collection, getDocs, orderBy, query, where } from "firebase/firestore";
+import { addDoc, collection, deleteDoc, doc, getDoc, getDocs, orderBy, query, updateDoc, where } from "firebase/firestore";
 import { genSeed } from "../utils/rng";
+import { getStorage, ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 
 const auth = getAuth();
 const stampsCollection = collection(db, 'stamps');
@@ -43,7 +44,14 @@ export const stampService = {
                         date_created: rawDate
                     } as unknown as StampCardDetails; // unknown because Typescript error can't trust the doc.data() return if empty smh
                 });
-
+                
+                // console.log(fetchedStamps.length)
+                if (fetchedStamps.length == 0) {
+                    console.log('No stamps for this user, making new one');
+                    await this.addNewStamp(); 
+                    return await this.fetchStamps();
+                }
+                
                 return fetchedStamps;
             } catch (error: any) {
                 console.error("Error fetching stamps:", error);
@@ -75,6 +83,103 @@ export const stampService = {
         } else {
             console.log('No user logged in!')
             return false;
+        }
+    },
+    
+    async deleteAllStampsByOwner() {
+        console.log('Deleting all...')
+        const user = auth.currentUser;
+
+        if (user) {
+            try {
+                // 1. Query all documents belonging to the owner in the stamps collection
+                const q = query(stampsCollection, where("owner_ID", "==", user.uid));
+                const snapshot = await getDocs(q);
+
+                if (snapshot.empty) {
+                    console.log('No documents found to delete.');
+                    return true;
+                }
+
+                // 2. Delete each document 
+                // We use Promise.all to delete them concurrently for better performance
+                const deletePromises = snapshot.docs.map((docSnapshot) => {
+                    return deleteDoc(docSnapshot.ref);
+                });
+
+                await Promise.all(deletePromises);
+                
+                console.log(`Successfully deleted all stamps for owner: ${user.uid}`);
+                return true;
+            } catch (error: any) {
+                console.error("Error deleting stamps: ", error);
+                return false;
+            }
+        } else {
+            console.log('No user logged in!');
+            return false;
+        }
+    },
+    async uploadBgImage(uri: string) {
+        const user = auth.currentUser;
+        if (user) {
+            try {
+                const blob: Blob = await new Promise((resolve, reject) => {
+                    const xhr = new XMLHttpRequest();
+                    xhr.onload = function() {
+                        resolve(xhr.response);
+                    };
+                    xhr.onerror = function(e) {
+                        console.log(e);
+                        reject(new TypeError('Network request failed'));
+                    };
+                    xhr.responseType = 'blob';
+                    xhr.open('GET', uri, true);
+                    xhr.send(null);
+                });
+        
+                const storage = getStorage();
+                const filename = `stampCard_bgs/stampBG_${user.uid}_${Date.now()}.jpg`;
+                const storageRef = ref(storage, filename);
+        
+                await uploadBytes(storageRef, blob);
+        
+                const downloadURL = await getDownloadURL(storageRef);
+                return downloadURL;
+            } catch (error: any) {
+                console.error("Error uploading stamp background: ", error);
+                return null;
+            }
+        } else {
+            console.log('No user logged in!');
+            return null;
+        }
+    },
+
+    async updateStamp(s: StampCardDetails) {
+        const user = auth.currentUser;
+        if (user && s.owner_ID == user.uid && s.id !== undefined) {
+            try {
+                const docRef = doc(stampsCollection, `${s.id}`);
+
+                const updateData = { ...s };
+                delete updateData.id; // so that the docu id doesnt go inside the fields
+
+                await updateDoc(docRef, updateData);
+
+                const docSnap = await getDoc(docRef);
+    
+                if (docSnap.exists()) {
+                    console.log("Updated data:", docSnap.data());
+                    return { success: true, data: docSnap.data() };
+                }
+            } catch (error: any) {
+                console.error("Error updating stamp: ", error);
+                return { success: false, error: error };
+            }
+        } else {
+            console.log('No user logged in or user doesn\'t own the stamp!');
+            return { success: false, error: 'No user logged in or user doesn\'t own stamp' };
         }
     }
 }
