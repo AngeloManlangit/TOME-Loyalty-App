@@ -1,0 +1,88 @@
+rules_version = '2';
+
+// TOME Loyalty — Firestore security rules
+//
+// Context: before this file, the project ran with NO deployed rules. The app performs exactly two
+// Firestore operations today, both reads:
+//   1. getDoc(users/{uid})                                    — src/services/userService.ts
+//   2. getDocs(query(stamps, where('owner_ID','==',uid)))     — src/services/stampService.ts
+// Both are preserved below and regression-tested in functions/__tests__/rules/.
+//
+// The OCR receipt feature writes via the Admin SDK inside Cloud Functions, which bypasses these rules
+// entirely. That is deliberate: clients have ZERO write access to receipts, stamps, scan_sessions and
+// rate_limits, so no client can award itself a stamp or double-claim a receipt whatever it sends.
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isSelf(uid) {
+      return isSignedIn() && request.auth.uid == uid;
+    }
+
+    // Owner check for docs that carry an owner_ID field.
+    // NOTE: for collection queries, Firestore can only satisfy this when the query itself filters on
+    // owner_ID == uid. stampService and receiptService both do. Removing that where() clause breaks
+    // the read with permission-denied — that is intended, not a bug.
+    function ownsResource() {
+      return isSignedIn() && resource.data.owner_ID == request.auth.uid;
+    }
+
+    // --- users -------------------------------------------------------------------------------------
+    // Owner read + write. The app writes nothing here today (signup does not create the doc), but
+    // profile editing is a known near-term need, so create/update stay open to the owner.
+    match /users/{uid} {
+      allow read: if isSelf(uid);
+      allow create, update: if isSelf(uid);
+      allow delete: if false;
+    }
+
+    // --- stamps ------------------------------------------------------------------------------------
+    // Owner read only. stamp_count and history are awarded exclusively by claimReceipt, in a
+    // transaction. A client that could write here could mint stamps for free.
+    match /stamps/{stampId} {
+      allow read: if ownsResource();
+      allow write: if false;
+    }
+
+    // --- receipts ----------------------------------------------------------------------------------
+    // Doc ID is the {accn}__{invoice_no} uniqueness key. Create-once, never updated, never deleted.
+    match /receipts/{receiptId} {
+      allow read: if ownsResource();
+      allow write: if false;
+    }
+
+    // --- scan_sessions -----------------------------------------------------------------------------
+    // Holds the OCR text that claimReceipt validates corrections against. Client-writable sessions
+    // would defeat that check completely. TTL-reaped on expires_at.
+    match /scan_sessions/{sessionId} {
+      allow read: if ownsResource();
+      allow write: if false;
+    }
+
+    // --- rate_limits -------------------------------------------------------------------------------
+    // Billing control. Client writes would make the Vision spend cap meaningless.
+    match /rate_limits/{uid} {
+      allow read: if isSelf(uid);
+      allow write: if false;
+    }
+
+    // --- merchants ---------------------------------------------------------------------------------
+    // Accreditation whitelist. Readable by any signed-in user so the app can show which stores
+    // participate; seeded server-side only.
+    match /merchants/{accn} {
+      allow read: if isSignedIn();
+      allow write: if false;
+    }
+
+    // --- default deny ------------------------------------------------------------------------------
+    // Firestore denies unmatched paths anyway; this is here so the intent is explicit and so a new
+    // collection cannot be reached before someone has thought about its rules.
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

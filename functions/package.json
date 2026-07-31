@@ -1,0 +1,37 @@
+{
+  "name": "tome-functions",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Cloud Functions for TOME Loyalty — OCR receipt validation",
+  "main": "lib/index.js",
+  "engines": {
+    "node": "22"
+  },
+  "scripts": {
+    "build": "tsc",
+    "typecheck": "tsc -p tsconfig.test.json --noEmit",
+    "lint": "eslint .",
+    "test": "jest",
+    "test:core": "jest --selectProjects core",
+    "test:rules": "jest --selectProjects rules",
+    "test:functions": "jest --selectProjects functions",
+    "receipts:corpus": "tsx scripts/buildCorpus.ts",
+    "receipts:benchmark": "tsx scripts/benchmark.ts",
+    "serve": "npm run build && firebase emulators:start --only functions,firestore,auth"
+  },
+  "dependencies": {
+    "@google-cloud/vision": "^5.3.7",
+    "firebase-admin": "^14.2.0",
+    "firebase-functions": "^7.3.0"
+  },
+  "devDependencies": {
+    "@firebase/rules-unit-testing": "^5.0.1",
+    "@types/jest": "^30.0.0",
+    "eslint": "^10.8.0",
+    "jest": "^30.4.2",
+    "ts-jest": "^29.4.12",
+    "tsx": "^4.23.1",
+    "typescript": "^6.0.3",
+    "typescript-eslint": "^8.65.0"
+  }
+}
