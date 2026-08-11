@@ -20,7 +20,7 @@ export default function RootLayout() {
   const statusBarHeight = Constants.statusBarHeight;
   const { height } =  useWindowDimensions();
 
-  const statusBarHeightPercentage = statusBarHeight / height;
+  const statusBarHeightPercentage = (statusBarHeight / height) + 0.1;
 
   const segments = useSegments();
   const title = segments[1] ?? '';
