@@ -32,7 +32,7 @@ export default function StampSlider({stampList, chosenStamp}: StampSliderInterfa
     }
 
     const onViewableItemsChanged = ({viewableItems} : {viewableItems: ViewToken[]}) => {
-        if (viewableItems[0].index !== undefined && viewableItems[0].index !== null) {
+        if (viewableItems.length > 0 && viewableItems[0].index != null) {
             setPaginationIndex(viewableItems[0].index);
         }
     };

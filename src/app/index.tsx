@@ -62,7 +62,9 @@ export default function Index() {
                 <View style={[styles.loginContainer, styles.signContainer]}>
                     <View style={styles.textInputContainer}>
                         <TextInput 
-                            placeholder='Email' style={styles.textInput} 
+                            placeholder='Email' 
+                            placeholderTextColor='#797979'
+                            style={styles.textInput} 
                             value={email} 
                             onChangeText={setEmail} 
                             autoCapitalize="none"
@@ -70,7 +72,9 @@ export default function Index() {
                     </View>
                     <View style={styles.textInputContainer}>
                         <TextInput 
-                            placeholder='Password' style={styles.textInput} 
+                            placeholder='Password' 
+                            placeholderTextColor='#797979'
+                            style={styles.textInput} 
                             value={password} 
                             onChangeText={setPassword} 
                             autoCapitalize="none"
@@ -95,7 +99,9 @@ export default function Index() {
                 <View style={[styles.loginContainer, styles.signContainer]}>
                     <View style={styles.textInputContainer}>
                         <TextInput 
-                            placeholder='Email' style={styles.textInput} 
+                            placeholder='Email' 
+                            placeholderTextColor='#797979'
+                            style={styles.textInput} 
                             value={email} 
                             onChangeText={setEmail} 
                             autoCapitalize="none"
@@ -103,7 +109,9 @@ export default function Index() {
                     </View>
                     <View style={styles.textInputContainer}>
                         <TextInput 
-                            placeholder='Password' style={styles.textInput} 
+                            placeholder='Password' 
+                            placeholderTextColor='#797979'
+                            style={styles.textInput} 
                             value={password} 
                             onChangeText={setPassword} 
                             autoCapitalize="none"
@@ -203,6 +211,7 @@ const styles = StyleSheet.create({
         borderWidth: 1
     },
     textInput: {
+        color: '#000',
         flex: 1,
         width: '100%',
         paddingHorizontal: 10,

@@ -72,7 +72,8 @@ const styles = StyleSheet.create({
   scrollContent: {
     paddingVertical: 30,
     flexGrow: 1,
-    alignItems: 'center'
+    alignItems: 'center',
+    paddingBottom: 200,
   },
   logoImage: {
     height: 80,

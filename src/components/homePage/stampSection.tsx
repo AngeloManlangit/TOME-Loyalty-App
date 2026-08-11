@@ -43,13 +43,6 @@ export default function StampSection({chosenStamp}: stampEmit) {
           )
         }
 
-        <TouchableOpacity onPress={() => stampService.addNewStamp()}>
-          <Text>Make new stamp</Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity onPress={() => stampService.deleteAllStampsByOwner()}>
-          <Text>Delete all stamps</Text>
-        </TouchableOpacity>
     </View>
   );
 }
