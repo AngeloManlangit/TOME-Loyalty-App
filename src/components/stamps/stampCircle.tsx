@@ -1,4 +1,4 @@
-import { Text, View, StyleSheet } from "react-native";
+import { View, StyleSheet } from "react-native";
 import { StarIcon } from "lucide-react-native";
 
 interface StampCircleInterface {

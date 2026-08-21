@@ -8,7 +8,7 @@ import { useUser } from "@/src/contexts/userContext";
 
 export default function OthersScreen() {
 
-  const { user, loading } = useUser();
+  const { user } = useUser();
 
   getAuth().onAuthStateChanged((user) => {
     if (!user) router.replace('/');

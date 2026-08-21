@@ -6,33 +6,9 @@
   "storage": {
     "rules": "storage.rules"
   },
-  "functions": [
-    {
-      "source": "functions",
-      "codebase": "default",
-      "ignore": [
-        "node_modules",
-        ".git",
-        "firebase-debug.log",
-        "firebase-debug.*.log",
-        "*.local",
-        "__tests__",
-        "__fixtures__",
-        "scripts",
-        "coverage"
-      ],
-      "predeploy": [
-        "npm --prefix functions run lint",
-        "npm --prefix functions run build"
-      ]
-    }
-  ],
   "emulators": {
     "auth": {
       "port": 9099
-    },
-    "functions": {
-      "port": 5001
     },
     "firestore": {
       "port": 8080

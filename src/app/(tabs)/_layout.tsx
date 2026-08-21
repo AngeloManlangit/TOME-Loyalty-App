@@ -7,9 +7,9 @@ import CustomHeader from "@src/components/header";
 import { Colors } from "@src/constants/theme";
 
 import { NoRippleTabBarButton } from "@src/components/custom/noRippleButton";
-import ScannerButton from "@src/components/scannerPage/scannerButton";
+import ScannerButton from "@src/components/custom/scannerButton";
 import { LinearGradient } from "expo-linear-gradient";
-import Animated, { LinearTransition, useAnimatedStyle, useSharedValue, withSpring, withTiming } from 'react-native-reanimated';
+import Animated, { useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
 import { useEffect } from "react";
 
 import { UserProvider } from "@src/contexts/userContext";
@@ -31,7 +31,7 @@ export default function RootLayout() {
 
   useEffect(() => {
     headerSpace.value = withTiming(hideHeader ? 0 : 120, {duration: 300});
-  }, [hideHeader]);
+  }, [hideHeader, headerSpace]);
 
   // animated style that only applies to the top of the container so that whenever the header disappears, it adjusts properly
   const animatedContainerStyle = useAnimatedStyle(() => {

@@ -1,53 +1,11 @@
-import { View, StyleSheet, ActivityIndicator } from "react-native";
-import { useScanner } from "@src/features/receipts/useScanner";
-import CameraCapture from "@src/components/scannerPage/cameraCapture";
-import ReviewFields from "@src/components/scannerPage/reviewFields";
-import { ResultSuccess, ResultRejected, ResultOffline } from "@src/components/scannerPage/resultScreens";
-import { Colors } from "@src/constants/theme";
+import { View, Text, StyleSheet } from "react-native";
+import { Colors, Fonts } from "@src/constants/theme";
 
 export default function ScannerScreen() {
-    const scanner = useScanner();
-
-    const renderContent = () => {
-        switch (scanner.state.phase) {
-            case 'idle':
-            case 'processing':
-                return (
-                    <View style={styles.container}>
-                        <CameraCapture 
-                            onCaptured={scanner.capture} 
-                            busy={scanner.state.phase === 'processing'} 
-                        />
-                        {scanner.state.phase === 'processing' && (
-                            <View style={styles.overlay}>
-                                <ActivityIndicator size="large" color={Colors.outlets.purple} />
-                            </View>
-                        )}
-                    </View>
-                );
-            case 'review':
-            case 'submitting':
-                return (
-                    <ReviewFields 
-                        scanner={scanner} 
-                        candidates={scanner.state.scan.candidates} 
-                        submitting={scanner.state.phase === 'submitting'} 
-                    />
-                );
-            case 'success':
-                return <ResultSuccess result={scanner.state.result} onDone={scanner.reset} />;
-            case 'rejected':
-                return <ResultRejected error={scanner.state.error} onRetry={scanner.reset} />;
-            case 'offline':
-                return <ResultOffline onRetry={scanner.reset} />;
-            default:
-                return null;
-        }
-    };
-
     return (
         <View style={styles.container}>
-            {renderContent()}
+            <Text style={styles.title}>Scanner</Text>
+            <Text style={styles.subtitle}>Coming soon.</Text>
         </View>
     );
 }
@@ -55,12 +13,19 @@ export default function ScannerScreen() {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: "#fff",
-    },
-    overlay: {
-        ...StyleSheet.absoluteFillObject,
-        backgroundColor: 'rgba(0,0,0,0.4)',
         justifyContent: 'center',
         alignItems: 'center',
-    }
+        backgroundColor: '#fff',
+    },
+    title: {
+        fontSize: 28,
+        fontFamily: Fonts.Lato_Bold,
+        color: Colors.outlets.purple,
+        textTransform: 'uppercase',
+    },
+    subtitle: {
+        fontSize: 16,
+        color: '#666',
+        marginTop: 6,
+    },
 });

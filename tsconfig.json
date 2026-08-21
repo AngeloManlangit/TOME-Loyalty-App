@@ -21,10 +21,7 @@
     ".expo/types/**/*.ts",
     "expo-env.d.ts"
   ],
-  // functions/ is a separate package with its own tsconfig, Node types and Jest globals. The broad
-  // "**/*.ts" include above would otherwise pull server code into the Expo program and fail.
   "exclude": [
-    "node_modules",
-    "functions"
+    "node_modules"
   ]
 }

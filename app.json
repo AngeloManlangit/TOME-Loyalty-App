@@ -18,9 +18,6 @@
         "monochromeImage": "./assets/images/android-icon-monochrome.png"
       },
       "predictiveBackGestureEnabled": false,
-      "permissions": [
-        "android.permission.CAMERA"
-      ],
       "package": "com.anonymous.tomeloyaltyapp"
     },
     "web": {
@@ -38,14 +35,6 @@
         }
       ],
       "expo-font",
-      [
-        "expo-camera",
-        {
-          "cameraPermission": "Allow $(PRODUCT_NAME) to access your camera",
-          "recordAudioAndroid": false,
-          "barcodeScannerEnabled": false
-        }
-      ],
       "expo-image",
       "expo-status-bar",
       "expo-web-browser"

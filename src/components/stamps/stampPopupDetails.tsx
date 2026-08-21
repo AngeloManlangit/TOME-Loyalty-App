@@ -1,5 +1,5 @@
 import { StampCardDetails } from "@/assets/classes/stamps";
-import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import StampCard from "./stampCard";
 import { Colors, Fonts } from "@/src/constants/theme";
 import { EditIcon, TrashIcon } from "lucide-react-native";
