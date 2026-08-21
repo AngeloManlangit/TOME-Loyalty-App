@@ -1,4 +1,4 @@
-import { View, StyleSheet, Text, DimensionValue, ImageBackground } from "react-native";
+import { View, StyleSheet, DimensionValue, ImageBackground } from "react-native";
 import type { StampCardDetails } from "@/assets/classes/stamps";
 import StampCircle from "./stampCircle";
 import { getSeededRand } from "@/src/utils/rng";

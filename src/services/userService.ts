@@ -1,10 +1,9 @@
 import { type UserDetails } from "@/assets/classes/users";
 import { db } from "@/firebase/firebaseConfig";
 import { getAuth } from "firebase/auth";
-import { collection, doc, getDoc } from "firebase/firestore";
+import { doc, getDoc } from "firebase/firestore";
 
 const auth = getAuth();
-const userCollection = collection(db, 'users');
 
 export const userService = {
 

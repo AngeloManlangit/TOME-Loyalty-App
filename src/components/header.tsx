@@ -1,10 +1,8 @@
-import { Image, Text, StyleSheet, View, TouchableOpacity } from "react-native";
+import { Image, Text, StyleSheet, TouchableOpacity } from "react-native";
 import { Colors, Fonts } from "../constants/theme";
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { router, usePathname, useSegments } from 'expo-router';
 import Animated, { LinearTransition, FadeIn, FadeOut, SlideInUp, SlideOutUp } from 'react-native-reanimated';
-import { userService } from "../services/userService";
-import { UserDetails } from "@/assets/classes/users";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { useUser } from "@src/contexts/userContext";
@@ -19,7 +17,7 @@ export default function CustomHeader() {
     const isHome = title === "home";
     const hideHeader = title === "scanner" || title === "others"
 
-    const { user, loading } = useUser();
+    const { user } = useUser();
 
     useEffect(() => {
         console.log('Route changed to:', pathname);

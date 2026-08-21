@@ -1,8 +1,7 @@
-import { StampCardDetails, defaultStampCard } from "@/assets/classes/stamps";
+import { StampCardDetails } from "@/assets/classes/stamps";
 import { Fonts } from "@src/constants/theme";
-import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { StyleSheet, Text, View } from "react-native";
 import { SmallCapsText } from "../custom/smallCapsText";
-import StampCard from "../stamps/stampCard";
 
 import { stampService } from "@src/services/stampService";
 import { useEffect, useState } from "react";

@@ -11,18 +11,14 @@ import { GestureHandlerRootView } from "react-native-gesture-handler";
 
 export default function CollectionScreen() {
   const [stamps, setStamps] = useState<StampCardDetails[]>([]);
-  const [loading, setLoading] = useState(true);
   
   useEffect(() => {
     const loadStamps = async () => {
-      setLoading(true);
       const userStamps = await stampService.fetchStamps();
       if (userStamps) {
         // console.log(userStamps) // debug purposes
         setStamps(userStamps);
       }
-
-      setLoading(false);
     };
 
     loadStamps();

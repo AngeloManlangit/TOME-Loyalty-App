@@ -5,7 +5,7 @@ import StampSection from "@src/components/homePage/stampSection";
 import { bgTransparency, Colors } from "@src/constants/theme";
 import { LinearGradient } from 'expo-linear-gradient';
 import { useCallback, useMemo, useRef, useState } from "react";
-import { Alert, Linking, Image, StyleSheet, TouchableOpacity, View } from "react-native";
+import { Alert, Linking, Image, StyleSheet, TouchableOpacity } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 
 export default function HomeScreen() {

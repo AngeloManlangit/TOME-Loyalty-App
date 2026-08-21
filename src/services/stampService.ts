@@ -46,7 +46,7 @@ export const stampService = {
                 });
                 
                 // console.log(fetchedStamps.length)
-                if (fetchedStamps.length == 0) {
+                if (fetchedStamps.length === 0) {
                     console.log('No stamps for this user, making new one');
                     await this.addNewStamp(); 
                     return await this.fetchStamps();
@@ -158,7 +158,7 @@ export const stampService = {
 
     async updateStamp(s: StampCardDetails) {
         const user = auth.currentUser;
-        if (user && s.owner_ID == user.uid && s.id !== undefined) {
+        if (user && s.owner_ID === user.uid && s.id !== undefined) {
             try {
                 const docRef = doc(stampsCollection, `${s.id}`);
 

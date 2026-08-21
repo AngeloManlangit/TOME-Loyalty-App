@@ -2,13 +2,7 @@ rules_version = '2';
 
 // TOME Loyalty — Cloud Storage security rules
 //
-// Per the retention decision (architecture doc Q4): raw Vision JSON is retained 90 days for parser
-// improvement and dispute resolution; receipt IMAGES are not retained in v1.
-//
-// Nothing here is client-accessible. Cloud Functions write Vision JSON with the Admin SDK, which
-// bypasses these rules. If image retention is turned on later, add an owner-scoped read rule under
-// receipts/{uid}/ — do not open write access, since the server is the only thing that should be able
-// to put a file next to a claimed receipt.
+// Nothing here is client-accessible. Open access deliberately, per path, if and when a feature needs it.
 
 service firebase.storage {
   match /b/{bucket}/o {

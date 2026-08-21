@@ -3,8 +3,14 @@ import { StyleSheet, useWindowDimensions, Text, View, ViewToken } from "react-na
 import StampSliderItem from "./stampSliderItem";
 import Animated, { useAnimatedScrollHandler, useSharedValue } from "react-native-reanimated";
 import StampPagination from "./stampPagination";
-import { useRef, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { Fonts } from "@/src/constants/theme";
+
+// Module-level so the reference is stable: FlatList does not support changing viewability config
+// after mount.
+const VIEWABILITY_CONFIG = {
+    itemVisiblePercentThreshold: 50
+};
 
 interface StampSliderInterface {
     stampList: StampCardDetails[];
@@ -27,19 +33,16 @@ export default function StampSlider({stampList, chosenStamp}: StampSliderInterfa
         },
     });
 
-    const viewabilityConfig = {
-        itemVisiblePercentThreshold: 50
-    }
-
-    const onViewableItemsChanged = ({viewableItems} : {viewableItems: ViewToken[]}) => {
+    const onViewableItemsChanged = useCallback(({viewableItems} : {viewableItems: ViewToken[]}) => {
         if (viewableItems.length > 0 && viewableItems[0].index != null) {
             setPaginationIndex(viewableItems[0].index);
         }
-    };
+    }, []);
 
-    const viewabilityConfigCallbackPairs = useRef([
-        {viewabilityConfig, onViewableItemsChanged}
-    ]);
+    const viewabilityConfigCallbackPairs = useMemo(
+        () => [{ viewabilityConfig: VIEWABILITY_CONFIG, onViewableItemsChanged }],
+        [onViewableItemsChanged]
+    );
     
     return(
         <View style={styles.container}>
@@ -59,7 +62,7 @@ export default function StampSlider({stampList, chosenStamp}: StampSliderInterfa
                 onScroll={onScrollHandler}
                 snapToAlignment="center"
                 decelerationRate="fast"
-                viewabilityConfigCallbackPairs={viewabilityConfigCallbackPairs.current}
+                viewabilityConfigCallbackPairs={viewabilityConfigCallbackPairs}
             />
 
             <Text style={styles.collectedCaption}>{`${stampList[paginationIndex].stamp_count}/${stampList[paginationIndex].stamp_total} Collected`}</Text>
