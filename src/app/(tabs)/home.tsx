@@ -47,7 +47,7 @@ export default function HomeScreen() {
 
         <TouchableOpacity onPress={handleAdPress}>
           <Image 
-            source={{ uri: 'https://scontent-mnl1-2.xx.fbcdn.net/v/t39.99422-6/738416341_1538276351173222_2955608102244361871_n.png?stp=dst-png&cstp=mx1702x630&ctp=s1702x630&_nc_cat=100&ccb=1-7&_nc_sid=cc71e4&_nc_eui2=AeEC8rJmVLFAEwKDAtxdntbFNCgo_bRzV8M0KCj9tHNXw0w40p4yPsq6CNMJVnvP6qxn5YYlhq08wL-egmzdOj0F&_nc_ohc=Pup_rDlQ-bEQ7kNvwE56WW9&_nc_oc=Adp_hD0VdJ0CBY6r5uJ_eM7VICgVBLrIBto8x887k7nGuQTL3w0U5DEau4wikxm8aVA&_nc_zt=14&_nc_ht=scontent-mnl1-2.xx&_nc_gid=PaC5kVXh7JG_jmdrv5tZlA&_nc_ss=7b2a8&oh=00_AQD1J9oeDmqBZdYug7URqq11RRzlwIrbgraLHmV3XPZH_A&oe=6A68A942' }} 
+            source={{ uri: 'https://scontent.fmnl17-5.fna.fbcdn.net/v/t39.99422-6/764833155_940450489097168_3070133556105380496_n.png?stp=dst-png&cstp=mx2278x1000&ctp=s2278x1000&_nc_cat=102&_nc_map=urlgen_bucketless&ccb=1-7&_nc_sid=cc71e4&_nc_eui2=AeFoDcVL0QAUfQok0J8BPnVXJmtcnpVGMpYma1yelUYylj9aiBtv9LFxStj7S7hGQ_iFaPxQSKWYKUe7sd11PYim&_nc_ohc=gZqtdNhKa24Q7kNvwHmUu1X&_nc_oc=AdpoQaN3pMu5KOXGfUJg8pMj4-0ST69Nkq3Xd6m6udnIjtWonk_6A2ls3J66FdaiFeU&_nc_zt=14&_nc_ht=scontent.fmnl17-5.fna&_nc_gid=14_Nkm3H4qldyyRb64EvCA&_nc_ss=7a2a8&oh=00_AQH47frbeOA6IaqqppBkTyv9dJE_eufT0kSk55XOpT6MqA&oe=6A8C480A' }} 
             style={styles.adImage}  
           />
         </TouchableOpacity>
