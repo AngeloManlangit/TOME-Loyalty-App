@@ -6,9 +6,36 @@ import { View, Text, TouchableOpacity, TextInput, StyleSheet } from "react-nativ
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Colors, Fonts } from '@src/constants/theme';
 
+enum AccountCreationState {
+    InfoDetails1, InfoDetails2, ProfileInfo, ProfileCard
+}
+
+/*
+Info Details 1:
+- First Name, Middle Name, Last Name, Birthday
+
+Info Details 2:
+- Email, Password, Confirm Password, Contact Number
+
+Profile Info:
+- Profile pfp, Custom Username
+
+Profile Card
+- Customize color of the profile card
+*/
+
 export default function CreateAcc() {
+    const [firstName, setFirstName] = useState('');
+    const [midName, setMidName] = useState('');
+    const [lastName, setLastName] = useState('');
+    const [birthdate, setBirthdate] = useState(new Date);
+
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
+    const [contactNo, setContactNo] = useState('');
+
+    const [username, setUsername] = useState('');
+
     const [loading, setLoading] = useState(false);
 
     const signUp = async () => {
