@@ -1,12 +1,12 @@
 import { Image, Text, TextInput, TouchableOpacity, StyleSheet, View } from 'react-native'
 import { useState, useEffect } from 'react'
 import { auth } from '@/firebase/firebaseConfig'
-import { createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged } from 'firebase/auth'
+import { signInWithEmailAndPassword, onAuthStateChanged } from 'firebase/auth'
 import { router } from 'expo-router';
 import { Colors, Fonts } from '@src/constants/theme';
 
 enum LoginScreenOptions {
-    Base, SignIn, SignUp
+    Base, SignIn
 }
 
 export default function Index() {
@@ -36,20 +36,6 @@ export default function Index() {
         } finally {
             const user = auth.currentUser
             console.log('Successfully signed in! Welcome user ' + user?.uid);
-            setLoading(false);
-        }
-    }
-
-    const signUp = async () => {
-        try {
-            const user = await createUserWithEmailAndPassword(auth, email, password);
-            if (user) router.replace('/home');
-        } catch (error: any) {
-            console.log(error);
-            alert('Sign in failed: ' + error.message)
-        } finally {
-            const user = auth.currentUser
-            console.log('Successfully signed up! Welcome new user +' + user?.uid);
             setLoading(false);
         }
     }
@@ -94,43 +80,6 @@ export default function Index() {
                     </TouchableOpacity>
                 </View>
             );
-        } else if (screenState === LoginScreenOptions.SignUp) {
-            return (
-                <View style={[styles.loginContainer, styles.signContainer]}>
-                    <View style={styles.textInputContainer}>
-                        <TextInput 
-                            placeholder='Email' 
-                            placeholderTextColor='#797979'
-                            style={styles.textInput} 
-                            value={email} 
-                            onChangeText={setEmail} 
-                            autoCapitalize="none"
-                            removeClippedSubviews={false} />
-                    </View>
-                    <View style={styles.textInputContainer}>
-                        <TextInput 
-                            placeholder='Password' 
-                            placeholderTextColor='#797979'
-                            style={styles.textInput} 
-                            value={password} 
-                            onChangeText={setPassword} 
-                            autoCapitalize="none"
-                            removeClippedSubviews={false}
-                            secureTextEntry />
-                    </View>
-
-                    <TouchableOpacity 
-                        onPress={signUp} 
-                        style={[styles.baseButton, {backgroundColor: Colors.outlets.purple}]}
-                    >
-                        <Text style={[styles.buttonText, {color: '#fff'}]}>SIGN UP</Text>
-                    </TouchableOpacity>
-
-                    <TouchableOpacity onPress={() => setScreenState(LoginScreenOptions.Base)}>
-                        <Text style={styles.back}>BACK</Text>
-                    </TouchableOpacity>
-                </View>
-            );
         } else {
             return (
                 <View style={[styles.loginContainer, styles.baseLoginContainer]}>
@@ -142,7 +91,7 @@ export default function Index() {
                     </TouchableOpacity>
 
                     <TouchableOpacity 
-                        onPress={() => setScreenState(LoginScreenOptions.SignUp)}
+                        onPress={() => router.replace('/createAcc')}
                         style={styles.baseButton}
                     >
                         <Text style={styles.buttonText}>CREATE ACCOUNT</Text>
