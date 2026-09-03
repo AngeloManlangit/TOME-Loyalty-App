@@ -1,12 +1,15 @@
 import { auth } from '@/firebase/firebaseConfig'
 import { createUserWithEmailAndPassword } from "@firebase/auth";
+
 import { router } from "expo-router";
 import { useState } from "react";
-import { View, Text, TouchableOpacity, TextInput, StyleSheet, Platform, Pressable, StatusBar } from "react-native";
+import { View, Text, TouchableOpacity, TextInput, StyleSheet, Platform, Pressable, StatusBar, Image } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+
 import { Colors, Fonts } from '@src/constants/theme';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { Eye, EyeOff, Mail, Phone } from 'lucide-react-native';
+import * as ImagePicker from 'expo-image-picker';
 
 enum AccountCreationState {
     InfoDetails1, InfoDetails2, ProfileInfo, ProfileCard
@@ -39,6 +42,7 @@ export default function CreateAcc() {
     const [showPw, setShowPw] = useState(false);
     const [showConPw, setShowConPw] = useState(false);
 
+    const [profilePic, setProfilePic] = useState<string | null>(null);
     const [username, setUsername] = useState('');
 
     const [loading, setLoading] = useState(false);
@@ -57,6 +61,28 @@ export default function CreateAcc() {
             setLoading(false);
         }
     }
+
+    // for the pfp
+    const pickImage = async () => {
+        // Request permission (optional but recommended)
+        const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
+
+        if (permissionResult.granted === false) {
+            alert("You've refused to allow this app to access your photos!");
+            return;
+        }
+
+        let result = await ImagePicker.launchImageLibraryAsync({
+            mediaTypes: ['images'],
+            allowsEditing: true,
+            aspect: [1, 1],
+            quality: 1,
+        });
+
+        if (!result.canceled) {
+            setProfilePic(result.assets[0].uri);
+        }
+    };
 
     const [screenState, setScreenState] = useState(AccountCreationState.InfoDetails1);
 
@@ -141,7 +167,7 @@ export default function CreateAcc() {
                             value={birthdate}
                             mode="date"
                             display={Platform.OS === 'ios' ? 'spinner' : 'default'}
-                            onChange={onChange}
+                            onValueChange={onChange}
                             maximumDate={new Date()} // Optional: Prevents picking future dates
                         />
                     )}
@@ -154,7 +180,7 @@ export default function CreateAcc() {
         }
         else if (screenState === AccountCreationState.InfoDetails2) {
             return (
-                <View style={styles.formContainer}>
+                <View style={[styles.formContainer, {paddingTop: 30}]}>
                     <View style={styles.textInputContainer}>
                         <Mail color={Colors.outlets.purple} style={{marginLeft: 10}} />
                         <TextInput
@@ -229,6 +255,46 @@ export default function CreateAcc() {
                         </TouchableOpacity>
 
                         <TouchableOpacity onPress={() => setScreenState(AccountCreationState.ProfileInfo)} style={[styles.baseButton, { flex: 1, width: 'auto' }]}>
+                            <Text style={styles.buttonText}>NEXT</Text>
+                        </TouchableOpacity>
+                    </View>
+                </View>
+            );
+        }
+        else if (screenState === AccountCreationState.ProfileInfo) {
+            return (
+                <View style={styles.formContainer}>
+
+                    <View style={{ alignItems: 'center', marginBottom: 20 }}>
+                        <TouchableOpacity onPress={pickImage} style={styles.imagePickerButton}>
+                            {profilePic ? (
+                                <Image source={{ uri: profilePic }} style={styles.profileImage} />
+                            ) : (
+                                <Text style={{ color: Colors.outlets.purple }}>Upload Photo</Text>
+                            )}
+                        </TouchableOpacity>
+                    </View>
+
+                    {/* Custom Username Input */}
+                    <Text>Username</Text>
+                    <View style={styles.textInputContainer}>
+                        <TextInput
+                            placeholder='e.g. juandelacruz99'
+                            placeholderTextColor='#797979'
+                            style={styles.textInput}
+                            value={username}
+                            onChangeText={setUsername}
+                            autoCapitalize="none"
+                        />
+                    </View>
+
+                    <View style={styles.besideButtonsContainer}>
+                        <TouchableOpacity onPress={() => setScreenState(AccountCreationState.InfoDetails2)}
+                            style={[styles.baseButton, { flex: 1, width: 'auto', borderColor: Colors.outlets.purple, backgroundColor: '#fff' }]}>
+                            <Text style={[styles.buttonText, { color: Colors.outlets.purple }]}>BACK</Text>
+                        </TouchableOpacity>
+
+                        <TouchableOpacity onPress={() => setScreenState(AccountCreationState.ProfileCard)} style={[styles.baseButton, { flex: 1, width: 'auto' }]}>
                             <Text style={styles.buttonText}>NEXT</Text>
                         </TouchableOpacity>
                     </View>
@@ -326,5 +392,20 @@ const styles = StyleSheet.create({
         justifyContent: 'space-between',
         width: '100%',
         gap: 12
+    },
+    imagePickerButton: {
+        width: 200,
+        height: 200,
+        borderRadius: 100,
+        backgroundColor: `${Colors.outlets.purple}${30}`,
+        borderColor: Colors.outlets.purple,
+        borderWidth: 3,
+        justifyContent: 'center',
+        alignItems: 'center',
+        overflow: 'hidden',
+    },
+    profileImage: {
+        width: '100%',
+        height: '100%',
     },
 })
