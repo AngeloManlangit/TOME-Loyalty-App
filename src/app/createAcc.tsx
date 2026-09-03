@@ -6,6 +6,7 @@ import { View, Text, TouchableOpacity, TextInput, StyleSheet, Platform, Pressabl
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Colors, Fonts } from '@src/constants/theme';
 import DateTimePicker from '@react-native-community/datetimepicker';
+import { Eye, EyeOff, Mail, Phone } from 'lucide-react-native';
 
 enum AccountCreationState {
     InfoDetails1, InfoDetails2, ProfileInfo, ProfileCard
@@ -32,8 +33,11 @@ export default function CreateAcc() {
     const [birthdate, setBirthdate] = useState(new Date());
 
     const [email, setEmail] = useState('');
-    const [password, setPassword] = useState('');
     const [contactNo, setContactNo] = useState('');
+    const [password, setPassword] = useState('');
+    const [confirmPassword, setConfirmPassword] = useState('');
+    const [showPw, setShowPw] = useState(false);
+    const [showConPw, setShowConPw] = useState(false);
 
     const [username, setUsername] = useState('');
 
@@ -125,6 +129,7 @@ export default function CreateAcc() {
                             <TextInput
                                 style={styles.textInput}
                                 placeholder="DD/MM/YYYY"
+                                placeholderTextColor='#797979'
                                 value={birthdayText}
                                 editable={false} // Prevents the system keyboard from popping up
                             />
@@ -151,6 +156,7 @@ export default function CreateAcc() {
             return (
                 <View style={styles.formContainer}>
                     <View style={styles.textInputContainer}>
+                        <Mail color={Colors.outlets.purple} style={{marginLeft: 10}} />
                         <TextInput
                             placeholder='Email'
                             placeholderTextColor='#797979'
@@ -160,6 +166,19 @@ export default function CreateAcc() {
                             autoCapitalize="none"
                             removeClippedSubviews={false} />
                     </View>
+
+                    <View style={styles.textInputContainer}>
+                        <Phone color={Colors.outlets.purple} style={{ marginLeft: 10 }} />
+                        <TextInput
+                            placeholder='Contact no.'
+                            placeholderTextColor='#797979'
+                            style={styles.textInput}
+                            value={contactNo}
+                            onChangeText={setContactNo}
+                            autoCapitalize="none"
+                            removeClippedSubviews={false} />
+                    </View>
+
                     <View style={styles.textInputContainer}>
                         <TextInput
                             placeholder='Password'
@@ -169,7 +188,38 @@ export default function CreateAcc() {
                             onChangeText={setPassword}
                             autoCapitalize="none"
                             removeClippedSubviews={false}
-                            secureTextEntry />
+                            secureTextEntry={!showPw} />
+                        <TouchableOpacity onPress={() => setShowPw(!showPw)} style={{ marginRight: 10 }}>
+                            { 
+                                showPw ? (
+                                    <EyeOff color={Colors.outlets.purple} /> 
+                                ) : (
+                                    <Eye color={Colors.outlets.purple} /> 
+                                )
+                            }
+                        </TouchableOpacity>
+                    </View>
+
+                    <View style={styles.textInputContainer}>
+                        <TextInput
+                            placeholder='Confirm Password'
+                            placeholderTextColor='#797979'
+                            style={styles.textInput}
+                            value={confirmPassword}
+                            onChangeText={setConfirmPassword}
+                            autoCapitalize="none"
+                            removeClippedSubviews={false}
+                            secureTextEntry={!showConPw} />
+
+                        <TouchableOpacity onPress={() => setShowConPw(!showConPw)} style={{ marginRight: 10 }}>
+                            {
+                                showConPw ? (
+                                    <EyeOff color={Colors.outlets.purple} />
+                                ) : (
+                                    <Eye color={Colors.outlets.purple} />
+                                )
+                            }
+                        </TouchableOpacity>
                     </View>
 
                     <View style={styles.besideButtonsContainer}>
@@ -247,8 +297,11 @@ const styles = StyleSheet.create({
     textInputContainer: {
         width: '100%',
         height: 50,
-        alignItems: 'flex-start',
+        flexDirection: 'row',
+        justifyContent: 'flex-start',
+        alignItems: 'center',
         borderRadius: 10,
+        backgroundColor: `${Colors.outlets.purple}${30}`,
         borderColor: Colors.outlets.purple,
         borderWidth: 1,
         marginBottom: 20
