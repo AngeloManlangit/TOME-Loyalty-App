@@ -8,6 +8,7 @@
     "@firebase/auth": "^1.13.3",
     "@gorhom/bottom-sheet": "^5.2.14",
     "@react-native-async-storage/async-storage": "2.2.0",
+    "@react-native-community/datetimepicker": "9.1.0",
     "expo": "^57.0.9",
     "expo-constants": "~57.0.3",
     "expo-font": "~57.0.1",
@@ -50,6 +51,7 @@
   "allowScripts": {
     "protobufjs@7.6.5": true,
     "re2@1.24.1": true,
-    "@firebase/util@1.15.2": true
+    "@firebase/util@1.15.2": true,
+    "unrs-resolver@1.12.2": true
   }
 }
