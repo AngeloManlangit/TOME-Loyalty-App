@@ -11,6 +11,8 @@ import DateTimePicker from '@react-native-community/datetimepicker';
 import { Eye, EyeOff, Mail, Phone } from 'lucide-react-native';
 import * as ImagePicker from 'expo-image-picker';
 
+import ProfileCard from '@src/components/profile/profileCard';
+
 enum AccountCreationState {
     InfoDetails1, InfoDetails2, ProfileInfo, ProfileCard
 }
@@ -296,6 +298,33 @@ export default function CreateAcc() {
 
                         <TouchableOpacity onPress={() => setScreenState(AccountCreationState.ProfileCard)} style={[styles.baseButton, { flex: 1, width: 'auto' }]}>
                             <Text style={styles.buttonText}>NEXT</Text>
+                        </TouchableOpacity>
+                    </View>
+                </View>
+            );
+        }
+        else {
+            return(
+                <View style={styles.formContainer}>
+                    <ProfileCard
+                        username={username}
+                        email={email}
+                        contact_no={contactNo}
+                        first_name={firstName}
+                        middle_name={midName}
+                        last_name={lastName}
+                        profile_img_url={profilePic || ''}
+                        birth_date={birthdayText}
+                    />
+
+                    <View style={[styles.besideButtonsContainer, { marginTop: 20 }]}>
+                        <TouchableOpacity onPress={() => setScreenState(AccountCreationState.ProfileInfo)}
+                            style={[styles.baseButton, { flex: 1, width: 'auto', borderColor: Colors.outlets.purple, backgroundColor: '#fff' }]}>
+                            <Text style={[styles.buttonText, { color: Colors.outlets.purple }]}>BACK</Text>
+                        </TouchableOpacity>
+
+                        <TouchableOpacity onPress={signUp} style={[styles.baseButton, { flex: 1, width: 'auto' }]}>
+                            <Text style={styles.buttonText}>FINISH</Text>
                         </TouchableOpacity>
                     </View>
                 </View>

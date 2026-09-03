@@ -7,5 +7,6 @@ export interface UserDetails {
     middle_name: string,
     last_name: string,
     profile_img_url: string,
-    birth_date: string
+    birth_date: string,
+    cardBackgroundColor?: string
 };
