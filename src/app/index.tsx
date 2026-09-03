@@ -1,4 +1,4 @@
-import { Image, Text, TextInput, TouchableOpacity, StyleSheet, View } from 'react-native'
+import { Image, Text, TextInput, TouchableOpacity, StyleSheet, View, StatusBar } from 'react-native'
 import { useState, useEffect } from 'react'
 import { auth } from '@/firebase/firebaseConfig'
 import { signInWithEmailAndPassword, onAuthStateChanged } from 'firebase/auth'
@@ -103,6 +103,10 @@ export default function Index() {
 
     return (
         <View style={styles.container}>
+            <StatusBar
+                barStyle="light-content" // Options: 'default', 'light-content', 'dark-content'
+            />
+
             <Image source={require('@/assets/images/Top Half Sign Up.png')} style={styles.topHalfImage} />
             
             { renderContent() }
