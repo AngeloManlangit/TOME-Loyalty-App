@@ -5,6 +5,7 @@ import { Image, StyleSheet, Text, View, TouchableOpacity, ScrollView } from "rea
 import { getAuth } from 'firebase/auth'
 import { router } from "expo-router";
 import { useUser } from "@/src/contexts/userContext";
+import ProfileCard from "@/src/components/profile/profileCard";
 
 export default function OthersScreen() {
 
@@ -21,14 +22,24 @@ export default function OthersScreen() {
           style={styles.mainView}
       > 
         <ScrollView contentContainerStyle={styles.scrollContent}>
-          <View style={styles.profileContainer}>
-            <Image 
-                source={(user) ? { uri: user?.profile_img_url } : require('@/assets/images/fallbackUserProfile.png')} 
-                style={styles.profileImage} 
-            />
-
-            <Text style={styles.nameText}>{user?.first_name} {user?.middle_name.at(0)}. {user?.last_name}</Text>
-            <Text style={styles.usernameText}>@{user?.username}</Text>
+          
+          <View style={styles.cardContainer}>
+            {
+              user ? (
+                <ProfileCard
+                  id={user.id}
+                  username={user.username}
+                  email={user.email}
+                  contact_no={user.contact_no}
+                  first_name={user.first_name}
+                  middle_name={user.middle_name}
+                  last_name={user.last_name}
+                  profile_img_url={user.profile_img_url}
+                  birth_date={user.birth_date}
+                  card_background_color={user.card_background_color}
+                />
+              ) : ('')
+            }
           </View>
 
           <View style={styles.optionsView}>
@@ -57,27 +68,11 @@ const styles = StyleSheet.create({
   scrollContent: {
     paddingVertical: 40,
     flexGrow: 1,
-    gap: 60
+    gap: 60,
+    alignItems: 'center'
   },
-  profileContainer: {
-    alignItems: 'center',
-  },
-  profileImage: {
-    width: 200,
-    height: 200,
-    borderRadius: 100,
-    borderColor: '#ffd9f9',
-    borderWidth: 6,
-  },
-  nameText: {
-    marginTop: 13,
-    fontFamily: Fonts.Montserrat,
-    fontSize: 21
-  },
-  usernameText: {
-    fontFamily: Fonts.Lato,
-    fontSize: 15,
-    color: '#777777'
+  cardContainer: {
+    width: '95%'
   },
   optionsView: {
     flex: 1,

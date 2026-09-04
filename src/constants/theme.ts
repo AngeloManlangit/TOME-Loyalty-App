@@ -12,7 +12,10 @@ export const Colors = {
         pink: '#D61967',
         green: '#44AD4E',
         blue: '#24A8E0',
-        orange: '#FD7033'
+        orange: '#FD7033',
+        red: '#DA0A0A',
+        yellow: '#F3F942',
+        gray: '#b8b8b8'
     },
     light: {
         text: '#000000',
