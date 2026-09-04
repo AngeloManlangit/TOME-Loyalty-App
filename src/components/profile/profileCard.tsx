@@ -107,6 +107,7 @@ const styles = StyleSheet.create({
     imageBackgroundWrapper: {
         width: '100%',
         height: '100%',
+        paddingVertical: 10
     },
     mainContent: {
         flexDirection: 'row',
