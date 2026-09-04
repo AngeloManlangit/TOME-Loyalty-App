@@ -4,7 +4,7 @@
     "slug": "tome-loyalty-app",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/images/outlets-logo.jpg",
+    "icon": "./assets/images/outlets-logo.png",
     "scheme": "tomeloyaltyapp",
     "userInterfaceStyle": "automatic",
     "ios": {
