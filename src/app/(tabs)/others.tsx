@@ -1,7 +1,7 @@
 import { auth } from "@/firebase/firebaseConfig";
 import { Fonts, Colors, bgTransparency } from "@src/constants/theme";
 import { LinearGradient } from "expo-linear-gradient";
-import { Image, StyleSheet, Text, View, TouchableOpacity, ScrollView } from "react-native";
+import { StyleSheet, Text, View, TouchableOpacity, ScrollView } from "react-native";
 import { getAuth } from 'firebase/auth'
 import { router } from "expo-router";
 import { useUser } from "@/src/contexts/userContext";
