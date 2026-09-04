@@ -335,7 +335,28 @@ export default function CreateAcc() {
                         last_name={lastName}
                         profile_img_url={profilePic || ''}
                         birth_date={birthdayText}
+                        cardBackgroundColor={cardColor}
                     />
+
+                    <View style={styles.innerFormContainer}>
+                        <Text>Choose your Profile Card Color</Text>
+                        <View style={{ flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'center', gap: 15}}>
+                            {Object.values(Colors.outlets).map((color, index) => (
+                                <TouchableOpacity
+                                    key={index}
+                                    onPress={() => setCardColor(color)}
+                                    style={{
+                                        width: 40,
+                                        height: 40,
+                                        borderRadius: 20,
+                                        backgroundColor: color,
+                                        borderWidth: cardColor === color ? 3 : 1,
+                                        borderColor: cardColor === color ? '#000' : '#cacaca',
+                                    }}
+                                />
+                            ))}
+                        </View>
+                    </View>
 
                     <View style={[styles.besideButtonsContainer, { marginTop: 20 }]}>
                         <TouchableOpacity onPress={() => handleSwitchForm(-1)}
