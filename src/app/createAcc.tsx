@@ -338,7 +338,7 @@ export default function CreateAcc() {
                         cardBackgroundColor={cardColor}
                     />
 
-                    <View style={styles.innerFormContainer}>
+                    <View style={[styles.innerFormContainer, { gap: 10 }]}>
                         <Text>Choose your Profile Card Color</Text>
                         <View style={{ flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'center', gap: 15}}>
                             {Object.values(Colors.outlets).map((color, index) => (
