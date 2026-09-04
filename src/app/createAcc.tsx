@@ -47,6 +47,8 @@ export default function CreateAcc() {
     const [profilePic, setProfilePic] = useState<string | null>(null);
     const [username, setUsername] = useState('');
 
+    const [cardColor, setCardColor] = useState('');
+
     const [loading, setLoading] = useState(false);
 
     // sign UP functionality
@@ -111,70 +113,83 @@ export default function CreateAcc() {
         setShow(true);
     };
 
+    const handleSwitchForm = (nextIndex: number) => {
+        setScreenState(screenState + nextIndex);
+    }
 
     const renderContent = () => {
         if (screenState === AccountCreationState.InfoDetails1) {
             return (
                 <View style={styles.formContainer}>
-                    <Text>First Name</Text>
-                    <View style={styles.textInputContainer}>
-                        <TextInput
-                            placeholder='e.g. Juan'
-                            placeholderTextColor='#797979'
-                            style={styles.textInput}
-                            value={firstName}
-                            onChangeText={setFirstName}
-                            autoCapitalize="none"
-                            removeClippedSubviews={false} />
-                    </View>
-
-                    <Text>Middle Name (optional)</Text>
-                    <View style={styles.textInputContainer}>
-                        <TextInput
-                            placeholderTextColor='#797979'
-                            style={styles.textInput}
-                            value={midName}
-                            onChangeText={setMidName}
-                            autoCapitalize="none"
-                            removeClippedSubviews={false} />
-                    </View>
-
-                    <Text>Last Name</Text>
-                    <View style={styles.textInputContainer}>
-                        <TextInput
-                            placeholder='e.g. dela Cruz'
-                            placeholderTextColor='#797979'
-                            style={styles.textInput}
-                            value={lastName}
-                            onChangeText={setLastName}
-                            autoCapitalize="none"
-                            removeClippedSubviews={false} />
-                    </View>
-
-                    <Text>Birthdate</Text>
-                    <Pressable onPress={showDatePicker} style={styles.textInputContainer}>
-                        <View pointerEvents="none">
-                            <TextInput
-                                style={styles.textInput}
-                                placeholder="DD/MM/YYYY"
-                                placeholderTextColor='#797979'
-                                value={birthdayText}
-                                editable={false} // Prevents the system keyboard from popping up
-                            />
+                    <View style={styles.innerFormContainer}>
+                        <View>
+                            <Text>First Name</Text>
+                            <View style={styles.textInputContainer}>
+                                <TextInput
+                                    placeholder='e.g. Juan'
+                                    placeholderTextColor='#797979'
+                                    style={styles.textInput}
+                                    value={firstName}
+                                    onChangeText={setFirstName}
+                                    autoCapitalize="none"
+                                    removeClippedSubviews={false} />
+                            </View>
                         </View>
-                    </Pressable>
 
-                    {show && (
-                        <DateTimePicker
-                            value={birthdate}
-                            mode="date"
-                            display={Platform.OS === 'ios' ? 'spinner' : 'default'}
-                            onValueChange={onChange}
-                            maximumDate={new Date()} // Optional: Prevents picking future dates
-                        />
-                    )}
+                        <View>
+                            <Text>Middle Name (optional)</Text>
+                            <View style={styles.textInputContainer}>
+                                <TextInput
+                                    placeholderTextColor='#797979'
+                                    style={styles.textInput}
+                                    value={midName}
+                                    onChangeText={setMidName}
+                                    autoCapitalize="none"
+                                    removeClippedSubviews={false} />
+                            </View>
+                        </View>
 
-                    <TouchableOpacity onPress={() => setScreenState(AccountCreationState.InfoDetails2)} style={styles.baseButton}>
+                        <View>
+                            <Text>Last Name</Text>
+                            <View style={styles.textInputContainer}>
+                                <TextInput
+                                    placeholder='e.g. dela Cruz'
+                                    placeholderTextColor='#797979'
+                                    style={styles.textInput}
+                                    value={lastName}
+                                    onChangeText={setLastName}
+                                    autoCapitalize="none"
+                                    removeClippedSubviews={false} />
+                            </View>
+                        </View>
+
+                        <View>
+                            <Text>Birthdate</Text>
+                            <Pressable onPress={showDatePicker} style={styles.textInputContainer}>
+                                <View pointerEvents="none">
+                                    <TextInput
+                                        style={styles.textInput}
+                                        placeholder="DD/MM/YYYY"
+                                        placeholderTextColor='#797979'
+                                        value={birthdayText}
+                                        editable={false} // Prevents the system keyboard from popping up
+                                    />
+                                </View>
+                            </Pressable>
+                        </View>
+
+                        {show && (
+                            <DateTimePicker
+                                value={birthdate}
+                                mode="date"
+                                display={Platform.OS === 'ios' ? 'spinner' : 'default'}
+                                onValueChange={onChange}
+                                maximumDate={new Date()} // Optional: Prevents picking future dates
+                            />
+                        )}
+                    </View>
+
+                    <TouchableOpacity onPress={() => handleSwitchForm(1)} style={styles.baseButton}>
                         <Text style={styles.buttonText}>NEXT</Text>
                     </TouchableOpacity>
                 </View>
@@ -182,81 +197,84 @@ export default function CreateAcc() {
         }
         else if (screenState === AccountCreationState.InfoDetails2) {
             return (
-                <View style={[styles.formContainer, {paddingTop: 30}]}>
-                    <View style={styles.textInputContainer}>
-                        <Mail color={Colors.outlets.purple} style={{marginLeft: 10}} />
-                        <TextInput
-                            placeholder='Email'
-                            placeholderTextColor='#797979'
-                            style={styles.textInput}
-                            value={email}
-                            onChangeText={setEmail}
-                            autoCapitalize="none"
-                            removeClippedSubviews={false} />
-                    </View>
+                <View style={[styles.formContainer]}>
+                    <View style={styles.innerFormContainer}>
 
-                    <View style={styles.textInputContainer}>
-                        <Phone color={Colors.outlets.purple} style={{ marginLeft: 10 }} />
-                        <TextInput
-                            placeholder='Contact no.'
-                            placeholderTextColor='#797979'
-                            style={styles.textInput}
-                            value={contactNo}
-                            onChangeText={setContactNo}
-                            autoCapitalize="none"
-                            removeClippedSubviews={false} />
-                    </View>
+                        <View style={styles.textInputContainer}>
+                            <Mail color={Colors.outlets.purple} style={{marginLeft: 10}} />
+                            <TextInput
+                                placeholder='Email'
+                                placeholderTextColor='#797979'
+                                style={styles.textInput}
+                                value={email}
+                                onChangeText={setEmail}
+                                autoCapitalize="none"
+                                removeClippedSubviews={false} />
+                        </View>
 
-                    <View style={styles.textInputContainer}>
-                        <TextInput
-                            placeholder='Password'
-                            placeholderTextColor='#797979'
-                            style={styles.textInput}
-                            value={password}
-                            onChangeText={setPassword}
-                            autoCapitalize="none"
-                            removeClippedSubviews={false}
-                            secureTextEntry={!showPw} />
-                        <TouchableOpacity onPress={() => setShowPw(!showPw)} style={{ marginRight: 10 }}>
-                            { 
-                                showPw ? (
-                                    <EyeOff color={Colors.outlets.purple} /> 
-                                ) : (
-                                    <Eye color={Colors.outlets.purple} /> 
-                                )
-                            }
-                        </TouchableOpacity>
-                    </View>
+                        <View style={styles.textInputContainer}>
+                            <Phone color={Colors.outlets.purple} style={{ marginLeft: 10 }} />
+                            <TextInput
+                                placeholder='Contact no.'
+                                placeholderTextColor='#797979'
+                                style={styles.textInput}
+                                value={contactNo}
+                                onChangeText={setContactNo}
+                                autoCapitalize="none"
+                                removeClippedSubviews={false} />
+                        </View>
 
-                    <View style={styles.textInputContainer}>
-                        <TextInput
-                            placeholder='Confirm Password'
-                            placeholderTextColor='#797979'
-                            style={styles.textInput}
-                            value={confirmPassword}
-                            onChangeText={setConfirmPassword}
-                            autoCapitalize="none"
-                            removeClippedSubviews={false}
-                            secureTextEntry={!showConPw} />
+                        <View style={styles.textInputContainer}>
+                            <TextInput
+                                placeholder='Password'
+                                placeholderTextColor='#797979'
+                                style={styles.textInput}
+                                value={password}
+                                onChangeText={setPassword}
+                                autoCapitalize="none"
+                                removeClippedSubviews={false}
+                                secureTextEntry={!showPw} />
+                            <TouchableOpacity onPress={() => setShowPw(!showPw)} style={{ marginRight: 10 }}>
+                                { 
+                                    showPw ? (
+                                        <EyeOff color={Colors.outlets.purple} /> 
+                                    ) : (
+                                        <Eye color={Colors.outlets.purple} /> 
+                                    )
+                                }
+                            </TouchableOpacity>
+                        </View>
 
-                        <TouchableOpacity onPress={() => setShowConPw(!showConPw)} style={{ marginRight: 10 }}>
-                            {
-                                showConPw ? (
-                                    <EyeOff color={Colors.outlets.purple} />
-                                ) : (
-                                    <Eye color={Colors.outlets.purple} />
-                                )
-                            }
-                        </TouchableOpacity>
+                        <View style={styles.textInputContainer}>
+                            <TextInput
+                                placeholder='Confirm Password'
+                                placeholderTextColor='#797979'
+                                style={styles.textInput}
+                                value={confirmPassword}
+                                onChangeText={setConfirmPassword}
+                                autoCapitalize="none"
+                                removeClippedSubviews={false}
+                                secureTextEntry={!showConPw} />
+
+                            <TouchableOpacity onPress={() => setShowConPw(!showConPw)} style={{ marginRight: 10 }}>
+                                {
+                                    showConPw ? (
+                                        <EyeOff color={Colors.outlets.purple} />
+                                    ) : (
+                                        <Eye color={Colors.outlets.purple} />
+                                    )
+                                }
+                            </TouchableOpacity>
+                        </View>
                     </View>
 
                     <View style={styles.besideButtonsContainer}>
-                        <TouchableOpacity onPress={() => setScreenState(AccountCreationState.InfoDetails1)} 
+                        <TouchableOpacity onPress={() => handleSwitchForm(-1)} 
                             style={[styles.baseButton, { flex: 1, width: 'auto', borderColor: Colors.outlets.purple, backgroundColor: '#fff' }]}>
                             <Text style={[styles.buttonText, {color: Colors.outlets.purple}]}>BACK</Text>
                         </TouchableOpacity>
 
-                        <TouchableOpacity onPress={() => setScreenState(AccountCreationState.ProfileInfo)} style={[styles.baseButton, { flex: 1, width: 'auto' }]}>
+                        <TouchableOpacity onPress={() => handleSwitchForm(1)} style={[styles.baseButton, { flex: 1, width: 'auto' }]}>
                             <Text style={styles.buttonText}>NEXT</Text>
                         </TouchableOpacity>
                     </View>
@@ -266,37 +284,39 @@ export default function CreateAcc() {
         else if (screenState === AccountCreationState.ProfileInfo) {
             return (
                 <View style={styles.formContainer}>
+                    <View style={styles.innerFormContainer}>
+                        <View style={{ alignItems: 'center', marginBottom: 25 }}>
+                            <TouchableOpacity onPress={pickImage} style={styles.imagePickerButton}>
+                                {profilePic ? (
+                                    <Image source={{ uri: profilePic }} style={styles.profileImage} />
+                                ) : (
+                                    <Text style={{ color: Colors.outlets.purple }}>Upload Photo</Text>
+                                )}
+                            </TouchableOpacity>
+                        </View>
 
-                    <View style={{ alignItems: 'center', marginBottom: 20 }}>
-                        <TouchableOpacity onPress={pickImage} style={styles.imagePickerButton}>
-                            {profilePic ? (
-                                <Image source={{ uri: profilePic }} style={styles.profileImage} />
-                            ) : (
-                                <Text style={{ color: Colors.outlets.purple }}>Upload Photo</Text>
-                            )}
-                        </TouchableOpacity>
-                    </View>
-
-                    {/* Custom Username Input */}
-                    <Text>Username</Text>
-                    <View style={styles.textInputContainer}>
-                        <TextInput
-                            placeholder='e.g. juandelacruz99'
-                            placeholderTextColor='#797979'
-                            style={styles.textInput}
-                            value={username}
-                            onChangeText={setUsername}
-                            autoCapitalize="none"
-                        />
+                        <View>
+                            <Text>Username</Text>
+                            <View style={styles.textInputContainer}>
+                                <TextInput
+                                    placeholder='e.g. juandelacruz99'
+                                    placeholderTextColor='#797979'
+                                    style={styles.textInput}
+                                    value={username}
+                                    onChangeText={setUsername}
+                                    autoCapitalize="none"
+                                />
+                            </View>
+                        </View>
                     </View>
 
                     <View style={styles.besideButtonsContainer}>
-                        <TouchableOpacity onPress={() => setScreenState(AccountCreationState.InfoDetails2)}
+                        <TouchableOpacity onPress={() => handleSwitchForm(-1)}
                             style={[styles.baseButton, { flex: 1, width: 'auto', borderColor: Colors.outlets.purple, backgroundColor: '#fff' }]}>
                             <Text style={[styles.buttonText, { color: Colors.outlets.purple }]}>BACK</Text>
                         </TouchableOpacity>
 
-                        <TouchableOpacity onPress={() => setScreenState(AccountCreationState.ProfileCard)} style={[styles.baseButton, { flex: 1, width: 'auto' }]}>
+                        <TouchableOpacity onPress={() => handleSwitchForm(1)} style={[styles.baseButton, { flex: 1, width: 'auto' }]}>
                             <Text style={styles.buttonText}>NEXT</Text>
                         </TouchableOpacity>
                     </View>
@@ -305,7 +325,7 @@ export default function CreateAcc() {
         }
         else {
             return(
-                <View style={styles.formContainer}>
+                <View style={[styles.formContainer, {paddingTop: 20}]}>
                     <ProfileCard
                         username={username}
                         email={email}
@@ -318,7 +338,7 @@ export default function CreateAcc() {
                     />
 
                     <View style={[styles.besideButtonsContainer, { marginTop: 20 }]}>
-                        <TouchableOpacity onPress={() => setScreenState(AccountCreationState.ProfileInfo)}
+                        <TouchableOpacity onPress={() => handleSwitchForm(-1)}
                             style={[styles.baseButton, { flex: 1, width: 'auto', borderColor: Colors.outlets.purple, backgroundColor: '#fff' }]}>
                             <Text style={[styles.buttonText, { color: Colors.outlets.purple }]}>BACK</Text>
                         </TouchableOpacity>
@@ -368,7 +388,17 @@ const styles = StyleSheet.create({
     },
     formContainer: {
         width: '85%',
-        padding: 10,
+        height: '60%', 
+        justifyContent: 'space-between'
+    },
+    innerFormContainer: {
+        padding: 15,
+        borderWidth: 1,
+        borderColor: '#cacaca',
+        borderRadius: 20,
+        justifyContent: 'center',
+        gap: 20,
+        marginTop: 20
     },
     baseLoginContainer: {
         gap: 20,
@@ -399,7 +429,6 @@ const styles = StyleSheet.create({
         backgroundColor: `${Colors.outlets.purple}${30}`,
         borderColor: Colors.outlets.purple,
         borderWidth: 1,
-        marginBottom: 20
     },
     textInput: {
         color: '#000',
