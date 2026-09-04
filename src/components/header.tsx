@@ -59,7 +59,7 @@ export default function CustomHeader() {
             <TouchableOpacity onPress={() => router.replace('/others')}>
                 <Image 
                     source={(user) ? { uri: user?.profile_img_url } : require('@/assets/images/fallbackUserProfile.png')} 
-                    style={styles.profileImage} 
+                    style={[styles.profileImage, { borderColor: user?.card_background_color }]} 
                 />
             </TouchableOpacity>
         </Animated.View>

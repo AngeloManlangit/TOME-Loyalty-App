@@ -76,7 +76,7 @@ export default function CreateAcc() {
                 last_name: lastName,
                 profile_img_url: uploadedPicUrl,
                 birth_date: birthdate,
-                cardBackgroundColor: cardColor
+                card_background_color: cardColor
             };
 
             await userService.uploadUserDetails(profile as any, user.uid);
@@ -361,7 +361,7 @@ export default function CreateAcc() {
                         last_name={lastName}
                         profile_img_url={profilePic || ''}
                         birth_date={birthdayText}
-                        cardBackgroundColor={cardColor}
+                        card_background_color={cardColor}
                     />
 
                     <View style={[styles.innerFormContainer, { gap: 10 }]}>

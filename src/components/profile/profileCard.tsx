@@ -6,7 +6,7 @@ import { Mail, Phone } from "lucide-react-native";
 
 export default function ProfileCard(userProfile: UserDetails) {
     return (
-        <View style={[styles.cardLayout, styles.boxWithShadow, { backgroundColor: userProfile.cardBackgroundColor }]}>
+        <View style={[styles.cardLayout, styles.boxWithShadow, { backgroundColor: userProfile.card_background_color }]}>
             <LinearGradient colors={['#ffffff75', '#ffffff30']} 
                 style={styles.gradientOverlay} 
                 start={{ x: 0.2, y: 0.2 }}
@@ -20,7 +20,7 @@ export default function ProfileCard(userProfile: UserDetails) {
                     <View style={styles.mainContent}>
                         {/* Left Column: Image and Username */}
                         <View style={styles.leftColumn}>
-                            <View style={[styles.imageContainer, {borderColor: userProfile.cardBackgroundColor}]}>
+                            <View style={[styles.imageContainer, {borderColor: userProfile.card_background_color}]}>
                                 {userProfile.profile_img_url ? (
                                     <Image source={{ uri: userProfile.profile_img_url }} style={styles.profileImg} />
                                 ) : (

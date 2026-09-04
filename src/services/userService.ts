@@ -1,8 +1,8 @@
 import { type UserDetails } from "@/assets/classes/users";
 import { db } from "@/firebase/firebaseConfig";
 import { getDownloadURL, getStorage, ref, uploadBytes } from "@firebase/storage";
-import { createUserWithEmailAndPassword, getAuth } from "firebase/auth";
-import { doc, getDoc, collection, addDoc, setDoc } from "firebase/firestore";
+import { getAuth } from "firebase/auth";
+import { doc, getDoc, setDoc } from "firebase/firestore";
 
 const auth = getAuth();
 
