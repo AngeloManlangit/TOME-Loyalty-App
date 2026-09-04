@@ -29,9 +29,9 @@
       [
         "expo-splash-screen",
         {
-          "backgroundColor": "#208AEF",
-          "image": "./assets/images/outlets-logo.jpg",
-          "imageWidth": 76
+          "backgroundColor": "#ffffff",
+          "image": "./assets/images/outlets-percent-logo.png",
+          "imageWidth": 200
         }
       ],
       "expo-font",

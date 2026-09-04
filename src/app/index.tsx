@@ -1,7 +1,7 @@
 import { Image, Text, TextInput, TouchableOpacity, StyleSheet, View, StatusBar } from 'react-native'
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { auth } from '@/firebase/firebaseConfig'
-import { signInWithEmailAndPassword, onAuthStateChanged } from 'firebase/auth'
+import { signInWithEmailAndPassword } from 'firebase/auth'
 import { router } from 'expo-router';
 import { Colors, Fonts } from '@src/constants/theme';
 
@@ -13,16 +13,6 @@ export default function Index() {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [loading, setLoading] = useState(false);
-
-    // for account persistence, if user is still logged in
-    useEffect(() => {
-        onAuthStateChanged(auth, (user) => {
-            if (user) {
-                console.log("USER IS STILL LOGGED IN: " , user?.uid);
-                router.replace('/home');
-            }
-        });
-    }, []);
 
     const signIn = async () => {
         setLoading(true)
