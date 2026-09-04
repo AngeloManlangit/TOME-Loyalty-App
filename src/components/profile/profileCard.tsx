@@ -51,13 +51,18 @@ export default function ProfileCard(userProfile: UserDetails) {
                             </View>
 
                             <View style={styles.fieldContainer}>
-                                <View style={styles.valueRow}>
+                                <View style={[styles.valueRow, { paddingRight: 15 }]}>
                                     <Mail size={16} />
-                                    <Text style={[styles.valueText, {textTransform: 'none'}]}>{userProfile.email}</Text>
+                                    <Text
+                                        numberOfLines={1}
+                                        ellipsizeMode="tail"
+                                        style={[styles.valueText, { fontFamily: Fonts.Lato, textTransform: 'none' }]}>
+                                        {userProfile.email}
+                                    </Text>
                                 </View>
                                 <View style={styles.valueRow}>
                                     <Phone size={16} />
-                                    <Text style={[styles.valueText, { textTransform: 'none' }]}>{userProfile.contact_no}</Text>
+                                    <Text style={[styles.valueText, { fontFamily: Fonts.Lato, textTransform: 'none' }]}>{userProfile.contact_no}</Text>
                                 </View>
                             </View>
 
@@ -108,12 +113,12 @@ const styles = StyleSheet.create({
         flex: 1,
     },
     leftColumn: {
-        flex: 0.45,
+        flex: 0.40,
         alignItems: 'center',
         justifyContent: 'flex-start',
     },
     rightColumn: {
-        flex: 0.55,
+        flex: 0.60,
         paddingLeft: 10,
         justifyContent: 'flex-start',
     },

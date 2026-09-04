@@ -12,6 +12,7 @@ import { Eye, EyeOff, Mail, Phone } from 'lucide-react-native';
 import * as ImagePicker from 'expo-image-picker';
 
 import ProfileCard from '@src/components/profile/profileCard';
+import { userService } from '@src/services/userService';
 
 enum AccountCreationState {
     InfoDetails1, InfoDetails2, ProfileInfo, ProfileCard
@@ -54,11 +55,36 @@ export default function CreateAcc() {
     // sign UP functionality
     const signUp = async () => {
         try {
-            const user = await createUserWithEmailAndPassword(auth, email, password);
-            if (user) router.replace('/home');
+            const userCred = await createUserWithEmailAndPassword(auth, email, password);
+            const user = userCred.user;
+
+            let uploadedPicUrl = '';
+
+            if (profilePic) {
+                const downloadUrl = await userService.uploadProfileImage(profilePic);
+                if (downloadUrl) {
+                    uploadedPicUrl = downloadUrl;
+                }
+            }
+
+            const profile = {
+                username,
+                email,
+                contact_no: contactNo,
+                first_name: firstName,
+                middle_name: midName,
+                last_name: lastName,
+                profile_img_url: uploadedPicUrl,
+                birth_date: birthdate,
+                cardBackgroundColor: cardColor
+            };
+
+            await userService.uploadUserDetails(profile as any, user.uid);
+            
+            router.replace('/home');
         } catch (error: any) {
             console.log(error);
-            alert('Sign in failed: ' + error.message)
+            alert('Sign up failed: ' + error.message)
         } finally {
             const user = auth.currentUser
             console.log('Successfully signed up! Welcome new user +' + user?.uid);

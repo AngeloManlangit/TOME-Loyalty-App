@@ -1,7 +1,8 @@
 import { type UserDetails } from "@/assets/classes/users";
 import { db } from "@/firebase/firebaseConfig";
-import { getAuth } from "firebase/auth";
-import { doc, getDoc } from "firebase/firestore";
+import { getDownloadURL, getStorage, ref, uploadBytes } from "@firebase/storage";
+import { createUserWithEmailAndPassword, getAuth } from "firebase/auth";
+import { doc, getDoc, collection, addDoc, setDoc } from "firebase/firestore";
 
 const auth = getAuth();
 
@@ -47,6 +48,58 @@ export const userService = {
         } else {
             console.log('No user logged in!')
             return null;
+        }
+    },
+
+    async uploadProfileImage(uri: string) {
+        const user = auth.currentUser;
+        if (user) {
+            try {
+                const blob: Blob = await new Promise((resolve, reject) => {
+                    const xhr = new XMLHttpRequest();
+                    xhr.onload = function() {
+                        resolve(xhr.response);
+                    };
+                    xhr.onerror = function(e) {
+                        console.log(e);
+                        reject(new TypeError('Network request failed'));
+                    };
+                    xhr.responseType = 'blob';
+                    xhr.open('GET', uri, true);
+                    xhr.send(null);
+                });
+        
+                const storage = getStorage();
+                const filename = `userPfps/${user.uid}_${Date.now()}.jpg`;
+                const storageRef = ref(storage, filename);
+        
+                await uploadBytes(storageRef, blob);
+        
+                const downloadURL = await getDownloadURL(storageRef);
+                return downloadURL;
+            } catch (error: any) {
+                console.error("Error uploading stamp background: ", error);
+                return null;
+            }
+        } else {
+            console.log('No user logged in!');
+            return null;
+        }
+    },
+
+    async uploadUserDetails(profile: UserDetails, userID: string | undefined) {
+        try {
+            if (!userID) throw new Error("No user ID provided.");
+
+            // Point to the specific document using the Auth UID
+            const docRef = doc(db, "users", userID);
+
+            // writes a document to that specific userID (makes a new one if DNE)
+            await setDoc(docRef, profile, { merge: true });
+
+            console.log("User added with ID: ", userID);
+        } catch (error) {
+            console.error("Error uploading user details: ", error);
         }
     }
 }
