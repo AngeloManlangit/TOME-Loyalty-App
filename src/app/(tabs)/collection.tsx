@@ -44,6 +44,12 @@ export default function CollectionScreen() {
     bottomSheetRef.current?.snapToIndex(0);
   }
 
+  const [showShareModal, setShowShareModal] = useState(false);
+  const handleSharePress = (response: boolean) => {
+    setShowShareModal(response);
+    console.log(showShareModal);
+  };
+
   for (const s of stamps) {
       stampList.push(
         <TouchableOpacity key={s.id} style={[styles.cardButtonContainer]} activeOpacity={0.8} onPress={() => setCurrentStamp(s)}>
@@ -84,7 +90,8 @@ export default function CollectionScreen() {
                     onRefresh={() => {
                       handleRefresh();
                       bottomSheetRef.current?.close();
-                    }}  
+                    }}
+                    onSharePress={handleSharePress}
                   />
               )}
           </BottomSheetScrollView>

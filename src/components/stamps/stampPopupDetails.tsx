@@ -10,9 +10,10 @@ import { useState } from "react";
 interface StampPopupDetailsInterface {
     stamp: StampCardDetails;
     onRefresh?: () => void;
+    onSharePress: (response: boolean) => void;
 }
 
-export default function StampPopupDetails({stamp, onRefresh}: StampPopupDetailsInterface) {
+export default function StampPopupDetails({stamp, onRefresh, onSharePress}: StampPopupDetailsInterface) {
 
     const historyContent = [];
 
@@ -105,13 +106,15 @@ export default function StampPopupDetails({stamp, onRefresh}: StampPopupDetailsI
             
             <View style={{flexDirection: 'column', alignItems: 'center'}}>
                 <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
-                    <TouchableOpacity style={styles.button} onPress={() => handleEditPress(stamp)}>
+                    <TouchableOpacity style={styles.button} 
+                        
+                    >
                         <StampIcon color={'#fff'} />
                         <Text style={styles.buttonText}>Stamp</Text>
                     </TouchableOpacity>
 
                     <TouchableOpacity style={[styles.button, { backgroundColor: Colors.outlets.green }]} 
-                        onPress={() => handleEditPress(stamp)}
+                        onPress={() => onSharePress(true)}
                     >
                         <ShareIcon color={'#fff'} />
                         <Text style={styles.buttonText}>Share</Text>

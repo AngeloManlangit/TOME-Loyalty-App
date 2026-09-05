@@ -37,6 +37,11 @@ export default function HomeScreen() {
     bottomSheetRef.current?.snapToIndex(0);
   }
 
+  const [showShareModal, setShowShareModal] = useState(false);
+  const handleSharePress = (response: boolean) => {
+    setShowShareModal(response);
+  };
+
   return (
     <GestureHandlerRootView style={styles.container}>
       <LinearGradient
@@ -61,11 +66,13 @@ export default function HomeScreen() {
         >
             <BottomSheetScrollView contentContainerStyle={styles.sheetContent}>
                 {selectedStamp && (
-                    <StampPopupDetails stamp={selectedStamp} />
+                    <StampPopupDetails 
+                      stamp={selectedStamp} 
+                      onSharePress={handleSharePress}
+                    />
                 )}
             </BottomSheetScrollView>
         </BottomSheet>
-        
       </LinearGradient>
     </GestureHandlerRootView>
   );
