@@ -4,12 +4,14 @@ import StampCard from "./stampCard";
 import { Colors, Fonts } from "@/src/constants/theme";
 import { EditIcon, TrashIcon } from "lucide-react-native";
 import { router } from "expo-router";
+import { stampService } from "@/src/services/stampService";
 
 interface StampPopupDetailsInterface {
     stamp: StampCardDetails;
+    onRefresh?: () => void;
 }
 
-export default function StampPopupDetails({stamp}: StampPopupDetailsInterface) {
+export default function StampPopupDetails({stamp, onRefresh}: StampPopupDetailsInterface) {
 
     const historyContent = [];
 
@@ -41,6 +43,27 @@ export default function StampPopupDetails({stamp}: StampPopupDetailsInterface) {
         }
     };
 
+    const handleDeletePress = async () => {
+        if (!stamp) return;
+            
+        try {
+            const response = await stampService.deleteStamp(stamp);
+
+            if (response?.success) {
+                alert("Stamp deleted successfully!");
+                if (onRefresh) onRefresh();
+            }
+            else {
+                alert("Error in deleting stamp. Please again later.\nError: " + response?.error);
+            }
+
+            return;
+        } catch (error) {
+            console.error("Error deleting the stamp card:", error);
+            alert("Failed to delete card.");
+        }
+    }
+
     return (
         <View style={styles.container}>
             <Text style={styles.title}>{stamp.stampCard_configs.title}</Text>
@@ -67,7 +90,9 @@ export default function StampPopupDetails({stamp}: StampPopupDetailsInterface) {
                     <Text style={styles.buttonText}>Edit</Text>
                 </TouchableOpacity>
 
-                <TouchableOpacity style={[styles.button, {backgroundColor: Colors.outlets.pink}]}>
+                <TouchableOpacity style={[styles.button, {backgroundColor: Colors.outlets.pink}]}
+                    onPress={handleDeletePress}
+                >
                     <TrashIcon color={'#fff'} />
                     <Text style={styles.buttonText}>Delete</Text>
                 </TouchableOpacity>

@@ -3,7 +3,7 @@ import { db } from "@/firebase/firebaseConfig";
 import { getAuth } from "firebase/auth";
 import { addDoc, collection, deleteDoc, doc, getDoc, getDocs, orderBy, query, updateDoc, where } from "firebase/firestore";
 import { genSeed } from "../utils/rng";
-import { getStorage, ref, uploadBytes, getDownloadURL } from 'firebase/storage';
+import { getStorage, ref, uploadBytes, getDownloadURL, deleteObject } from 'firebase/storage';
 
 const auth = getAuth();
 const stampsCollection = collection(db, 'stamps');
@@ -86,6 +86,7 @@ export const stampService = {
         }
     },
     
+    // for debug purposes
     async deleteAllStampsByOwner() {
         console.log('Deleting all...')
         const user = auth.currentUser;
@@ -175,6 +176,40 @@ export const stampService = {
                 }
             } catch (error: any) {
                 console.error("Error updating stamp: ", error);
+                return { success: false, error: error };
+            }
+        } else {
+            console.log('No user logged in or user doesn\'t own the stamp!');
+            return { success: false, error: 'No user logged in or user doesn\'t own stamp' };
+        }
+    },
+
+    async deleteStamp(s: StampCardDetails) {
+        const user = auth.currentUser;
+        if (user && s.owner_ID === user.uid && s.id !== undefined) {
+            try {
+                
+                if (s.stampCard_configs.bgImage) {
+                    const storage = getStorage();
+                    const imageRef = ref(storage, s.stampCard_configs.bgImage);
+
+                    try {
+                        await deleteObject(imageRef);
+                        console.log("Background image successfully deleted!");
+                    } catch (imgError) {
+                        console.error("Error deleting background image: ", imgError);
+                    }
+                }
+                
+                const docRef = doc(stampsCollection, `${s.id}`);
+
+                await deleteDoc(docRef).then(() => {
+                    console.log("Document successfully deleted!");
+                })
+
+                return { success: true }
+            } catch (error: any) {
+                console.error("Error deleting stamp: ", error);
                 return { success: false, error: error };
             }
         } else {

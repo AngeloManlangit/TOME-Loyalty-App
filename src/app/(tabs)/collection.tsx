@@ -6,22 +6,25 @@ import BottomSheet, { BottomSheetBackdrop, BottomSheetScrollView } from "@gorhom
 import { Colors, Fonts, bgTransparency } from "@src/constants/theme";
 import { LinearGradient } from "expo-linear-gradient";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { Pressable, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 
 export default function CollectionScreen() {
   const [stamps, setStamps] = useState<StampCardDetails[]>([]);
   
+  const handleRefresh = async () => {
+    const userStamps = await stampService.fetchStamps();
+    if (userStamps) {
+      setStamps(userStamps);
+    }
+  };
+
   useEffect(() => {
-    const loadStamps = async () => {
-      const userStamps = await stampService.fetchStamps();
+    stampService.fetchStamps().then((userStamps) => {
       if (userStamps) {
-        // console.log(userStamps) // debug purposes
         setStamps(userStamps);
       }
-    };
-
-    loadStamps();
+    });
   }, []);
 
   const stampList = [];
@@ -76,7 +79,13 @@ export default function CollectionScreen() {
       >
           <BottomSheetScrollView contentContainerStyle={styles.sheetContent}>
               {selectedStamp && (
-                  <StampPopupDetails stamp={selectedStamp} />
+                  <StampPopupDetails 
+                    stamp={selectedStamp}
+                    onRefresh={() => {
+                      handleRefresh();
+                      bottomSheetRef.current?.close();
+                    }}  
+                  />
               )}
           </BottomSheetScrollView>
       </BottomSheet>
