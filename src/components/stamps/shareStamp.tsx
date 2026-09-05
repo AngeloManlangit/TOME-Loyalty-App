@@ -29,6 +29,7 @@ export default function ShareStampModal({ s, visible, onClose }: ShareStampInter
             });
             return uri;
         } catch (error) {
+            console.log('Error: ', error);
             Alert.alert("Error", "Could not generate the image.");
             return null;
         }
@@ -53,9 +54,10 @@ export default function ShareStampModal({ s, visible, onClose }: ShareStampInter
         if (!uri) return;
 
         try {
-            await CameraRoll.save(uri, { type: 'photo' });
+            await CameraRoll.saveAsset(uri, { type: 'photo' });
             Alert.alert("Success", "Image saved to your gallery!");
         } catch (error) {
+            console.log('Error: ', error);
             Alert.alert("Error", "Failed to save image. Check permissions.");
         }
     };

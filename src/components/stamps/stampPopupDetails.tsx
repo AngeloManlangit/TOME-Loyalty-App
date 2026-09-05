@@ -2,10 +2,9 @@ import { StampCardDetails } from "@/assets/classes/stamps";
 import { Alert, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import StampCard from "./stampCard";
 import { Colors, Fonts } from "@/src/constants/theme";
-import { CircleAlert, EditIcon, ShareIcon, StampIcon, TrashIcon } from "lucide-react-native";
+import { EditIcon, ShareIcon, StampIcon, TrashIcon } from "lucide-react-native";
 import { router } from "expo-router";
 import { stampService } from "@/src/services/stampService";
-import { useState } from "react";
 
 interface StampPopupDetailsInterface {
     stamp: StampCardDetails;
