@@ -2,7 +2,7 @@ import { StampCardDetails } from "@/assets/classes/stamps";
 import { Alert, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import StampCard from "./stampCard";
 import { Colors, Fonts } from "@/src/constants/theme";
-import { CircleAlert, EditIcon, TrashIcon } from "lucide-react-native";
+import { CircleAlert, EditIcon, ShareIcon, StampIcon, TrashIcon } from "lucide-react-native";
 import { router } from "expo-router";
 import { stampService } from "@/src/services/stampService";
 import { useState } from "react";
@@ -103,18 +103,36 @@ export default function StampPopupDetails({stamp, onRefresh}: StampPopupDetailsI
             
             }
             
-            <View style={{flexDirection: 'row', alignItems: 'center', gap: 10}}>
-                <TouchableOpacity style={styles.button} onPress={() => handleEditPress(stamp)}>
-                    <EditIcon color={'#fff'} />
-                    <Text style={styles.buttonText}>Edit</Text>
-                </TouchableOpacity>
+            <View style={{flexDirection: 'column', alignItems: 'center'}}>
+                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
+                    <TouchableOpacity style={styles.button} onPress={() => handleEditPress(stamp)}>
+                        <StampIcon color={'#fff'} />
+                        <Text style={styles.buttonText}>Stamp</Text>
+                    </TouchableOpacity>
 
-                <TouchableOpacity style={[styles.button, {backgroundColor: Colors.outlets.pink}]}
-                    onPress={askDelete}
-                >
-                    <TrashIcon color={'#fff'} />
-                    <Text style={styles.buttonText}>Delete</Text>
-                </TouchableOpacity>
+                    <TouchableOpacity style={[styles.button, { backgroundColor: Colors.outlets.green }]} 
+                        onPress={() => handleEditPress(stamp)}
+                    >
+                        <ShareIcon color={'#fff'} />
+                        <Text style={styles.buttonText}>Share</Text>
+                    </TouchableOpacity>
+                </View>
+
+                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
+                    <TouchableOpacity style={[styles.button, { backgroundColor: Colors.outlets.blue }]} 
+                        onPress={() => handleEditPress(stamp)}
+                    >
+                        <EditIcon color={'#fff'} />
+                        <Text style={styles.buttonText}>Edit</Text>
+                    </TouchableOpacity>
+
+                    <TouchableOpacity style={[styles.button, {backgroundColor: Colors.outlets.pink}]}
+                        onPress={askDelete}
+                    >
+                        <TrashIcon color={'#fff'} />
+                        <Text style={styles.buttonText}>Delete</Text>
+                    </TouchableOpacity>
+                </View>
             </View>
         </View>
     );
@@ -178,12 +196,13 @@ const styles = StyleSheet.create({
         color: '#fff'
     },
     button: {
+        flex: 1,
         marginTop: 20,
-        paddingHorizontal: 20,
         paddingVertical: 10,
         backgroundColor: Colors.outlets.purple,
         borderRadius: 15,
         flexDirection: 'row',
+        justifyContent: 'center',
         alignItems: 'center',
         gap: 7
     },
