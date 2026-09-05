@@ -1,4 +1,5 @@
 import { StampCardDetails } from "@/assets/classes/stamps";
+import ShareStampModal from "@/src/components/stamps/shareStamp";
 import StampPopupDetails from "@/src/components/stamps/stampPopupDetails";
 import BottomSheet, { BottomSheetBackdrop, BottomSheetScrollView } from "@gorhom/bottom-sheet";
 import StampSection from "@src/components/homePage/stampSection";
@@ -37,6 +38,11 @@ export default function HomeScreen() {
     bottomSheetRef.current?.snapToIndex(0);
   }
 
+  const [showShareModal, setShowShareModal] = useState(false);
+  const handleSharePress = (response: boolean) => {
+    setShowShareModal(response);
+  };
+
   return (
     <GestureHandlerRootView style={styles.container}>
       <LinearGradient
@@ -61,12 +67,24 @@ export default function HomeScreen() {
         >
             <BottomSheetScrollView contentContainerStyle={styles.sheetContent}>
                 {selectedStamp && (
-                    <StampPopupDetails stamp={selectedStamp} />
+                    <StampPopupDetails 
+                      stamp={selectedStamp} 
+                      onSharePress={handleSharePress}
+                    />
                 )}
             </BottomSheetScrollView>
         </BottomSheet>
-        
       </LinearGradient>
+                
+      {
+        selectedStamp && (
+          <ShareStampModal
+            s={selectedStamp}
+            visible={showShareModal}
+            onClose={() => setShowShareModal(false)}
+          />
+        )
+      }
     </GestureHandlerRootView>
   );
 }
@@ -75,6 +93,8 @@ const styles = StyleSheet.create({
   container: {
     backgroundColor: "#fff",
     flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center'
   },
   mainView: {
     flex: 1,

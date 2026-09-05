@@ -1,15 +1,18 @@
 import { StampCardDetails } from "@/assets/classes/stamps";
-import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { Alert, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import StampCard from "./stampCard";
 import { Colors, Fonts } from "@/src/constants/theme";
-import { EditIcon, TrashIcon } from "lucide-react-native";
+import { EditIcon, ShareIcon, StampIcon, TrashIcon } from "lucide-react-native";
 import { router } from "expo-router";
+import { stampService } from "@/src/services/stampService";
 
 interface StampPopupDetailsInterface {
     stamp: StampCardDetails;
+    onRefresh?: () => void;
+    onSharePress: (response: boolean) => void;
 }
 
-export default function StampPopupDetails({stamp}: StampPopupDetailsInterface) {
+export default function StampPopupDetails({stamp, onRefresh, onSharePress}: StampPopupDetailsInterface) {
 
     const historyContent = [];
 
@@ -41,6 +44,45 @@ export default function StampPopupDetails({stamp}: StampPopupDetailsInterface) {
         }
     };
 
+    const handleDeletePress = async () => {
+        if (!stamp) return;
+            
+        try {
+            const response = await stampService.deleteStamp(stamp);
+
+            if (response?.success) {
+                alert("Stamp deleted successfully!");
+                if (onRefresh) onRefresh();
+            }
+            else {
+                alert("Error in deleting stamp. Please again later.\nError: " + response?.error);
+            }
+
+            return;
+        } catch (error) {
+            console.error("Error deleting the stamp card:", error);
+            alert("Failed to delete card.");
+        }
+    }
+
+    const askDelete = () => {
+        Alert.alert(
+            'Delete stamp card?',
+            'This action can not be undone.',
+            [
+                {
+                    text: 'Cancel',
+                    style: 'cancel'
+                },
+                {
+                    text: 'Confirm',
+                    onPress: handleDeletePress
+                },
+            ],
+            { cancelable: true }
+        );
+    }
+
     return (
         <View style={styles.container}>
             <Text style={styles.title}>{stamp.stampCard_configs.title}</Text>
@@ -61,16 +103,38 @@ export default function StampPopupDetails({stamp}: StampPopupDetailsInterface) {
             
             }
             
-            <View style={{flexDirection: 'row', alignItems: 'center', gap: 10}}>
-                <TouchableOpacity style={styles.button} onPress={() => handleEditPress(stamp)}>
-                    <EditIcon color={'#fff'} />
-                    <Text style={styles.buttonText}>Edit</Text>
-                </TouchableOpacity>
+            <View style={{flexDirection: 'column', alignItems: 'center'}}>
+                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
+                    <TouchableOpacity style={styles.button} 
+                        
+                    >
+                        <StampIcon color={'#fff'} />
+                        <Text style={styles.buttonText}>Stamp</Text>
+                    </TouchableOpacity>
 
-                <TouchableOpacity style={[styles.button, {backgroundColor: Colors.outlets.pink}]}>
-                    <TrashIcon color={'#fff'} />
-                    <Text style={styles.buttonText}>Delete</Text>
-                </TouchableOpacity>
+                    <TouchableOpacity style={[styles.button, { backgroundColor: Colors.outlets.green }]} 
+                        onPress={() => onSharePress(true)}
+                    >
+                        <ShareIcon color={'#fff'} />
+                        <Text style={styles.buttonText}>Share</Text>
+                    </TouchableOpacity>
+                </View>
+
+                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
+                    <TouchableOpacity style={[styles.button, { backgroundColor: Colors.outlets.blue }]} 
+                        onPress={() => handleEditPress(stamp)}
+                    >
+                        <EditIcon color={'#fff'} />
+                        <Text style={styles.buttonText}>Edit</Text>
+                    </TouchableOpacity>
+
+                    <TouchableOpacity style={[styles.button, {backgroundColor: Colors.outlets.pink}]}
+                        onPress={askDelete}
+                    >
+                        <TrashIcon color={'#fff'} />
+                        <Text style={styles.buttonText}>Delete</Text>
+                    </TouchableOpacity>
+                </View>
             </View>
         </View>
     );
@@ -134,12 +198,13 @@ const styles = StyleSheet.create({
         color: '#fff'
     },
     button: {
+        flex: 1,
         marginTop: 20,
-        paddingHorizontal: 20,
         paddingVertical: 10,
         backgroundColor: Colors.outlets.purple,
         borderRadius: 15,
         flexDirection: 'row',
+        justifyContent: 'center',
         alignItems: 'center',
         gap: 7
     },
@@ -147,5 +212,5 @@ const styles = StyleSheet.create({
         color: '#fff',
         fontSize: 20,
         fontFamily: Fonts.Lato
-    },
+    }
 })

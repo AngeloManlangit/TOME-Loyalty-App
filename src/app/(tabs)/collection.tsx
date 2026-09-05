@@ -1,4 +1,5 @@
 import { StampCardDetails } from "@/assets/classes/stamps";
+import ShareStampModal from "@/src/components/stamps/shareStamp";
 import StampCard from "@/src/components/stamps/stampCard";
 import StampPopupDetails from "@/src/components/stamps/stampPopupDetails";
 import { stampService } from "@/src/services/stampService";
@@ -12,16 +13,19 @@ import { GestureHandlerRootView } from "react-native-gesture-handler";
 export default function CollectionScreen() {
   const [stamps, setStamps] = useState<StampCardDetails[]>([]);
   
+  const handleRefresh = async () => {
+    const userStamps = await stampService.fetchStamps();
+    if (userStamps) {
+      setStamps(userStamps);
+    }
+  };
+
   useEffect(() => {
-    const loadStamps = async () => {
-      const userStamps = await stampService.fetchStamps();
+    stampService.fetchStamps().then((userStamps) => {
       if (userStamps) {
-        // console.log(userStamps) // debug purposes
         setStamps(userStamps);
       }
-    };
-
-    loadStamps();
+    });
   }, []);
 
   const stampList = [];
@@ -40,6 +44,12 @@ export default function CollectionScreen() {
     setSelectedStamp(s);
     bottomSheetRef.current?.snapToIndex(0);
   }
+
+  const [showShareModal, setShowShareModal] = useState(false);
+  const handleSharePress = (response: boolean) => {
+    setShowShareModal(response);
+    console.log(showShareModal);
+  };
 
   for (const s of stamps) {
       stampList.push(
@@ -76,10 +86,27 @@ export default function CollectionScreen() {
       >
           <BottomSheetScrollView contentContainerStyle={styles.sheetContent}>
               {selectedStamp && (
-                  <StampPopupDetails stamp={selectedStamp} />
+                  <StampPopupDetails 
+                    stamp={selectedStamp}
+                    onRefresh={() => {
+                      handleRefresh();
+                      bottomSheetRef.current?.close();
+                    }}
+                    onSharePress={handleSharePress}
+                  />
               )}
           </BottomSheetScrollView>
       </BottomSheet>
+
+      {
+        selectedStamp && (
+          <ShareStampModal
+            s={selectedStamp}
+            visible={showShareModal}
+            onClose={() => setShowShareModal(false)}
+          />
+        )
+      }
     </GestureHandlerRootView>
   );
 }
