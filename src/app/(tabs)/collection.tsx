@@ -1,4 +1,5 @@
 import { StampCardDetails } from "@/assets/classes/stamps";
+import ShareStampModal from "@/src/components/stamps/shareStamp";
 import StampCard from "@/src/components/stamps/stampCard";
 import StampPopupDetails from "@/src/components/stamps/stampPopupDetails";
 import { stampService } from "@/src/services/stampService";
@@ -96,6 +97,16 @@ export default function CollectionScreen() {
               )}
           </BottomSheetScrollView>
       </BottomSheet>
+
+      {
+        selectedStamp && (
+          <ShareStampModal
+            s={selectedStamp}
+            visible={showShareModal}
+            onClose={() => setShowShareModal(false)}
+          />
+        )
+      }
     </GestureHandlerRootView>
   );
 }
