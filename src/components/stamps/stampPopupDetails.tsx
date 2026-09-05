@@ -1,10 +1,11 @@
 import { StampCardDetails } from "@/assets/classes/stamps";
-import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { Alert, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import StampCard from "./stampCard";
 import { Colors, Fonts } from "@/src/constants/theme";
-import { EditIcon, TrashIcon } from "lucide-react-native";
+import { CircleAlert, EditIcon, TrashIcon } from "lucide-react-native";
 import { router } from "expo-router";
 import { stampService } from "@/src/services/stampService";
+import { useState } from "react";
 
 interface StampPopupDetailsInterface {
     stamp: StampCardDetails;
@@ -64,6 +65,24 @@ export default function StampPopupDetails({stamp, onRefresh}: StampPopupDetailsI
         }
     }
 
+    const askDelete = () => {
+        Alert.alert(
+            'Delete stamp card?',
+            'This action can not be undone.',
+            [
+                {
+                    text: 'Cancel',
+                    style: 'cancel'
+                },
+                {
+                    text: 'Confirm',
+                    onPress: handleDeletePress
+                },
+            ],
+            { cancelable: true }
+        );
+    }
+
     return (
         <View style={styles.container}>
             <Text style={styles.title}>{stamp.stampCard_configs.title}</Text>
@@ -91,7 +110,7 @@ export default function StampPopupDetails({stamp, onRefresh}: StampPopupDetailsI
                 </TouchableOpacity>
 
                 <TouchableOpacity style={[styles.button, {backgroundColor: Colors.outlets.pink}]}
-                    onPress={handleDeletePress}
+                    onPress={askDelete}
                 >
                     <TrashIcon color={'#fff'} />
                     <Text style={styles.buttonText}>Delete</Text>
@@ -172,5 +191,5 @@ const styles = StyleSheet.create({
         color: '#fff',
         fontSize: 20,
         fontFamily: Fonts.Lato
-    },
+    }
 })
