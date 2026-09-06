@@ -9,6 +9,8 @@ import { useUser } from "@/src/contexts/userContext";
 import { bgTransparency, Colors, Fonts } from "@/src/constants/theme";
 import { LinearGradient } from "expo-linear-gradient";
 import { Undo2 } from "lucide-react-native";
+import { stampService } from "@/src/services/stampService";
+import { userService } from "@/src/services/userService";
 
 export default function AddStamp() {
     const { user } = useUser();
@@ -59,6 +61,27 @@ export default function AddStamp() {
         }
     }
 
+    const confirmStamp = async () => {
+        if (localStampsUsed > 0) {
+            try {
+                const stampResponse = await stampService.updateStamp(dynamicStampCard);
+                if (!stampResponse?.success) {
+                    console.error("Could not save stamp response");
+                }
+
+                const userResponse = await userService.updateStampBank(stampBankCount);
+                if (!userResponse?.success) {
+                    console.error("Could not save stamp response");
+                }
+
+                console.log("Updating stamp bank and card finished!");
+                router.push("/home"); // needs some work
+            } catch (error: any) {
+                console.error("Error in saving new stamp count details!", error);
+            }
+        }
+    }
+
     return(
         <View style={styles.flexy}>
             <StatusBar barStyle={"dark-content"} />
@@ -106,11 +129,17 @@ export default function AddStamp() {
                                 </Pressable>
 
                                 <View style={styles.buttonContainer}>
-                                    <TouchableOpacity style={[styles.button, { backgroundColor: Colors.outlets.purple }]}>
+                                    <TouchableOpacity 
+                                        style={[styles.button, { backgroundColor: Colors.outlets.purple }]}
+                                        onPress={confirmStamp}    
+                                    >
                                         <Text style={[styles.finishText]}>FINISH</Text>
                                     </TouchableOpacity>
 
-                                    <TouchableOpacity style={[styles.button, { backgroundColor: '#e7e7e7' }]} onPress={() => router.back()}>
+                                    <TouchableOpacity 
+                                        style={[styles.button, { backgroundColor: '#e7e7e7' }]} 
+                                        onPress={() => router.back()}
+                                    >
                                         <Text style={styles.cancelText}>Cancel</Text>
                                     </TouchableOpacity>
                                 </View>

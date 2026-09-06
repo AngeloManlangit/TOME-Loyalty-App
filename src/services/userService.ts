@@ -2,9 +2,10 @@ import { type UserDetails } from "@/assets/classes/users";
 import { db } from "@/firebase/firebaseConfig";
 import { getDownloadURL, getStorage, ref, uploadBytes } from "@firebase/storage";
 import { getAuth } from "firebase/auth";
-import { doc, getDoc, setDoc } from "firebase/firestore";
+import { collection, doc, getDoc, setDoc, updateDoc } from "firebase/firestore";
 
 const auth = getAuth();
+const userCollection = collection(db, 'users');
 
 export const userService = {
 
@@ -100,6 +101,28 @@ export const userService = {
             console.log("User added with ID: ", userID);
         } catch (error) {
             console.error("Error uploading user details: ", error);
+        }
+    },
+
+    async updateStampBank(newCount: number) {
+        const user = auth.currentUser;
+        if (user) {
+            try {
+                const docRef = doc(userCollection, `${user.uid}`);
+
+                await updateDoc(docRef, {
+                    stamp_bank: newCount
+                });
+                
+                console.log("Updated new Stamp Bank Count!");
+                return { success: true }
+            } catch (error: any) {
+                console.error("Error updating stamp count: ", error);
+                return { success: false }
+            } 
+        } else {
+            console.log('No user logged in!');
+            return { success: false }
         }
     }
 }
