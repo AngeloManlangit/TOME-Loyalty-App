@@ -32,6 +32,18 @@ export default function StampPopupDetails({stamp, onRefresh, onSharePress}: Stam
         }
     }
 
+    const handleStampPress = (stampCardDetails: StampCardDetails) => {
+        if (stampCardDetails.id) {
+            router.push({
+                pathname: "/addStamp",
+                params: {
+                    stamp_ID: stampCardDetails.id,
+                    details: JSON.stringify(stampCardDetails),
+                },
+            });
+        }
+    };
+
     const handleEditPress = (stampCardDetails: StampCardDetails) => {
         if (stampCardDetails.id){
             router.push({
@@ -106,7 +118,7 @@ export default function StampPopupDetails({stamp, onRefresh, onSharePress}: Stam
             <View style={{flexDirection: 'column', alignItems: 'center'}}>
                 <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
                     <TouchableOpacity style={styles.button} 
-                        
+                        onPress={() => handleStampPress(stamp)}
                     >
                         <StampIcon color={'#fff'} />
                         <Text style={styles.buttonText}>Stamp</Text>
