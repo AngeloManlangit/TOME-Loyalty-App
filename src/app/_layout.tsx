@@ -62,7 +62,6 @@ export default function RootLayout() {
           <Stack.Screen name="index" />
           <Stack.Screen name="(tabs)" />
           <Stack.Screen name="(misc)" />
-          <Stack.Screen name="createAcc" />
         </Stack>
 
         {!hideSplash && (

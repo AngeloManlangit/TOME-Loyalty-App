@@ -20,7 +20,7 @@ export default function AddStamp() {
 
     const handlePressIn = () => {
         setIsDisabled(true);
-        scale.set(() => 0.90); // Shrink slightly
+        scale.set(() => withSpring(0.90, { duration: 20 })); // Shrink slightly
 
         // short cooldown so that users can't spam and the scale has time to grow a little
         setTimeout(() => {
