@@ -24,8 +24,9 @@ export default function ShareStampModal({ s, visible, onClose }: ShareStampInter
     const captureView = async () => {
         try {
             const uri = await captureRef(viewShotRef, {
-                format: "jpg",
-                quality: 0.9,
+                format: "png",
+                quality: 1.0,
+                fileName: `The Outlets Loyalty App - ${s.stampCard_configs.title} by @${user?.username}`
             });
             return uri;
         } catch (error) {
@@ -42,7 +43,7 @@ export default function ShareStampModal({ s, visible, onClose }: ShareStampInter
         try {
             await Share.open({
                 url: uri,
-                type: 'image/jpeg',
+                type: 'image/png',
             });
         } catch (error: any) {
             console.log("Share canceled", error.message);
@@ -72,7 +73,11 @@ export default function ShareStampModal({ s, visible, onClose }: ShareStampInter
             <View style={styles.modalBackground}>
                 <View style={styles.modalContainer}>
                     <Text style={styles.shareTitle}>Share stamp card</Text>
-                    <ViewShot ref={viewShotRef} options={{ format: "jpg", quality: 0.9 }}>
+                    <ViewShot ref={viewShotRef} options={{ 
+                        format: "png",
+                        quality: 1.0,
+                        fileName: `The Outlets Loyalty App - ${s.stampCard_configs.title} by @${user?.username}` 
+                    }}>
                         <View style={styles.pictureContainer}>
                             <View style={styles.headerRow}>
                                 <Image 
