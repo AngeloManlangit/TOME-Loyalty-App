@@ -1,14 +1,17 @@
+import { UserProvider } from "@/src/contexts/userContext";
 import { Stack } from "expo-router";
 import { StyleSheet, View } from "react-native";
 
 export default function RootLayout() {
     return(
-        <View style={styles.container}>
-            <Stack screenOptions={{ headerShown: false }}>
-                <Stack.Screen name="addStamp" />
-                <Stack.Screen name="createAcc" />
-            </Stack>
-        </View>
+        <UserProvider>
+            <View style={styles.container}>
+                <Stack screenOptions={{ headerShown: false }}>
+                    <Stack.Screen name="addStamp" />
+                    <Stack.Screen name="createAcc" />
+                </Stack>
+            </View>
+        </UserProvider>
     );
 }
 
