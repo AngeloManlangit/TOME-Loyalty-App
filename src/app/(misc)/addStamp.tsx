@@ -1,26 +1,33 @@
 import { StampCardDetails } from "@/assets/classes/stamps";
 import StampCard from "@/src/components/stamps/stampCard";
-import { router, useLocalSearchParams, useRouter } from "expo-router";
+import { useLocalSearchParams, useRouter } from "expo-router";
 import { Pressable, StyleSheet, View, Text, Image, TouchableOpacity, StatusBar } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import Animated, { useAnimatedStyle, useSharedValue, withSpring } from 'react-native-reanimated';
 import { useState } from "react";
-import { UserProvider, useUser } from "@/src/contexts/userContext";
+import { useUser } from "@/src/contexts/userContext";
 import { bgTransparency, Colors, Fonts } from "@/src/constants/theme";
 import { LinearGradient } from "expo-linear-gradient";
+import { Undo2 } from "lucide-react-native";
 
 export default function AddStamp() {
+    const { user } = useUser();
+    const router = useRouter();
+    
     const { details } = useLocalSearchParams();
     const parsedDetails = details ? JSON.parse(details as string) : null;
     const stampCard = parsedDetails as StampCardDetails;
+    
+    const [localStampsUsed, setLocalStampsUsed] = useState(0);
+    const stampBankCount = (user?.stamp_bank || 0) - localStampsUsed;
 
     const scale = useSharedValue(1); //
     const [isDisabled, setIsDisabled] = useState(false);
-
+    
     const animatedStyle = useAnimatedStyle(() => ({
         transform: [{ scale: scale.value }], //
     }));
-
+    
     const handlePressIn = () => {
         setIsDisabled(true);
         scale.set(() => withSpring(0.90, { duration: 20 })); // Shrink slightly
@@ -35,8 +42,22 @@ export default function AddStamp() {
         scale.set(() => withSpring(1, { duration: 550, dampingRatio: 1 , velocity: 5 })); // Snap back to normal
     };
 
-    const { user } = useUser();
-    const router = useRouter();
+    const dynamicStampCard = {
+        ...stampCard,
+        stamp_count: (stampCard?.stamp_count || 0) + localStampsUsed
+    };
+
+    const addStamp = () => {
+        if (stampBankCount > 0 && dynamicStampCard.stamp_count < dynamicStampCard.stamp_total) {
+            setLocalStampsUsed(localStampsUsed + 1);
+        }
+    }
+
+    const undoStamp = () => {
+        if (localStampsUsed > 0) {
+            setLocalStampsUsed(localStampsUsed - 1);
+        }
+    }
 
     return(
         <View style={styles.flexy}>
@@ -57,17 +78,30 @@ export default function AddStamp() {
                                         style={styles.stampImage}
                                         resizeMode="contain"
                                     />
-                                    <Text style={styles.stampCount}>{user.stamp_bank}</Text>
+                                    <Text style={styles.stampCount}>{stampBankCount}</Text>
+
+                                    {
+                                        (localStampsUsed > 0) ? (
+                                            <TouchableOpacity
+                                                style={styles.resetButton}
+                                                onPress={undoStamp}
+                                            >
+                                                <Undo2 />
+                                                <Text>Undo</Text>
+                                            </TouchableOpacity>
+                                        ) : ''
+                                    }
                                 </View>
 
                                 <Pressable
                                     onPressIn={handlePressIn}
                                     onPressOut={handlePressOut}
+                                    onPress={addStamp}
                                     style={styles.cardButton}
                                     disabled={isDisabled}
                                 >
                                     <Animated.View style={animatedStyle}>
-                                        <StampCard cardDetails={stampCard} />
+                                        <StampCard cardDetails={dynamicStampCard} />
                                     </Animated.View>
                                 </Pressable>
 
@@ -148,4 +182,12 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         borderRadius: 10
     },
+    resetButton: {
+        flexDirection: 'row',
+        justifyContent: 'center',
+        alignItems: 'center',
+        gap: 2,
+        marginLeft: 8,
+        marginRight: -20
+    }
 })
