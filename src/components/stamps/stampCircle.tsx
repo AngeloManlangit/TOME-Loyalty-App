@@ -1,4 +1,4 @@
-import { View, StyleSheet } from "react-native";
+import { View, StyleSheet, Image } from "react-native";
 import { StarIcon } from "lucide-react-native";
 
 interface StampCircleInterface {
@@ -20,10 +20,23 @@ export default function StampCircle({stamped = false, reward = false, randomizer
     return (
         <View style={[
             styles.circle, 
-            (stamped) ? {backgroundColor: '#000'} : {backgroundColor: '#FFFCF3'},
+            { backgroundColor: '#FFFCF3' },
             { marginTop: randomMarginTop, marginLeft: randomMarginLeft }  
-        ]}>
-            {reward ? (
+        ]}> 
+            {
+                stamped ? (
+                    <Image
+                        style={[
+                            styles.stamp,
+                            { transform: [{ rotate: `${randomRotation}deg` }] },
+                            { marginTop: randomMarginTop / 2, marginLeft: randomMarginLeft / 2 }
+                        ]}
+                        source={require('@/assets/images/stamp.png')} 
+                        resizeMode="contain"
+                    />
+                ) : ''
+            }
+            { reward ? (
                 <View style={[
                     styles.rewardContainer, 
                     { transform: [{ rotate: `${randomRotation}deg` }]},
@@ -49,5 +62,11 @@ const styles = StyleSheet.create({
         height: '100%',
         justifyContent: 'center',
         alignItems: 'center'
+    },
+    stamp: {
+        position: 'absolute',
+        width: '100%',
+        opacity: 0.8,
+        borderColor: '#000',
     }
 })
