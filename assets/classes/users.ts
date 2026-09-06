@@ -8,5 +8,6 @@ export interface UserDetails {
     last_name: string,
     profile_img_url: string,
     birth_date: string,
-    card_background_color: string
+    card_background_color: string,
+    stamp_bank: number,
 };
