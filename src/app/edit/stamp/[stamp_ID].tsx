@@ -260,7 +260,8 @@ const styles = StyleSheet.create({
   swatch: {
     width: '15%',
     aspectRatio: 1,
-    borderRadius: 200,
+    borderRadius: 999,
     marginBottom: '2.5%',
+    transform: [{ scale: 0.75 }]
   }
 });
