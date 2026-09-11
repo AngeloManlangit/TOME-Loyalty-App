@@ -4,7 +4,7 @@ import { StampCardDetails } from '@/assets/classes/stamps';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { UserProvider } from '@/src/contexts/userContext';
 import { LinearGradient } from 'expo-linear-gradient';
-import { Colors } from '@/src/constants/theme';
+import { Colors, Fonts } from '@/src/constants/theme';
 import Constants from 'expo-constants';
 import { useState } from 'react';
 import * as ImagePicker from 'expo-image-picker';
@@ -13,6 +13,7 @@ import StampCard from '@/src/components/stamps/stampCard';
 
 import { GestureHandlerRootView, ScrollView } from "react-native-gesture-handler";
 import ColorPicker, { Swatches, Preview, ColorFormatsObject, Panel3, BrightnessSlider } from "reanimated-color-picker";
+import { Trash, Upload } from 'lucide-react-native';
 
 
 export default function EditStampScreen() {
@@ -63,6 +64,10 @@ export default function EditStampScreen() {
     }
   };
 
+  const removeImage = async () => {
+    setBgImageLink(undefined);
+  }
+
   const handleSaveToFirebase = async () => {
     if (!dynamicStampCard) return;
     
@@ -87,8 +92,11 @@ export default function EditStampScreen() {
 
       console.log("Ready to save to Firestore:", finalStampDetails);
       
-      // Execute your Firestore update here:
-      const response = await stampService.updateStamp(finalStampDetails);
+      // executing the firebase update, changes parameters on whether or not the bg Image has changed (deletes the old stamp image if there is a new one to save space in the storage)
+      const response = 
+        (finalBgImageUrl === stampCard.stampCard_configs.bgImage && stampCard.stampCard_configs.bgImage) ? 
+          await stampService.updateStamp(finalStampDetails) : 
+          await stampService.updateStamp(finalStampDetails, stampCard.stampCard_configs.bgImage);
 
       if (response?.success) {
         alert("Stamp updated successfully!");
@@ -159,15 +167,28 @@ export default function EditStampScreen() {
 
                           {/* Background Image Upload */}
                           <Text style={styles.label}>Background Image</Text>
-                          <TouchableOpacity style={styles.uploadButton} onPress={pickImage}>
-                            <Text style={styles.uploadButtonText}>Upload Image</Text>
-                          </TouchableOpacity>
+                          <View style={styles.imageButtonContainer}>
+                            <TouchableOpacity style={[styles.imageButton, styles.uploadButton]} onPress={pickImage}>
+                              <Upload size={18} color={'#245ae1'} />
+                              <Text style={styles.uploadButtonText}>Upload Image</Text>
+                            </TouchableOpacity>
+
+                            {
+                              bgImageLink && (
+                                <TouchableOpacity style={[styles.imageButton, styles.removeButton]} onPress={removeImage}>
+                                  <Trash size={18} color={'#b61212'} />
+                                  <Text style={styles.removeButtonText}>Remove Image</Text>
+                                </TouchableOpacity>
+                              )
+                            }
+                          </View>
                           
                           {/* Display the selected image if it exists */}
                           { bgImageLink && (
                             <Image 
                               source={{ uri: bgImageLink }} 
                               style={styles.previewImage}
+                              resizeMode='cover'
                             />
                           )}
 
@@ -185,71 +206,87 @@ export default function EditStampScreen() {
 }
 
 const styles = StyleSheet.create({
-    header: {
-        fontSize: 24,
-        fontWeight: 'bold',
-        marginBottom: 20,
-    },
-    formContainer: {
-        marginTop: 10,
-    },
-    cardHolder: {
-        marginBottom: 30,
-        width: '100%',
-        alignItems: 'center',
-    },
-    label: {
-        fontSize: 16,
-        marginBottom: 5,
-        fontWeight: '600',
-        color: '#333'
-    },
-    input: {
-        width: '100%',
-        backgroundColor: '#fff',
-        borderWidth: 1,
-        borderColor: '#ccc',
-        padding: 12,
-        borderRadius: 8,
-        marginBottom: 15,
-        fontSize: 16,
-    },
-    uploadButton: {
-        backgroundColor: '#eee',
-        padding: 12,
-        borderRadius: 8,
-        borderWidth: 1,
-        borderColor: '#ccc',
-        alignItems: 'center',
-        marginBottom: 15,
-    },
-    uploadButtonText: {
-        fontSize: 16,
-        color: '#333',
-    },
-    previewImage: {
-        width: '100%',
-        height: 150,
-        borderRadius: 8,
-        resizeMode: 'cover',
-        marginBottom: 15,
-    },
-    titleSection: {
+  header: {
+    fontSize: 24,
+    marginBottom: 20,
+    alignSelf: 'center',
+    fontFamily: Fonts.Montserrat,
+    color: Colors.outlets.blue,
+  },
+  formContainer: {
+      marginTop: 10,
+  },
+  cardHolder: {
+      marginBottom: 30,
       width: '100%',
-      alignItems: 'flex-start'
-    },
-    bgColorSection: {
+      alignItems: 'center',
+  },
+  label: {
+      fontSize: 16,
+      marginBottom: 5,
+      fontWeight: '600',
+      color: '#333'
+  },
+  input: {
       width: '100%',
-      alignItems: 'center'
-    },
-    panelAndBar: {
+      backgroundColor: '#fff',
+      borderWidth: 1,
+      borderColor: '#ccc',
+      padding: 12,
+      borderRadius: 8,
+      marginBottom: 15,
+      fontSize: 16,
+  },
+  imageButton: {
+    flex: 1,
+    padding: 12,
+    borderRadius: 12,
+    borderWidth: 1,
+    alignItems: 'center',
+    marginBottom: 15,
+    flexDirection: 'row',
+    justifyContent: 'center',
+    gap: 6
+  },
+  uploadButton: {
+      backgroundColor: `${Colors.outlets.blue}${50}`,
+      borderColor: Colors.outlets.blue,
+  },
+  uploadButtonText: {
+      fontSize: 16,
+      color: '#245ae1',
+  },
+  removeButton: {
+    backgroundColor: `${Colors.outlets.red}${50}`,
+    borderColor: Colors.outlets.red,
+  },
+  removeButtonText: {
+    fontSize: 16,
+    color: '#b61212',
+  },
+  previewImage: {
       width: '100%',
-      height: 250,
-      flexDirection: 'row',
-      gap: 18,
-      justifyContent: 'center',
-      marginVertical: 15,
-    },
+      height: 150,
+      borderRadius: 8,
+      resizeMode: 'cover',
+      marginBottom: 15,
+  },
+  titleSection: {
+    width: '100%',
+    alignItems: 'flex-start'
+  },
+  bgColorSection: {
+    width: '100%',
+    alignItems: 'center'
+  },
+  panelAndBar: {
+    width: '100%',
+    height: 250,
+    flexDirection: 'row',
+    gap: 18,
+    justifyContent: 'center',
+    marginVertical: 15,
+  },
   swatchesContainer: {
     flexDirection: 'row',
     flexWrap: 'wrap',
@@ -263,5 +300,10 @@ const styles = StyleSheet.create({
     borderRadius: 999,
     marginBottom: '2.5%',
     transform: [{ scale: 0.75 }]
-  }
+  },
+  imageButtonContainer: {
+    flex: 1,
+    flexDirection: 'row',
+    gap: 8
+  },
 });

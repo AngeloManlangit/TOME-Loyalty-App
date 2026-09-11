@@ -362,6 +362,7 @@ export default function CreateAcc() {
                         profile_img_url={profilePic || ''}
                         birth_date={birthdayText}
                         card_background_color={cardColor}
+                        stamp_bank={0}
                     />
 
                     <View style={[styles.innerFormContainer, { gap: 10 }]}>

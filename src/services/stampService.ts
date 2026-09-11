@@ -157,7 +157,7 @@ export const stampService = {
         }
     },
 
-    async updateStamp(s: StampCardDetails) {
+    async updateStamp(s: StampCardDetails, prevImage?: string | null) {
         const user = auth.currentUser;
         if (user && s.owner_ID === user.uid && s.id !== undefined) {
             try {
@@ -165,6 +165,19 @@ export const stampService = {
 
                 const updateData = { ...s };
                 delete updateData.id; // so that the docu id doesnt go inside the fields
+
+                // to delete previous image
+                if (prevImage) {
+                    const storage = getStorage();
+                    const imageRef = ref(storage, prevImage);
+
+                    try {
+                        await deleteObject(imageRef);
+                        console.log("Background image successfully deleted!");
+                    } catch (imgError) {
+                        console.error("Error deleting background image: ", imgError);
+                    }
+                }
 
                 await updateDoc(docRef, updateData);
 
