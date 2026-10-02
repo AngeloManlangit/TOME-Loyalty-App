@@ -41,7 +41,7 @@ export default function CustomHeader() {
                         entering={FadeIn.duration(300)} 
                         exiting={FadeOut.duration(200)}
                     >
-                        <Text style={styles.headerText}>Good Morning, </Text>
+                        <Text style={styles.headerText}>Good Day, </Text>
                         <Text style={[styles.headerText, styles.uppercased]}>{user?.first_name || 'User'}</Text>
                     </Animated.View>
                 ) : 

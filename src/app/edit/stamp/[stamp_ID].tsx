@@ -1,37 +1,46 @@
-import { View, Text, useWindowDimensions, TextInput, Button, StyleSheet, Image, TouchableOpacity, ScrollView } from 'react-native';
+import { View, Text, useWindowDimensions, TextInput, Button, StyleSheet, Image, TouchableOpacity } from 'react-native';
 import { router, useLocalSearchParams } from 'expo-router';
-import { StampCardDetails, StampCardConfigs } from '@/assets/classes/stamps';
+import { StampCardDetails } from '@/assets/classes/stamps';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { UserProvider } from '@/src/contexts/userContext';
 import { LinearGradient } from 'expo-linear-gradient';
-import { Colors } from '@/src/constants/theme';
+import { Colors, Fonts } from '@/src/constants/theme';
 import Constants from 'expo-constants';
 import { useState } from 'react';
 import * as ImagePicker from 'expo-image-picker';
 import { stampService } from '@/src/services/stampService';
 import StampCard from '@/src/components/stamps/stampCard';
 
+import { GestureHandlerRootView, ScrollView } from "react-native-gesture-handler";
+import ColorPicker, { Swatches, Preview, ColorFormatsObject, Panel3, BrightnessSlider } from "reanimated-color-picker";
+import { Trash, Upload } from 'lucide-react-native';
+
+
 export default function EditStampScreen() {
   const { details } = useLocalSearchParams();
   const parsedDetails = details ? JSON.parse(details as string) : null;
-  const [stampDetails, setStampDetails] = useState<StampCardDetails | null>(parsedDetails);
+  const stampCard = parsedDetails as StampCardDetails;
 
   const statusBarHeight = Constants.statusBarHeight;
   const { height } =  useWindowDimensions();
   const statusBarHeightPercentage = statusBarHeight / height;
+  
+  // config options
+  const [titleInput, setTitleInput] = useState(stampCard.stampCard_configs.title);
+  const [bgColorInput, setBgColor] = useState(stampCard.stampCard_configs.bgColor);
+  const [bgImageLink, setBgImageLink] = useState(stampCard.stampCard_configs.bgImage);
 
-  // 1. Function to handle NESTED state updates for stampCard_configs
-  const handleConfigChange = (field: keyof StampCardConfigs, value: string | null) => {
-    if (stampDetails) {
-      setStampDetails({
-        ...stampDetails,
-        stampCard_configs: {
-          ...stampDetails.stampCard_configs, 
-          [field]: value                 
-        }
-      });
+  const dynamicStampCard = {
+    ...stampCard,
+    stampCard_configs: {
+      ...stampCard.stampCard_configs,
+      title: titleInput,
+      bgColor: bgColorInput,
+      bgImage: bgImageLink
     }
   };
+
+  const ColorChoices: string[] = Object.values(Colors.outlets);
 
   // 2. Function to handle launching the image gallery
   const pickImage = async () => {
@@ -51,16 +60,20 @@ export default function EditStampScreen() {
 
     if (!result.canceled) {
       // Save the local image URI to the bgImage field
-      handleConfigChange('bgImage', result.assets[0].uri);
+      setBgImageLink(result.assets[0].uri);
     }
   };
 
+  const removeImage = async () => {
+    setBgImageLink(undefined);
+  }
+
   const handleSaveToFirebase = async () => {
-    if (!stampDetails) return;
+    if (!dynamicStampCard) return;
     
     try {
       // Start with the current bgImage value
-      let finalBgImageUrl = stampDetails.stampCard_configs.bgImage;
+      let finalBgImageUrl = dynamicStampCard.stampCard_configs.bgImage;
 
       // Only upload if it's a new local image (starts with file://)
       if (finalBgImageUrl && finalBgImageUrl.startsWith('file://')) {
@@ -70,17 +83,20 @@ export default function EditStampScreen() {
 
       // Create the final object with the public URL
       const finalStampDetails = {
-        ...stampDetails,
+        ...dynamicStampCard,
         stampCard_configs: {
-          ...stampDetails.stampCard_configs,
+          ...dynamicStampCard.stampCard_configs,
           bgImage: finalBgImageUrl // This is now safe for Firestore
         }
       };
 
       console.log("Ready to save to Firestore:", finalStampDetails);
       
-      // Execute your Firestore update here:
-      const response = await stampService.updateStamp(finalStampDetails);
+      // executing the firebase update, changes parameters on whether or not the bg Image has changed (deletes the old stamp image if there is a new one to save space in the storage)
+      const response = 
+        (finalBgImageUrl === stampCard.stampCard_configs.bgImage && stampCard.stampCard_configs.bgImage) ? 
+          await stampService.updateStamp(finalStampDetails) : 
+          await stampService.updateStamp(finalStampDetails, stampCard.stampCard_configs.bgImage);
 
       if (response?.success) {
         alert("Stamp updated successfully!");
@@ -95,10 +111,17 @@ export default function EditStampScreen() {
       console.error("Error saving stamp details:", error);
       alert("Failed to save changes.");
     }
+
   };
   
+  const onSelectColor = ({ hex }: ColorFormatsObject) => {
+    setBgColor(hex);
+  };
+
   return (
     <UserProvider>
+      <GestureHandlerRootView>
+
         <LinearGradient
             colors={[Colors.outlets.purple, '#fff']}
             style={{flex: 1}}
@@ -111,104 +134,176 @@ export default function EditStampScreen() {
                 <Text style={styles.header}>EDIT STAMP</Text>
 
                 
-                { stampDetails && (
+                { dynamicStampCard && (
                     <ScrollView style={styles.formContainer}>
                         
                         <View style={styles.cardHolder}>
-                            <StampCard cardDetails={stampDetails} />
+                            <StampCard cardDetails={dynamicStampCard} />
                         </View>
                       
-                      {/* Title Input */}
-                      <Text style={styles.label}>Card Title</Text>
-                      <TextInput 
-                        style={styles.input}
-                        value={stampDetails.stampCard_configs.title} // Bind to nested title[cite: 3]
-                        onChangeText={(text) => handleConfigChange('title', text)}
-                        placeholder="Enter card title"
-                      />
+                          {/* Title Input */}
+                        <View style={styles.titleSection}>
+                          <Text style={styles.label}>Card Title</Text>
+                          <TextInput 
+                            style={styles.input}
+                            value={titleInput} 
+                            onChangeText={setTitleInput}
+                            placeholder="Enter card title"
+                          />
+                        </View>
 
-                      {/* Background Color Input */}
-                      <Text style={styles.label}>Background Color (Hex Code)</Text>
-                      <TextInput 
-                        style={styles.input}
-                        value={stampDetails.stampCard_configs.bgColor} // Bind to nested bgColor[cite: 3]
-                        onChangeText={(text) => handleConfigChange('bgColor', text)}
-                        placeholder="#F3BDFF"
-                        autoCapitalize="characters"
-                      />
+                          {/* Background Color Input */}
+                        <View style={styles.bgColorSection}>
+                          <Text style={[styles.label, { alignSelf: 'flex-start' }]}>Background Color</Text>
+                          <ColorPicker style={{ width: "90%", gap: 5 }} value={bgColorInput} onCompleteJS={onSelectColor}>
+                            <Preview />
+                            <View style={styles.panelAndBar}>
+                              <Panel3 />
+                              <BrightnessSlider reverse={true} vertical={true} style={{borderRadius: 50}} adaptSpectrum={true} />
+                            </View>
+                            <Swatches colors={ColorChoices} style={styles.swatchesContainer} swatchStyle={styles.swatch} />
+                          </ColorPicker>
+                        </View>
 
-                      {/* Background Image Upload */}
-                      <Text style={styles.label}>Background Image</Text>
-                      <TouchableOpacity style={styles.uploadButton} onPress={pickImage}>
-                        <Text style={styles.uploadButtonText}>Upload Image</Text>
-                      </TouchableOpacity>
+                          {/* Background Image Upload */}
+                          <Text style={styles.label}>Background Image</Text>
+                          <View style={styles.imageButtonContainer}>
+                            <TouchableOpacity style={[styles.imageButton, styles.uploadButton]} onPress={pickImage}>
+                              <Upload size={18} color={'#245ae1'} />
+                              <Text style={styles.uploadButtonText}>Upload Image</Text>
+                            </TouchableOpacity>
+
+                            {
+                              bgImageLink && (
+                                <TouchableOpacity style={[styles.imageButton, styles.removeButton]} onPress={removeImage}>
+                                  <Trash size={18} color={'#b61212'} />
+                                  <Text style={styles.removeButtonText}>Remove Image</Text>
+                                </TouchableOpacity>
+                              )
+                            }
+                          </View>
+                          
+                          {/* Display the selected image if it exists */}
+                          { bgImageLink && (
+                            <Image 
+                              source={{ uri: bgImageLink }} 
+                              style={styles.previewImage}
+                              resizeMode='cover'
+                            />
+                          )}
+
+                          <View style={{ marginTop: 20 }}>
+                            <Button title="Save Changes" onPress={handleSaveToFirebase} />
+                          </View>
                       
-                      {/* Display the selected image if it exists */}
-                      {stampDetails.stampCard_configs.bgImage && (
-                        <Image 
-                          source={{ uri: stampDetails.stampCard_configs.bgImage }} 
-                          style={styles.previewImage} 
-                        />
-                      )}
-
-                      <View style={{ marginTop: 20 }}>
-                        <Button title="Save Changes" onPress={handleSaveToFirebase} />
-                      </View>
                     </ScrollView>
                 )}
             </SafeAreaView>
         </LinearGradient>
+      </GestureHandlerRootView>
     </UserProvider>
   );
 }
 
 const styles = StyleSheet.create({
-    header: {
-        fontSize: 24,
-        fontWeight: 'bold',
-        marginBottom: 20,
-    },
-    formContainer: {
-        marginTop: 10,
-    },
-    cardHolder: {
-        marginBottom: 30,
-        width: '100%',
-        alignItems: 'center'
-    },
-    label: {
-        fontSize: 16,
-        marginBottom: 5,
-        fontWeight: '600',
-        color: '#333'
-    },
-    input: {
-        backgroundColor: '#fff',
-        borderWidth: 1,
-        borderColor: '#ccc',
-        padding: 12,
-        borderRadius: 8,
-        marginBottom: 15,
-        fontSize: 16,
-    },
-    uploadButton: {
-        backgroundColor: '#eee',
-        padding: 12,
-        borderRadius: 8,
-        borderWidth: 1,
-        borderColor: '#ccc',
-        alignItems: 'center',
-        marginBottom: 15,
-    },
-    uploadButtonText: {
-        fontSize: 16,
-        color: '#333',
-    },
-    previewImage: {
-        width: '100%',
-        height: 150,
-        borderRadius: 8,
-        resizeMode: 'cover',
-        marginBottom: 15,
-    }
+  header: {
+    fontSize: 24,
+    marginBottom: 20,
+    alignSelf: 'center',
+    fontFamily: Fonts.Montserrat,
+    color: Colors.outlets.blue,
+  },
+  formContainer: {
+      marginTop: 10,
+  },
+  cardHolder: {
+      marginBottom: 30,
+      width: '100%',
+      alignItems: 'center',
+  },
+  label: {
+      fontSize: 16,
+      marginBottom: 5,
+      fontWeight: '600',
+      color: '#333'
+  },
+  input: {
+      width: '100%',
+      backgroundColor: '#fff',
+      borderWidth: 1,
+      borderColor: '#ccc',
+      padding: 12,
+      borderRadius: 8,
+      marginBottom: 15,
+      fontSize: 16,
+  },
+  imageButton: {
+    flex: 1,
+    padding: 12,
+    borderRadius: 12,
+    borderWidth: 1,
+    alignItems: 'center',
+    marginBottom: 15,
+    flexDirection: 'row',
+    justifyContent: 'center',
+    gap: 6
+  },
+  uploadButton: {
+      backgroundColor: `${Colors.outlets.blue}${50}`,
+      borderColor: Colors.outlets.blue,
+  },
+  uploadButtonText: {
+      fontSize: 16,
+      color: '#245ae1',
+  },
+  removeButton: {
+    backgroundColor: `${Colors.outlets.red}${50}`,
+    borderColor: Colors.outlets.red,
+  },
+  removeButtonText: {
+    fontSize: 16,
+    color: '#b61212',
+  },
+  previewImage: {
+      width: '100%',
+      height: 150,
+      borderRadius: 8,
+      resizeMode: 'cover',
+      marginBottom: 15,
+  },
+  titleSection: {
+    width: '100%',
+    alignItems: 'flex-start'
+  },
+  bgColorSection: {
+    width: '100%',
+    alignItems: 'center'
+  },
+  panelAndBar: {
+    width: '100%',
+    height: 250,
+    flexDirection: 'row',
+    gap: 18,
+    justifyContent: 'center',
+    marginVertical: 15,
+  },
+  swatchesContainer: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'space-between',
+    width: '100%',
+    marginTop: 10,
+  },
+  swatch: {
+    width: '15%',
+    aspectRatio: 1,
+    borderRadius: 999,
+    marginBottom: '2.5%',
+    transform: [{ scale: 0.75 }]
+  },
+  imageButtonContainer: {
+    flex: 1,
+    flexDirection: 'row',
+    gap: 8
+  },
 });
